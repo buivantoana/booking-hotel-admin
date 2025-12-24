@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from "react";
-import ManagerBookingView from "./ManagerBookingView";
+import ManagerHotelView from "./ManagerHotelView";
 import { getHotels } from "../../service/hotel";
 
 type Props = {};
 
-const ManagerBookingController = (props: Props) => {
+const ManagerHotelController = (props: Props) => {
   const [hotels, setHotels] = useState([]);
   useEffect(() => {
     getDataHotels();
@@ -19,7 +19,7 @@ const ManagerBookingController = (props: Props) => {
       console.log(error);
     }
   };
-  return <ManagerBookingView hotels={hotels} getDataHotels={getDataHotels} />;
+  return <ManagerHotelView hotels={hotels} getDataHotels={getDataHotels} />;
 };
 
-export default ManagerBookingController;
+export default ManagerHotelController;

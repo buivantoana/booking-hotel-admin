@@ -248,34 +248,16 @@ export default function RoomDetail({
 
             <Box display={"flex"} gap={"10px"}>
               <Button
-                variant='contained'
+                variant='outlined'
                 sx={{
-                  bgcolor: "#F0F1F3",
+                  borderRadius: "24px",
+                  height: 40,
+                  minWidth: 120,
+                  border: "1px solid rgba(208, 211, 217, 1)",
+                  background: "rgba(240, 241, 243, 1)",
                   color: "black",
-                  fontWeight: 600,
-                  fontSize: 15,
-                  px: 4,
-                  py: 1.4,
-                  borderRadius: "50px",
-                  textTransform: "none",
-                  boxShadow: "none",
                 }}>
-                Từ chối
-              </Button>
-              <Button
-                variant='contained'
-                sx={{
-                  bgcolor: "#98B720",
-                  color: "white",
-                  fontWeight: 600,
-                  fontSize: 15,
-                  px: 4,
-                  py: 1.4,
-                  borderRadius: "50px",
-                  textTransform: "none",
-                  boxShadow: "none",
-                }}>
-                Phê duyệt
+                Ngừng hợp tác
               </Button>
             </Box>
           </Box>

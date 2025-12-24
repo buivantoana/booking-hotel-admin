@@ -38,13 +38,85 @@ import { useEffect, useState } from "react";
 import remove from "../../images/delete.png";
 import success from "../../images/Frame.png";
 import HotelDetail from "./HotelDetail";
-
+import RoomDetail from "./RoomDetail";
 import { getHotel, toggleHotels } from "../../service/hotel";
 import { useNavigate, useSearchParams } from "react-router-dom";
 
 // Component menu thao tác
+function ActionMenu({ setAction, setDeleteDialogOpen, setIdHotel, hotel }) {
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const open = Boolean(anchorEl);
+  const navigate = useNavigate();
+  const handleClick = (event: React.MouseEvent<HTMLElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
 
-export default function ManagerBookingView({ hotels, getDataHotels }) {
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+
+  return (
+    <>
+      <Button
+        variant='outlined'
+        size='small'
+        endIcon={<MoreVertIcon />}
+        onClick={handleClick}
+        sx={{
+          borderRadius: "20px",
+          textTransform: "none",
+          borderColor: "rgba(152, 183, 32, 1)",
+          color: "rgba(152, 183, 32, 1)",
+          fontWeight: 500,
+          minWidth: 110,
+          "&:hover": { borderColor: "#bbb" },
+        }}>
+        Thao tác
+      </Button>
+
+      <Menu
+        anchorEl={anchorEl}
+        open={open}
+        onClose={handleClose}
+        PaperProps={{
+          sx: {
+            borderRadius: "12px",
+            boxShadow: "0 4px 20px rgba(0,0,0,0.12)",
+            mt: 1,
+            padding: 0,
+          },
+        }}>
+        {/* Chi tiết */}
+        <MenuItem
+          sx={{ gap: 1.5, fontSize: 14, color: "#424242" }} // Màu xám đậm nhẹ
+        >
+          <Description fontSize='small' />
+          Chi tiết
+        </MenuItem>
+
+        {/* Phê duyệt khách sạn */}
+        <MenuItem
+          sx={{ gap: 1.5, fontSize: 14, color: "#2e7d32" }} // Màu xanh lá đậm (success)
+        >
+          <CheckCircle fontSize='small' />
+          Phê duyệt khách sạn
+        </MenuItem>
+
+        {/* Từ chối khách sạn */}
+        <MenuItem
+          sx={{ gap: 1.5, fontSize: 14, color: "#d32f2f" }} // Màu đỏ (error)
+        >
+          <HighlightOff fontSize='small' />
+          Từ chối khách sạn
+        </MenuItem>
+
+        {/* Hủy đặt phòng - giữ nguyên như code cũ của bạn */}
+      </Menu>
+    </>
+  );
+}
+
+export default function ManagerHotelView({ hotels, getDataHotels }) {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [action, setAction] = useState("manager");
   const [idHotel, setIdHotel] = useState(null);
@@ -76,6 +148,15 @@ export default function ManagerBookingView({ hotels, getDataHotels }) {
   };
   return (
     <Box sx={{ p: { xs: 2, sm: 3, md: 4 }, minHeight: "100vh" }}>
+      {action == "detail" && (
+        <RoomDetail
+          getHotelDetail={getHotelDetail}
+          detailHotel={detailHotel}
+          room={room}
+          onNext={setAction}
+        />
+      )}
+
       {action == "edit_detail" && (
         <HotelDetail
           detailHotel={detailHotel}
@@ -310,7 +391,7 @@ export default function ManagerBookingView({ hotels, getDataHotels }) {
 
                       <TableCell
                         onClick={() => {
-                          navigate(`/manager-bookings?id=${hotel.id}`);
+                          navigate(`/manager-hotel?id=${hotel.id}`);
                           setAction("edit_detail");
                         }}
                         sx={{ fontWeight: 500, cursor: "pointer" }}>
@@ -336,16 +417,11 @@ export default function ManagerBookingView({ hotels, getDataHotels }) {
                       </TableCell>
 
                       <TableCell>
-                        <Button
-                          variant='contained'
-                          sx={{
-                            borderRadius: "24px",
-                            bgcolor: "#98b720",
-                            height: 40,
-                            minWidth: 120,
-                          }}>
-                          Chi tiết
-                        </Button>
+                        <ActionMenu
+                          hotel={hotel}
+                          setIdHotel={setIdHotel}
+                          setDeleteDialogOpen={setDeleteDialogOpen}
+                        />
                       </TableCell>
                     </TableRow>
                   ))}

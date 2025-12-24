@@ -11,11 +11,13 @@ import CreateHotelController from "../pages/create_hotel/CreateHotelController";
 import HomeController from "../pages/home/HomeController";
 import ReviewController from "../pages/review/ReviewController";
 import NotificateController from "../pages/notificate/NotificateController";
-import ManagerRoomController from "../pages/manager-room/ManagerRoomController";
-import ManagerBookingController from "../pages/manager-booking/ManagerBookingController";
+
 import ReconciliationController from "../pages/reconciliation/ReconciliationController";
 import ProfileController from "../pages/profile/ProfileController";
 import ApprovalController from "../pages/approval/ApprovalController";
+import ManagerHotelController from "../pages/manager_hotel/ManagerHotelController";
+import ManagerBookingController from "../pages/manager-booking/ManagerBookingController";
+import ManagerPaymentController from "../pages/manager-payment/ManagerPaymentController";
 
 const Router = () => {
   const context: any = useBookingContext();
@@ -37,7 +39,7 @@ const Router = () => {
               </PrivateRouter>
             }
           />
-           <Route
+          <Route
             path='/approval'
             element={
               <PrivateRouter>
@@ -45,6 +47,24 @@ const Router = () => {
               </PrivateRouter>
             }
           />
+          <Route
+            path='/manager-hotel'
+            element={
+              <PrivateRouter>
+                <ManagerHotelController />
+              </PrivateRouter>
+            }
+          />
+
+          <Route
+            path='/manager-payments'
+            element={
+              <PrivateRouter>
+                <ManagerPaymentController />
+              </PrivateRouter>
+            }
+          />
+
           <Route
             path='/notificate'
             element={
@@ -61,15 +81,8 @@ const Router = () => {
               </PrivateRouter>
             }
           />
+
           <Route
-            path='/manager-room'
-            element={
-              <PrivateRouter>
-                <ManagerRoomController />
-              </PrivateRouter>
-            }
-          />
-           <Route
             path='/manager-profile'
             element={
               <PrivateRouter>

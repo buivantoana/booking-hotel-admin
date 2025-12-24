@@ -34,7 +34,7 @@ import { useEffect, useState } from "react";
 import remove from "../../images/delete.png";
 import success from "../../images/Frame.png";
 import HotelDetail from "./HotelDetail";
-import HotelEditForm from "./HotelEditForm";
+
 import RoomDetail from "./RoomDetail";
 import { getHotel, toggleHotels } from "../../service/hotel";
 import { useNavigate, useSearchParams } from "react-router-dom";
@@ -80,39 +80,34 @@ function ActionMenu({ setAction, setDeleteDialogOpen, setIdHotel, hotel }) {
             borderRadius: "12px",
             boxShadow: "0 4px 20px rgba(0,0,0,0.12)",
             mt: 1,
-            padding: 0
+            padding: 0,
           },
-        }}
-      >
+        }}>
         {/* Chi tiết */}
         <MenuItem
-
           sx={{ gap: 1.5, fontSize: 14, color: "#424242" }} // Màu xám đậm nhẹ
         >
-          <Description fontSize="small" />
+          <Description fontSize='small' />
           Chi tiết
         </MenuItem>
 
         {/* Phê duyệt khách sạn */}
         <MenuItem
-
           sx={{ gap: 1.5, fontSize: 14, color: "#2e7d32" }} // Màu xanh lá đậm (success)
         >
-          <CheckCircle fontSize="small" />
+          <CheckCircle fontSize='small' />
           Phê duyệt khách sạn
         </MenuItem>
 
         {/* Từ chối khách sạn */}
         <MenuItem
-
           sx={{ gap: 1.5, fontSize: 14, color: "#d32f2f" }} // Màu đỏ (error)
         >
-          <HighlightOff fontSize="small" />
+          <HighlightOff fontSize='small' />
           Từ chối khách sạn
         </MenuItem>
 
         {/* Hủy đặt phòng - giữ nguyên như code cũ của bạn */}
-
       </Menu>
     </>
   );
@@ -158,9 +153,7 @@ export default function ApprovalView({ hotels, getDataHotels }) {
           onNext={setAction}
         />
       )}
-      {action == "edit_form" && (
-        <HotelEditForm setAction={setAction} setRoom={setRoom} />
-      )}
+
       {action == "edit_detail" && (
         <HotelDetail
           detailHotel={detailHotel}
@@ -182,8 +175,6 @@ export default function ApprovalView({ hotels, getDataHotels }) {
             <Typography variant='h5' fontWeight='bold'>
               Phê duyệt
             </Typography>
-
-
           </Box>
 
           {/* Stats */}
@@ -207,8 +198,9 @@ export default function ApprovalView({ hotels, getDataHotels }) {
                 onClick={() => setAction("manager")}
                 color={action == "manager" ? "#98B720" : "#999"}
                 sx={{
-                  borderBottom: action == "manager" ? "3px solid #98B720" : "none",
-                  pb: .5,
+                  borderBottom:
+                    action == "manager" ? "3px solid #98B720" : "none",
+                  pb: 0.5,
                   cursor: "pointer",
                 }}>
                 Khách sạn
@@ -219,7 +211,8 @@ export default function ApprovalView({ hotels, getDataHotels }) {
                 onClick={() => setAction("rooms")}
                 color={action == "rooms" ? "#98B720" : "#999"}
                 sx={{
-                  borderBottom: action == "rooms" ? "3px solid #98B720" : "none",
+                  borderBottom:
+                    action == "rooms" ? "3px solid #98B720" : "none",
                   cursor: "pointer",
                 }}>
                 Loại phòng
