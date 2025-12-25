@@ -1,19 +1,18 @@
 // ManagerBookingController.tsx
 import React, { useEffect, useState } from "react";
 import ManagerPaymentView from "./ManagerPaymentView";
-import { getHotels } from "../../service/hotel";
+import { getHotels, listPayment } from "../../service/hotel";
 import { listBooking } from "../../service/booking";
 import dayjs from "dayjs";
 
-const ManagerPaymentController = ({ id }) => {
-  const [idHotel, setIdHotel] = useState<string | null>(id);
+const ManagerPaymentController = () => {
   const [dateRange, setDateRange] = useState({
-    checkIn: null,
-    checkOut: null,
+    checkIn: dayjs("2025-01-01T00:00:00"),
+    checkOut: dayjs(),
   });
 
   // State cho booking và phân trang
-  const [bookings, setBookings] = useState<any[]>([]);
+  const [Payment, setPayment] = useState<any[]>([]);
   const [pagination, setPagination] = useState({
     page: 1,
     limit: 10,
@@ -25,7 +24,7 @@ const ManagerPaymentController = ({ id }) => {
   // State cho filter
   const [filters, setFilters] = useState({
     booking_code: "",
-    rent_type: "all",
+    method: "all",
     status: "all",
     check_in_from: "",
     check_in_to: "",
@@ -60,12 +59,11 @@ const ManagerPaymentController = ({ id }) => {
   };
 
   // Gọi API lấy booking với filter
-  const fetchBookings = async (
-    hotelId: string,
+  const fetchPayment = async (
     page: number,
     filterParams = filters
   ) => {
-    if (!hotelId) return;
+
     setLoading(true);
     try {
       let query: any = {
@@ -78,8 +76,8 @@ const ManagerPaymentController = ({ id }) => {
         query.booking_code = filterParams.booking_code;
       }
 
-      if (filterParams.rent_type && filterParams.rent_type !== "all") {
-        query.rent_type = filterParams.rent_type;
+      if (filterParams.method && filterParams.method !== "all") {
+        query.method = filterParams.method;
       }
 
       if (filterParams.status && filterParams.status !== "all") {
@@ -87,11 +85,11 @@ const ManagerPaymentController = ({ id }) => {
       }
 
       if (filterParams.check_in_from) {
-        query.check_in_from = filterParams.check_in_from;
+        query.start_time = filterParams.check_in_from;
       }
 
       if (filterParams.check_in_to) {
-        query.check_in_to = filterParams.check_in_to;
+        query.end_time = filterParams.check_in_to;
       }
 
       // Debug chi tiết
@@ -117,9 +115,9 @@ const ManagerPaymentController = ({ id }) => {
       console.log("Cách 2 (Manual build):", queryString1);
 
       // Chọn cách 2 (manual build) để kiểm soát tốt hơn
-      const result = await listBooking(hotelId, queryString1);
+      const result = await listPayment(queryString1);
 
-      setBookings(result.bookings || []);
+      setPayment(result.payments || []);
       setPagination({
         page: result.page || 1,
         limit: result.limit || 10,
@@ -128,7 +126,7 @@ const ManagerPaymentController = ({ id }) => {
       });
     } catch (error) {
       console.error("Lỗi lấy danh sách booking:", error);
-      setBookings([]);
+      setPayment([]);
     } finally {
       setLoading(false);
     }
@@ -136,62 +134,61 @@ const ManagerPaymentController = ({ id }) => {
 
   // Khi chọn khách sạn mới
   useEffect(() => {
-    if (idHotel) {
-      // Set default date range filter khi load lần đầu
-      const defaultFilters = {
-        booking_code: "",
-        rent_type: "all",
-        status: "all",
-        check_in_from: formatDateForAPI(dateRange?.checkIn),
-        check_in_to: formatDateForAPI(dateRange?.checkOut),
-      };
-      console.log("Initial filters:", defaultFilters);
-      setFilters(defaultFilters);
-      fetchBookings(idHotel, 1, defaultFilters);
-    }
-  }, [idHotel]);
+
+    const defaultFilters = {
+      booking_code: "",
+      method: "all",
+      status: "all",
+      check_in_from: formatDateForAPI(dateRange?.checkIn),
+      check_in_to: formatDateForAPI(dateRange?.checkOut),
+    };
+    console.log("Initial filters:", defaultFilters);
+    setFilters(defaultFilters);
+    fetchPayment(1, defaultFilters);
+
+  }, []);
 
   // Xử lý đổi trang
   const handlePageChange = (
     event: React.ChangeEvent<unknown>,
     newPage: number
   ) => {
-    if (idHotel) {
-      fetchBookings(idHotel, newPage);
-    }
+
+    fetchPayment(newPage);
+
   };
 
   // Xử lý filter thay đổi
   const handleFilterChange = (newFilters: any) => {
     console.log("Filter changed to:", newFilters);
     setFilters(newFilters);
-    if (idHotel) {
-      fetchBookings(idHotel, 1, newFilters);
-    }
+
+    fetchPayment(1, newFilters);
+
   };
 
   // Reset filter
   const handleResetFilter = () => {
     const resetDateRange = {
-      checkIn: null,
-      checkOut: null,
+      checkIn: dayjs("2025-01-01T00:00:00"),
+      checkOut: dayjs(),
     };
 
     const resetFilters = {
       booking_code: "",
-      rent_type: "all",
+      method: "all",
       status: "all",
-      check_in_from: formatDateForAPI(resetDateRange.checkIn),
-      check_in_to: formatDateForAPI(resetDateRange.checkOut),
+      check_in_from: formatDateForAPI(dayjs("2025-01-01T00:00:00")),
+      check_in_to: formatDateForAPI(dayjs()),
     };
 
     console.log("Reset filters:", resetFilters);
     setFilters(resetFilters);
     setDateRange(resetDateRange);
 
-    if (idHotel) {
-      fetchBookings(idHotel, 1, resetFilters);
-    }
+
+    fetchPayment(1, resetFilters);
+
   };
 
   // Xử lý khi dateRange thay đổi
@@ -207,20 +204,19 @@ const ManagerPaymentController = ({ id }) => {
 
     console.log("Updated filters:", updatedFilters);
     setFilters(updatedFilters);
-    if (idHotel) {
-      fetchBookings(idHotel, 1, updatedFilters);
-    }
+
+    // fetchPayment(1, updatedFilters);
+
   };
 
   return (
     <ManagerPaymentView
-      idHotel={idHotel}
-      setIdHotel={setIdHotel}
-      bookings={bookings}
+     
+      Payment={Payment}
       pagination={pagination}
       loading={loading}
       onPageChange={handlePageChange}
-      fetchBookings={fetchBookings}
+      fetchPayment={fetchPayment}
       dateRange={dateRange}
       setDateRange={handleDateRangeChange}
       filters={filters}

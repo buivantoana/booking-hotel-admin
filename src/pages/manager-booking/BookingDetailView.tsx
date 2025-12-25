@@ -147,8 +147,6 @@ const STATUS_LABEL_TO_API: Record<string, string> = {
 
 export default function BookingDetailView({
   hotels,
-  idHotel,
-  setIdHotel,
   bookings,
   pagination,
   loading,
@@ -161,8 +159,7 @@ export default function BookingDetailView({
   onResetFilter,
 }: {
   hotels: any[];
-  idHotel: string | null;
-  setIdHotel: (id: string) => void;
+  
   bookings: any[];
   pagination: { page: number; total_pages: number; total: number };
   loading: boolean;
@@ -188,6 +185,7 @@ export default function BookingDetailView({
   const [selectedBooking, setSelectedBooking] = useState(null);
   const [localFilters, setLocalFilters] = useState({
     booking_code: "",
+    hotel_name:"",
     rent_type: "all",
     status: "all",
   });
@@ -197,6 +195,7 @@ export default function BookingDetailView({
         booking_code: filters.booking_code || "",
         rent_type: filters.rent_type || "all",
         status: filters.status || "all",
+        hotel_name:filters.hotel_name||"",
       });
     }
   }, [filters]);
@@ -258,6 +257,7 @@ export default function BookingDetailView({
       booking_code: "",
       rent_type: "all",
       status: "all",
+      hotel_name:""
     });
 
     const resetDateRange = {
@@ -349,7 +349,18 @@ export default function BookingDetailView({
   ];
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
-      <Box>
+       <Box sx={{ p: { xs: 2, sm: 3, md: 4 }, minHeight: "100vh" }}>
+       <Box
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            mb: 4,
+          }}>
+          <Typography variant='h5' fontWeight='bold'>
+          Quản lý đặt phòng
+          </Typography>
+        </Box>
         <Paper sx={{ p: 3, mb: 3 }}>
           <Stack spacing={4}>
             {/* Label căn chuẩn */}
@@ -361,14 +372,60 @@ export default function BookingDetailView({
               alignItems='end'>
               {/* Tìm kiếm */}
               <Box>
-                <Typography sx={{ mb: 1.5 }}>Tìm kiếm</Typography>
+                <Typography sx={{ mb: 1.5 }}>Mã đặt phòng</Typography>
                 <TextField
-                  placeholder='Tìm mã đặt phòng'
+                  placeholder='Tìm kiếm'
                   value={localFilters.booking_code}
                   onChange={(e) =>
                     setLocalFilters({
                       ...localFilters,
                       booking_code: e.target.value,
+                    })
+                  }
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position='start'>
+                        <SearchIcon sx={{ color: "#999" }} />
+                      </InputAdornment>
+                    ),
+                  }}
+                  sx={{
+                    width: 280,
+                    "& .MuiOutlinedInput-root": {
+                      height: 40,
+                      borderRadius: "24px",
+
+                      backgroundColor: "#fff",
+                      "& fieldset": {
+                        borderColor: "#cddc39", // Border mặc định
+                        borderWidth: "1px", // Tăng độ dày nếu muốn nổi bật hơn
+                      },
+                      "&:hover fieldset": {
+                        borderColor: "#c0ca33", // Hover: đậm hơn một chút (tùy chọn)
+                        borderWidth: "1px",
+                      },
+                      "&.Mui-focused fieldset": {
+                        borderColor: "#cddc39 !important", // QUAN TRỌNG: Khi focus vẫn giữ màu này
+                        borderWidth: "1px",
+                        boxShadow: "0 0 0 3px rgba(205, 220, 57, 0.2)", // Hiệu ứng glow nhẹ (tùy chọn)
+                      },
+                      // Tắt màu legend primary khi focus (nếu có label)
+                      "&.Mui-focused .MuiInputLabel-root": {
+                        color: "#666",
+                      },
+                    },
+                  }}
+                />
+              </Box>
+              <Box>
+                <Typography sx={{ mb: 1.5 }}>Tên khách sạn</Typography>
+                <TextField
+                  placeholder='Tìm kiếm'
+                  value={localFilters.hotel_name}
+                  onChange={(e) =>
+                    setLocalFilters({
+                      ...localFilters,
+                      hotel_name: e.target.value,
                     })
                   }
                   InputProps={{

@@ -5,11 +5,11 @@ import { getHotels } from "../../service/hotel";
 import { listBooking } from "../../service/booking";
 import dayjs from "dayjs";
 
-const BookingDetailController = ({ id }) => {
-  const [idHotel, setIdHotel] = useState<string | null>(id);
+const BookingDetailController = () => {
+  
   const [dateRange, setDateRange] = useState({
-    checkIn: null,
-    checkOut: null,
+    checkIn: dayjs("2025-01-01T00:00:00"),
+    checkOut: dayjs(),
   });
 
   // State cho booking và phân trang
@@ -25,6 +25,7 @@ const BookingDetailController = ({ id }) => {
   // State cho filter
   const [filters, setFilters] = useState({
     booking_code: "",
+    hotel_name: "",
     rent_type: "all",
     status: "all",
     check_in_from: "",
@@ -61,11 +62,10 @@ const BookingDetailController = ({ id }) => {
 
   // Gọi API lấy booking với filter
   const fetchBookings = async (
-    hotelId: string,
     page: number,
     filterParams = filters
   ) => {
-    if (!hotelId) return;
+  
     setLoading(true);
     try {
       let query: any = {
@@ -76,6 +76,9 @@ const BookingDetailController = ({ id }) => {
       // Thêm các filter nếu có giá trị
       if (filterParams.booking_code) {
         query.booking_code = filterParams.booking_code;
+      }
+      if (filterParams.hotel_name) {
+        query.hotel_name = filterParams.hotel_name;
       }
 
       if (filterParams.rent_type && filterParams.rent_type !== "all") {
@@ -117,7 +120,7 @@ const BookingDetailController = ({ id }) => {
       console.log("Cách 2 (Manual build):", queryString1);
 
       // Chọn cách 2 (manual build) để kiểm soát tốt hơn
-      const result = await listBooking(hotelId, queryString1);
+      const result = await listBooking( queryString1);
 
       setBookings(result.bookings || []);
       setPagination({
@@ -136,10 +139,11 @@ const BookingDetailController = ({ id }) => {
 
   // Khi chọn khách sạn mới
   useEffect(() => {
-    if (idHotel) {
+   
       // Set default date range filter khi load lần đầu
       const defaultFilters = {
         booking_code: "",
+        hotel_name:"",
         rent_type: "all",
         status: "all",
         check_in_from: formatDateForAPI(dateRange?.checkIn),
@@ -147,38 +151,39 @@ const BookingDetailController = ({ id }) => {
       };
       console.log("Initial filters:", defaultFilters);
       setFilters(defaultFilters);
-      fetchBookings(idHotel, 1, defaultFilters);
-    }
-  }, [idHotel]);
+      fetchBookings( 1, defaultFilters);
+   
+  }, []);
 
   // Xử lý đổi trang
   const handlePageChange = (
     event: React.ChangeEvent<unknown>,
     newPage: number
   ) => {
-    if (idHotel) {
-      fetchBookings(idHotel, newPage);
-    }
+   
+      fetchBookings( newPage);
+    
   };
 
   // Xử lý filter thay đổi
   const handleFilterChange = (newFilters: any) => {
     console.log("Filter changed to:", newFilters);
     setFilters(newFilters);
-    if (idHotel) {
-      fetchBookings(idHotel, 1, newFilters);
-    }
+   
+      fetchBookings( 1, newFilters);
+    
   };
 
   // Reset filter
   const handleResetFilter = () => {
     const resetDateRange = {
-      checkIn: null,
-      checkOut: null,
+      checkIn:  dayjs("2025-01-01T00:00:00"),
+      checkOut:  dayjs(),
     };
 
     const resetFilters = {
       booking_code: "",
+      hotel_name: "",
       rent_type: "all",
       status: "all",
       check_in_from: formatDateForAPI(resetDateRange.checkIn),
@@ -189,9 +194,9 @@ const BookingDetailController = ({ id }) => {
     setFilters(resetFilters);
     setDateRange(resetDateRange);
 
-    if (idHotel) {
-      fetchBookings(idHotel, 1, resetFilters);
-    }
+    
+      fetchBookings(1, resetFilters);
+    
   };
 
   // Xử lý khi dateRange thay đổi
@@ -207,15 +212,14 @@ const BookingDetailController = ({ id }) => {
 
     console.log("Updated filters:", updatedFilters);
     setFilters(updatedFilters);
-    if (idHotel) {
-      fetchBookings(idHotel, 1, updatedFilters);
-    }
+   
+      fetchBookings( 1, updatedFilters);
+    
   };
 
   return (
     <BookingDetailView
-      idHotel={idHotel}
-      setIdHotel={setIdHotel}
+     
       bookings={bookings}
       pagination={pagination}
       loading={loading}

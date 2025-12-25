@@ -57,12 +57,12 @@ const RegistrationForm = () => {
       if (result?.access_token) {
         localStorage.setItem("access_token", result.access_token);
 
-        localStorage.setItem("user", JSON.stringify(result.partner));
+        localStorage.setItem("user", JSON.stringify(result.account));
         context.dispatch({
           type: "LOGIN",
           payload: {
             ...context.state,
-            user: { ...result.partner },
+            user: { ...result.account },
           },
         });
         toast.success(result.message);

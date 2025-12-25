@@ -2,7 +2,7 @@ import api from "../core/api";
 
 export async function Login(body: any) {
   try {
-    const response = await api.post(`/partner/login`, body);
+    const response = await api.post(`/admin/account/login`, body);
     return response.data;
   } catch (error: any) {
     if (error.response) {

@@ -55,6 +55,36 @@ const ManagerRooms = ({ onNext, detailHotel, setRoom }: Props) => {
 
   const totalRooms = roomTypes.length;
 
+  const renderStatusChip = (status) => {
+    const map = {
+      active: {
+        label: "Đang hoạt động",
+        sx: { bgcolor: "#98B720", color: "white" },
+      },
+      paused: {
+        label: "Tạm dừng",
+        sx: { bgcolor: "#FFB020", color: "white" },
+      },
+      pending: {
+        label: "Chờ duyệt",
+        sx: { bgcolor: "#FEF7F2", color: "#EA6A00" },
+      },
+      terminated: {
+        label: "Đã kết thúc",
+        sx: { bgcolor: "#D32F2F", color: "white" },
+      },
+    };
+  
+    const config = map[status];
+  
+    return (
+      <Chip
+        label={config?.label || "Không xác định"}
+        size='small'
+        sx={config?.sx || { bgcolor: "#9E9E9E", color: "white" }}
+      />
+    );
+  };
   return (
     <>
       <Paper
@@ -76,7 +106,6 @@ const ManagerRooms = ({ onNext, detailHotel, setRoom }: Props) => {
                 {[
                   "Tên loại phòng",
                   "Trang thái",
-                  "SL phòng bán",
                   "Giá theo giờ",
                   "Giá qua đêm",
                   "Giá qua ngày",
@@ -116,16 +145,10 @@ const ManagerRooms = ({ onNext, detailHotel, setRoom }: Props) => {
 
                     {/* Trang thái */}
                     <TableCell>
-                      <Chip
-                        label='Đang hoạt động'
-                        size='small'
-                        color='success'
-                        variant='outlined'
-                      />
+                     {renderStatusChip(room.status)}
                     </TableCell>
 
-                    {/* SL phòng bán - chưa có dữ liệu thực tế */}
-                    <TableCell>-</TableCell>
+                  
 
                     {/* Giá theo giờ */}
                     <TableCell>{room.price_hourly_formatted}</TableCell>

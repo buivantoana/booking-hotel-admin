@@ -18,6 +18,10 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
+  Pagination,
+  useTheme,
+  useMediaQuery,
+  TextField,
 } from "@mui/material";
 import {
   Add as AddIcon,
@@ -36,13 +40,15 @@ import success from "../../images/Frame.png";
 import HotelDetail from "./HotelDetail";
 
 import RoomDetail from "./RoomDetail";
-import { getHotel, toggleHotels } from "../../service/hotel";
+import { getHotel, toggleHotels, updateHotelStatus } from "../../service/hotel";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import { toast } from "react-toastify";
 
 // Component menu thao tác
-function ActionMenu({ setAction, setDeleteDialogOpen, setIdHotel, hotel }) {
+function ActionMenu({ setAction, setDeleteDialogOpen, setIdHotel, hotel, setCancelDialogOpen }) {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
+
   const navigate = useNavigate();
   const handleClick = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
@@ -85,6 +91,11 @@ function ActionMenu({ setAction, setDeleteDialogOpen, setIdHotel, hotel }) {
         }}>
         {/* Chi tiết */}
         <MenuItem
+          onClick={() => {
+            setIdHotel(hotel)
+            setAction("edit_detail");
+            navigate(`/approval?id=${hotel.id}`);
+          }}
           sx={{ gap: 1.5, fontSize: 14, color: "#424242" }} // Màu xám đậm nhẹ
         >
           <Description fontSize='small' />
@@ -93,6 +104,10 @@ function ActionMenu({ setAction, setDeleteDialogOpen, setIdHotel, hotel }) {
 
         {/* Phê duyệt khách sạn */}
         <MenuItem
+          onClick={() => {
+            setIdHotel(hotel)
+            setDeleteDialogOpen(true)
+          }}
           sx={{ gap: 1.5, fontSize: 14, color: "#2e7d32" }} // Màu xanh lá đậm (success)
         >
           <CheckCircle fontSize='small' />
@@ -101,6 +116,10 @@ function ActionMenu({ setAction, setDeleteDialogOpen, setIdHotel, hotel }) {
 
         {/* Từ chối khách sạn */}
         <MenuItem
+          onClick={() => {
+            setIdHotel(hotel)
+            setCancelDialogOpen(true)
+          }}
           sx={{ gap: 1.5, fontSize: 14, color: "#d32f2f" }} // Màu đỏ (error)
         >
           <HighlightOff fontSize='small' />
@@ -113,8 +132,13 @@ function ActionMenu({ setAction, setDeleteDialogOpen, setIdHotel, hotel }) {
   );
 }
 
-export default function ApprovalView({ hotels, getDataHotels }) {
+export default function ApprovalView({ hotels, getDataHotels, pagination,
+
+  onPageChange, }) {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
   const [action, setAction] = useState("manager");
   const [idHotel, setIdHotel] = useState(null);
   const [room, setRoom] = useState(null);
@@ -124,6 +148,7 @@ export default function ApprovalView({ hotels, getDataHotels }) {
   const inactive = total - active;
   const [detailHotel, setDetailHotel] = useState({});
   const [searchParams] = useSearchParams();
+  const [reason, setReason] = useState("");
 
   useEffect(() => {
     if (searchParams.get("id")) {
@@ -143,6 +168,34 @@ export default function ApprovalView({ hotels, getDataHotels }) {
       console.log(error);
     }
   };
+  const handleStatusHotel =async (status) => {
+    try {
+      let result 
+      if(status == "reject"){
+        result = await updateHotelStatus(idHotel.id,{
+          action:"reject",
+          reason
+         })
+         setCancelDialogOpen(false)
+      }
+      if(status == "approve"){
+         result = await updateHotelStatus(idHotel.id,{
+          action:"approve"
+         })
+         setDeleteDialogOpen(false)
+      }
+      if(result?.message && !result?.code){
+        setReason("")
+        toast.success(result?.message);
+        getDataHotels()
+      }else{
+        toast.error(result?.message);
+      }
+      console.log("AAA result",result)
+    } catch (error) {
+      console.log(error)
+    }
+  }
   return (
     <Box sx={{ p: { xs: 2, sm: 3, md: 4 }, minHeight: "100vh" }}>
       {action == "detail" && (
@@ -160,6 +213,9 @@ export default function ApprovalView({ hotels, getDataHotels }) {
           getHotelDetail={getHotelDetail}
           setRoom={setRoom}
           setAction={setAction}
+          handleStatusHotel={handleStatusHotel}
+          setDeleteDialogOpen={setDeleteDialogOpen}
+          setCancelDialogOpen={setCancelDialogOpen}
         />
       )}
       {action == "manager" && (
@@ -221,13 +277,13 @@ export default function ApprovalView({ hotels, getDataHotels }) {
             <Box sx={{ mb: 3 }}>
               <Stack direction='row' spacing={4} color='#555' fontSize={14}>
                 <Box>
-                  Tất cả <strong>{total}</strong>
+                  Phê duyệt <strong>{total}</strong>
                 </Box>
                 <Box>
-                  Dạng hoạt động <strong>{active}</strong>
+                  Đã duyệt <strong>{active}</strong>
                 </Box>
                 <Box>
-                  Ngừng kinh doanh <strong>{inactive}</strong>
+                  Bị từ chối <strong>{inactive}</strong>
                 </Box>
               </Stack>
             </Box>
@@ -260,6 +316,7 @@ export default function ApprovalView({ hotels, getDataHotels }) {
 
                       <TableCell
                         onClick={() => {
+                          setIdHotel(hotel)
                           navigate(`/approval?id=${hotel.id}`);
                           setAction("edit_detail");
                         }}
@@ -271,7 +328,7 @@ export default function ApprovalView({ hotels, getDataHotels }) {
                         {renderCooperationChip(hotel.cooperation_type)}
                       </TableCell>
 
-                      <TableCell>{renderStatusChip(hotel.status)}</TableCell>
+                      <TableCell >{renderStatusChip(hotel.status)}</TableCell>
 
                       <TableCell sx={{ maxWidth: 280 }}>
                         {parseLang(hotel.address)}
@@ -291,6 +348,7 @@ export default function ApprovalView({ hotels, getDataHotels }) {
                           setIdHotel={setIdHotel}
                           setAction={setAction}
                           setDeleteDialogOpen={setDeleteDialogOpen}
+                          setCancelDialogOpen={setCancelDialogOpen}
                         />
                       </TableCell>
                     </TableRow>
@@ -298,7 +356,45 @@ export default function ApprovalView({ hotels, getDataHotels }) {
                 </TableBody>
               </Table>
             </TableContainer>
+            <Stack spacing={2} sx={{ mt: 3, alignItems: "center" }}>
+              <Pagination
+                key={pagination.page} // ← THÊM DÒNG NÀY ĐỂ FORCE RE-RENDER KHI PAGE THAY ĐỔI
+                count={pagination.total_pages}
+                page={pagination.page}
+                onChange={onPageChange}
+                siblingCount={1}
+                boundaryCount={1}
+                color='primary'
+                size={isMobile ? "medium" : "large"}
+                sx={{
+                  // Tùy chỉnh trang active
+                  "& .MuiPaginationItem-root.Mui-selected": {
+                    backgroundColor: "#98b720 !important", // Màu xanh lá bạn đang dùng trong app
+                    color: "white",
+                    fontWeight: "bold",
+                    boxShadow: "0 4px 8px rgba(139,195,74,0.4)",
+                    "&:hover": {
+                      backgroundColor: "#7cb342 !important",
+                    },
+                  },
+                  // Tùy chỉnh các trang thường (nếu muốn)
+                  "& .MuiPaginationItem-root": {
+                    borderRadius: "8px",
+                    margin: "0 4px",
+                    "&:hover": {
+                      backgroundColor: "#e8f5e9",
+                    },
+                  },
+                  // Tùy chỉnh nút ellipsis (...) nếu cần
+                  "& .MuiPaginationItem-ellipsis": {
+                    color: "#666",
+                  },
+                }}
+              />
+            </Stack>
           </Paper>
+        </>
+      )}
           <Dialog
             open={deleteDialogOpen}
             onClose={() => setDeleteDialogOpen(false)}
@@ -320,7 +416,7 @@ export default function ApprovalView({ hotels, getDataHotels }) {
                     mb: 2,
                   }}>
                   <img
-                    src={idHotel?.status == "paused" ? success : remove}
+                    src={success}
                     alt=''
                   />
                 </Box>
@@ -333,14 +429,14 @@ export default function ApprovalView({ hotels, getDataHotels }) {
             </DialogTitle>
             <DialogContent sx={{ textAlign: "center", px: 4, pb: 3 }}>
               <Typography fontWeight={600} fontSize='20px' mb={1}>
-                {idHotel?.status == "paused"
-                  ? "Xác nhận mở lại kinh doanh"
-                  : "Cảnh báo"}
+
+                Xác nhận phê duyệt khách sạn
+
               </Typography>
               <Typography fontSize='14px' color='#666'>
-                {idHotel?.status == "paused"
-                  ? "Hãy đảm bảo cập nhật đầu đủ thông tin, giá và tình trạng sãn sàng trước khi mở lại hoạt động kinh doanh để tránh sai sót trong quá trình đặt phòng."
-                  : " Khách sẽ không nhìn thấy khách sạn này sau khi bạn ngừng kinh doanh khách sạn. Bạn có thể mở kinh doanh lại loại phòng trong tương lai."}
+
+                Hãy đảm bảo đầy đủ thông tin, giá và tình trạng sãn sàng trước khi duyệt khách sạn để tránh sai sót trong quá trình đặt phòng.
+
               </Typography>
             </DialogContent>
             <DialogActions
@@ -351,17 +447,10 @@ export default function ApprovalView({ hotels, getDataHotels }) {
                 flexDirection: "column",
               }}>
               <Button
-                onClick={async () => {
-                  try {
-                    let result = await toggleHotels(idHotel?.id);
-                    if (result?.hotel_id) {
-                      getDataHotels();
-                      setDeleteDialogOpen(false);
-                    }
-                  } catch (error) {
-                    console.log(error);
-                  }
-                }}
+                  onClick={async () => {
+                    handleStatusHotel("approve")
+                  }}
+                
                 variant='contained'
                 sx={{
                   borderRadius: "24px",
@@ -370,9 +459,9 @@ export default function ApprovalView({ hotels, getDataHotels }) {
                   "&:hover": { bgcolor: "#8ab020" },
                   width: "100%",
                 }}>
-                {idHotel?.status == "paused"
-                  ? "Gửi duyệt"
-                  : "Xác nhận ngừng kinh doanh"}
+
+                Gửi duyệt
+
               </Button>
               <Button
                 onClick={() => setDeleteDialogOpen(false)}
@@ -388,8 +477,104 @@ export default function ApprovalView({ hotels, getDataHotels }) {
               </Button>
             </DialogActions>
           </Dialog>
-        </>
-      )}
+          <Dialog
+            open={cancelDialogOpen}
+            onClose={() => setCancelDialogOpen(false)}
+            maxWidth='xs'
+            fullWidth
+            PaperProps={{ sx: { borderRadius: "16px" } }}>
+            <DialogTitle sx={{ textAlign: "left",p:1 }}>
+              <Box sx={{ position: "relative" }}>
+              <Typography fontWeight={600} fontSize='20px' mb={1}>
+              Từ chối khách sạn
+              </Typography>
+                <IconButton
+                  onClick={() => setCancelDialogOpen(false)}
+                  sx={{ position: "absolute", top: -5, right: 0 }}>
+                  <Close />
+                </IconButton>
+              </Box>
+            </DialogTitle>
+            <DialogContent sx={{  pb: 3,padding:1 }}>
+             
+              <Typography fontSize='14px' color='#666'>
+
+                Từ chối kinh doanh khách sạn. Bạn có thể mở kinh doanh lại trong tương lai.
+              </Typography>
+              <TextField
+                    multiline
+                   
+                    rows={4}
+                    placeholder='Nhập nội dung từ chối loại phòng...'
+                    value={reason}
+                    onChange={(e) => setReason(e.target.value)}
+                    variant='outlined'
+                    fullWidth
+                    sx={{
+                      mt:2,
+                      "& .MuiOutlinedInput-root": {
+                        
+                        borderRadius: 1,
+  
+                        backgroundColor: "#fff",
+                        "& fieldset": {
+                          borderColor: "#cddc39", // Border mặc định
+                          borderWidth: "1px",     // Tăng độ dày nếu muốn nổi bật hơn
+                        },
+                        "&:hover fieldset": {
+                          borderColor: "#c0ca33", // Hover: đậm hơn một chút (tùy chọn)
+                          borderWidth: "1px",
+                        },
+                        "&.Mui-focused fieldset": {
+                          borderColor: "#cddc39 !important", // QUAN TRỌNG: Khi focus vẫn giữ màu này
+                          borderWidth: "1px",
+                          boxShadow: "0 0 0 3px rgba(205, 220, 57, 0.2)", // Hiệu ứng glow nhẹ (tùy chọn)
+                        },
+                        // Tắt màu legend primary khi focus (nếu có label)
+                        "&.Mui-focused .MuiInputLabel-root": {
+                          color: "#666",
+                        },
+                      },
+                    }}
+                  />
+            </DialogContent>
+            <DialogActions
+              sx={{
+                justifyContent: "center",
+                pb: 4,
+                gap: 2,
+                flexDirection: "column",
+              }}>
+              <Button
+                disabled={!reason}
+                onClick={async () => {
+                  handleStatusHotel("reject")
+                }}
+                variant='contained'
+                sx={{
+                  borderRadius: "24px",
+                  textTransform: "none",
+                  bgcolor: "#98b720",
+                  "&:hover": { bgcolor: "#8ab020" },
+                  width: "100%",
+                }}>
+
+                Xác nhận từ chối kinh doanh
+              </Button>
+              <Button
+                onClick={() => setCancelDialogOpen(false)}
+                variant='outlined'
+                sx={{
+                  borderRadius: "24px",
+                  textTransform: "none",
+                  borderColor: "#ddd",
+                  color: "#666",
+                  width: "100%",
+                }}>
+                Hủy bỏ
+              </Button>
+            </DialogActions>
+          </Dialog>
     </Box>
   );
 }
@@ -414,7 +599,7 @@ const renderStatusChip = (status) => {
     },
     pending: {
       label: "Chờ duyệt",
-      sx: { bgcolor: "#1976D2", color: "white" },
+      sx: { bgcolor: "#FEF7F2", color: "#EA6A00" },
     },
     terminated: {
       label: "Đã kết thúc",

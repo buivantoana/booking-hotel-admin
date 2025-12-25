@@ -6,16 +6,18 @@ import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { getHotel } from "../../service/hotel";
 
-export default function HotelDetail({ setAction, setRoom, detailHotel, getHotelDetail }) {
+export default function HotelDetail({ setAction, setRoom, detailHotel, getHotelDetail, 
+  setDeleteDialogOpen,
+  setCancelDialogOpen }) {
   return (
     <Box sx={{ minHeight: "100vh" }}>
-      <HotelHeader detailHotel={detailHotel} setAction={setAction} />
-      <HotelInfoDetail detailHotel={detailHotel} onNext={setAction} getHotelDetail={getHotelDetail} setRoom={setRoom} />
+      <HotelHeader detailHotel={detailHotel} setAction={setAction} setDeleteDialogOpen={setDeleteDialogOpen} setCancelDialogOpen={setCancelDialogOpen} />
+      <HotelInfoDetail detailHotel={detailHotel} onNext={setAction} setDeleteDialogOpen={setDeleteDialogOpen} setCancelDialogOpen={setCancelDialogOpen} getHotelDetail={getHotelDetail} setRoom={setRoom} />
     </Box>
   );
 }
 
-function HotelHeader({ setAction, detailHotel }) {
+function HotelHeader({ setAction, detailHotel,setDeleteDialogOpen ,setCancelDialogOpen}) {
   const parseVi = (str) => {
     if (!str) return "";
     try {
@@ -77,7 +79,7 @@ function HotelHeader({ setAction, detailHotel }) {
   );
 }
 
-function HotelInfoDetail({ onNext, setRoom, detailHotel, getHotelDetail }) {
+function HotelInfoDetail({ onNext, setRoom, detailHotel, getHotelDetail,setDeleteDialogOpen ,setCancelDialogOpen }) {
   const [action, setAction] = useState("manager");
   const parseVi = (str) => {
     if (!str) return "";
@@ -157,7 +159,7 @@ function HotelInfoDetail({ onNext, setRoom, detailHotel, getHotelDetail }) {
           <Button
             variant='contained'
 
-            onClick={() => onNext("edit_form")}
+            onClick={() =>setCancelDialogOpen(true)}
             sx={{
               bgcolor: "#F0F1F3",
               color: "black",
@@ -174,7 +176,7 @@ function HotelInfoDetail({ onNext, setRoom, detailHotel, getHotelDetail }) {
           <Button
             variant='contained'
 
-            onClick={() => onNext("edit_form")}
+            onClick={() =>setDeleteDialogOpen(true)}
             sx={{
               bgcolor: "#98B720",
               color: "white",

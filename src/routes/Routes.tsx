@@ -16,8 +16,9 @@ import ReconciliationController from "../pages/reconciliation/ReconciliationCont
 import ProfileController from "../pages/profile/ProfileController";
 import ApprovalController from "../pages/approval/ApprovalController";
 import ManagerHotelController from "../pages/manager_hotel/ManagerHotelController";
-import ManagerBookingController from "../pages/manager-booking/ManagerBookingController";
+
 import ManagerPaymentController from "../pages/manager-payment/ManagerPaymentController";
+import BookingDetailController from "../pages/manager-booking/BookingDetailController";
 
 const Router = () => {
   const context: any = useBookingContext();
@@ -102,7 +103,7 @@ const Router = () => {
             path='/manager-bookings'
             element={
               <PrivateRouter>
-                <ManagerBookingController />
+                <BookingDetailController />
               </PrivateRouter>
             }
           />

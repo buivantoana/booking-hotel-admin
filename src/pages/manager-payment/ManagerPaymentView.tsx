@@ -43,117 +43,16 @@ import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import dayjs from "dayjs";
 import edit from "../../images/brush-square.png";
 import SimpleDateSearchBar from "../../components/SimpleDateSearchBar";
-const getRentTypeLabel = (rent_type: string) => {
-  switch (rent_type) {
-    case "hourly":
-      return "Theo giờ";
-    case "daily":
-      return "Qua ngày";
-    case "overnight":
-      return "Qua đêm";
-    default:
-      return "Không xác định";
-  }
-};
 
-const statusStyles: Record<string, any> = {
-  "Chờ khách xác nhận": {
-    color: "#F97316", // cam (giữ nguyên như cũ cho "Chờ khách xác nhận" / "Chờ xử lý")
-    backgroundColor: "#FFEDD5",
-  },
-  "Chờ nhận phòng": {
-    color: "#2979FF", // xanh dương (giữ nguyên như cũ cho "Chờ nhận phòng")
-    backgroundColor: "#EAF2FF",
-  },
-  "Đã nhận phòng": {
-    color: "#8B5CF6", // tím (giữ nguyên như cũ)
-    backgroundColor: "#F3E8FF",
-  },
-  "Đã trả phòng": {
-    color: "#22C55E", // xanh lá (giữ nguyên như cũ cho "Hoàn thành")
-    backgroundColor: "#DCFCE7",
-  },
-  "Đã huỷ": {
-    color: "#EF4444", // đỏ (giữ nguyên như cũ cho "Hủy phòng")
-    backgroundColor: "#FEE2E2",
-  },
-  "Không nhận phòng": {
-    color: "#EF4444", // đỏ (giữ nguyên như cũ cho "Không nhận phòng")
-    backgroundColor: "#FEE2E2",
-  },
-};
-const paymentStatusStyles: Record<string, any> = {
-  "Thanh toán tại khách sạn": {
-    color: "#F97316", // cam
-  },
-  "Đã thanh toán": {
-    color: "#22C55E", // xanh lá
-  },
-  "Đã hoàn tiền": {
-    color: "#EF4444", // đỏ
-  },
-  "Thanh toán không thành công": {
-    color: "#EF4444", // đỏ
-  },
-  "Đã huỷ": {
-    color: "#666666", // xám
-  },
-};
 
-const getPaymentLabel = (booking: any): string => {
-  const payment = booking?.payment;
-  if (!payment) return "Chưa có thông tin";
 
-  const method = (payment.method || "").toString().trim().toLowerCase();
-
-  if (method === "cash") {
-    return "Thanh toán tại khách sạn";
-  }
-
-  // method !== cash → dựa vào status
-  const status = (payment.status || "").toString().trim().toLowerCase();
-  switch (status) {
-    case "paid":
-      return "Đã thanh toán";
-    case "refunded":
-      return "Đã hoàn tiền";
-    case "failed":
-      return "Thanh toán không thành công";
-    case "cancelled":
-      return "Đã huỷ";
-    default:
-      return "Chưa xác định";
-  }
-};
-const STATUS_API_TO_LABEL: Record<string, string> = {
-  pending: "Chờ khách xác nhận",
-  confirmed: "Chờ nhận phòng",
-  checked_in: "Đã nhận phòng",
-  checked_out: "Đã trả phòng",
-  cancelled: "Đã huỷ",
-  no_show: "Không nhận phòng",
-};
-
-// Mapping nhãn hiển thị → giá trị API (dùng cho filter/tab)
-const STATUS_LABEL_TO_API: Record<string, string> = {
-  "Tất cả": "all",
-  "Chờ khách xác nhận": "pending",
-  "Chờ nhận phòng": "confirmed",
-  "Đã nhận phòng": "checked_in",
-  "Đã trả phòng": "checked_out",
-  "Đã huỷ": "cancelled",
-  "Không nhận phòng": "no_show",
-};
 
 export default function ManagerPaymentView({
-  hotels,
-  idHotel,
-  setIdHotel,
-  bookings,
+
+  Payment,
   pagination,
-  loading,
+
   onPageChange,
-  fetchBookings,
   dateRange,
   setDateRange,
   filters,
@@ -163,11 +62,11 @@ export default function ManagerPaymentView({
   hotels: any[];
   idHotel: string | null;
   setIdHotel: (id: string) => void;
-  bookings: any[];
+  Payment: any[];
   pagination: { page: number; total_pages: number; total: number };
   loading: boolean;
   onPageChange: (event: React.ChangeEvent<unknown>, page: number) => void;
-  fetchBookings: (hotelId: string, page: number, filters?: any) => void;
+  fetchPayment: (hotelId: string, page: number, filters?: any) => void;
   dateRange: any;
   setDateRange: (dateRange: any) => void;
   filters: any;
@@ -188,14 +87,14 @@ export default function ManagerPaymentView({
   const [selectedBooking, setSelectedBooking] = useState(null);
   const [localFilters, setLocalFilters] = useState({
     booking_code: "",
-    rent_type: "all",
+    method: "all",
     status: "all",
   });
   useEffect(() => {
     if (filters) {
       setLocalFilters({
         booking_code: filters.booking_code || "",
-        rent_type: filters.rent_type || "all",
+        method: filters.method || "all",
         status: filters.status || "all",
       });
     }
@@ -256,13 +155,13 @@ export default function ManagerPaymentView({
   const handleReset = () => {
     setLocalFilters({
       booking_code: "",
-      rent_type: "all",
+      method: "all",
       status: "all",
     });
 
     const resetDateRange = {
-      checkIn: dayjs(),
-      checkOut: dayjs().add(1, "day"),
+      checkIn: dayjs("2025-01-01T00:00:00"),
+      checkOut: dayjs(),
     };
 
     setDateRange(resetDateRange);
@@ -272,37 +171,33 @@ export default function ManagerPaymentView({
   // Đếm số lượng booking theo status
   const countByStatus = () => {
     const counts: Record<string, number> = {
-      "Tất cả": 0,
-      "Chờ nhận phòng": 0,
-      "Đã nhận phòng": 0,
-      "Chờ khách xác nhận": 0,
+      "Tất cả": Payment.length, // Tổng số luôn là toàn bộ
+      "Thành công": 0,
+      "Thất bại": 0,
+      "Chờ xử lý": 0,
+      "Hoàn trả": 0,
     };
-
-    bookings.forEach((booking) => {
-      const statusLabel = STATUS_API_TO_LABEL[booking.status] || "Chờ xử lý";
-
-      switch (statusLabel) {
-        case "Chờ nhận phòng":
-          counts["Chờ nhận phòng"]++;
+  
+    Payment.forEach((payment) => {
+      switch (payment.status) {
+        case "paid":
+          counts["Thành công"]++;
           break;
-        case "Đã nhận phòng":
-          counts["Đã nhận phòng"]++;
+        case "failed":
+          counts["Thất bại"]++;
           break;
-        case "Chờ khách xác nhận":
-          counts["Chờ khách xác nhận"]++;
+        case "pending":
+          counts["Chờ xử lý"]++;
           break;
-        case "Hủy phòng":
-          counts["Đã hủy"]++;
+        case "refunded":
+          counts["Hoàn trả"]++;
           break;
-        case "Không nhận phòng":
-          counts["Không nhận phòng"]++;
-          break;
-        case "Hoàn thành":
-          counts["Hoàn thành"]++;
+        default:
+          // Nếu có status lạ, vẫn tính vào tổng nhưng không tăng riêng
           break;
       }
     });
-
+  
     return counts;
   };
 
@@ -317,14 +212,14 @@ export default function ManagerPaymentView({
       value: "pending",
     },
     {
-      label: "thất bại",
-      count: statusCounts["thất bại"],
-      value: "checked_in",
+      label: "Thất bại",
+      count: statusCounts["Thất bại"],
+      value: "failed",
     },
     {
       label: "Chờ xử lý",
       count: statusCounts["Chờ xử lý"],
-      value: "confirmed",
+      value: "pending",
     },
 
     {
@@ -333,6 +228,7 @@ export default function ManagerPaymentView({
       value: "no_show",
     },
   ];
+  
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
       <Box sx={{ p: { xs: 2, sm: 3, md: 4 }, minHeight: "100vh" }}>
@@ -411,11 +307,12 @@ export default function ManagerPaymentView({
                 <Typography sx={{ mb: 1.5 }}>Phương thức thanh toán</Typography>
                 <Select
                   displayEmpty
-                  value={localFilters.rent_type}
+
+                  value={localFilters.method}
                   onChange={(e) =>
                     setLocalFilters({
                       ...localFilters,
-                      rent_type: e.target.value,
+                      method: e.target.value,
                     })
                   }
                   sx={{
@@ -445,9 +342,10 @@ export default function ManagerPaymentView({
                     },
                   }}>
                   <MenuItem value='all'>Tất cả</MenuItem>
-                  <MenuItem value='hourly'>Theo giờ</MenuItem>
-                  <MenuItem value='daily'>Qua ngày</MenuItem>
-                  <MenuItem value='overnight'>Qua đêm</MenuItem>
+                  <MenuItem value='vnpay'>VNPay</MenuItem>
+                  <MenuItem value='momo'>Momo</MenuItem>
+                  <MenuItem value='cash'>Thanh toán trực tiếp</MenuItem>
+
                 </Select>
               </Box>
 
@@ -519,6 +417,9 @@ export default function ManagerPaymentView({
             <Table>
               <TableHead>
                 <TableRow sx={{ backgroundColor: "#f5f5f5" }}>
+                <TableCell>
+                    <strong>#</strong>
+                  </TableCell>
                   <TableCell>
                     <strong>Mã đặt phòng</strong>
                   </TableCell>
@@ -539,7 +440,99 @@ export default function ManagerPaymentView({
                   </TableCell>
                 </TableRow>
               </TableHead>
-              <TableBody></TableBody>
+              
+                <TableBody>
+                  {Payment.map((payment, index) => {
+                    // Format giá tiền
+                    const formattedAmount = new Intl.NumberFormat("vi-VN", {
+                      style: "currency",
+                      currency: "VND",
+                    }).format(payment.amount);
+
+                    // Format thời gian
+                    const formattedTime = dayjs(payment.created_at).format("HH:mm:ss DD/MM/YYYY");
+
+                    // Mapping phương thức thanh toán hiển thị đẹp
+                    const methodLabel = {
+                      momo: "MoMo",
+                      vnpay: "VN Pay",
+                      Cash: "Thanh toán trực tiếp",
+                    }[payment.method.toLowerCase()] || payment.method;
+
+                    // Mapping trạng thái + màu chip
+                    const statusConfig = {
+                      paid: { label: "Thành công", color: "#98b720", textColor: "white" },
+                      failed: { label: "Thất bại", color: "#d32f2f", textColor: "white" },
+                      pending: { label: "Chờ xử lý", color: "#ffb020", textColor: "white" },
+                      refunded: { label: "Hoàn trả", color: "#1976d2", textColor: "white" },
+                    };
+
+                    const status = statusConfig[payment.status] || {
+                      label: "Không xác định",
+                      color: "#9e9e9e",
+                      textColor: "white",
+                    };
+
+                    return (
+                      <TableRow
+                        key={payment.id}
+                        hover
+                        sx={{ cursor: "pointer" }}
+                        onClick={() => handleRowClick(payment)} // Nếu cần mở chi tiết
+                      >
+                        {/* STT */}
+                        <TableCell>{index + 1}</TableCell>
+
+                        {/* Mã đặt phòng */}
+                        <TableCell>
+                          <Stack>
+                            <Typography fontWeight={500}>{payment.booking_code}</Typography>
+                            <Typography variant="body2" color="text.secondary">
+                              Khách sạn 123
+                            </Typography>
+                          </Stack>
+                        </TableCell>
+
+                        {/* Mã thanh toán */}
+                        <TableCell>
+                          <Typography fontWeight={500}>{payment.id}</Typography>
+                        </TableCell>
+
+                        {/* Phương thức thanh toán */}
+                        <TableCell>
+                          <Typography>{methodLabel}</Typography>
+                        </TableCell>
+
+                        {/* Giá tiền */}
+                        <TableCell>
+                          <Typography fontWeight={600} color="#333">
+                            {formattedAmount.replace("₫", "")}
+                          </Typography>
+                        </TableCell>
+
+                        {/* Thời gian */}
+                        <TableCell>
+                          <Typography>{formattedTime}</Typography>
+                        </TableCell>
+
+                        {/* Tình trạng thanh toán */}
+                        <TableCell>
+                          <Chip
+                            label={status.label}
+                            size="small"
+                            sx={{
+                              bgcolor: status.color,
+                              color: status.textColor,
+                              fontWeight: 500,
+                              borderRadius: "12px",
+                              minWidth: 80,
+                            }}
+                          />
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
             </Table>
           </TableContainer>
           <Stack spacing={2} sx={{ mt: 3, alignItems: "center" }}>
