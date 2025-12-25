@@ -310,6 +310,14 @@ export default function ApprovalView({ hotels, getDataHotels, pagination,
                   </TableRow>
                 </TableHead>
                 <TableBody>
+                  {hotels.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={8} align='center'>
+                      <Typography>Không có dữ liệu</Typography>
+                    </TableCell>
+                  </TableRow>
+                ) :
+                  <>
                   {hotels?.map((hotel, index) => (
                     <TableRow hover key={hotel.id}>
                       <TableCell>{index + 1}</TableCell>
@@ -353,10 +361,11 @@ export default function ApprovalView({ hotels, getDataHotels, pagination,
                       </TableCell>
                     </TableRow>
                   ))}
+                  </>}
                 </TableBody>
               </Table>
             </TableContainer>
-            <Stack spacing={2} sx={{ mt: 3, alignItems: "center" }}>
+           {hotels.length !== 0 && <Stack spacing={2} sx={{ mt: 3, alignItems: "center" }}>
               <Pagination
                 key={pagination.page} // ← THÊM DÒNG NÀY ĐỂ FORCE RE-RENDER KHI PAGE THAY ĐỔI
                 count={pagination.total_pages}
@@ -391,7 +400,7 @@ export default function ApprovalView({ hotels, getDataHotels, pagination,
                   },
                 }}
               />
-            </Stack>
+            </Stack>}
           </Paper>
         </>
       )}

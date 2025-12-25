@@ -442,6 +442,14 @@ export default function ManagerPaymentView({
               </TableHead>
               
                 <TableBody>
+                {Payment.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={8} align='center'>
+                      <Typography>Không có dữ liệu</Typography>
+                    </TableCell>
+                  </TableRow>
+                ) :
+                  <>
                   {Payment.map((payment, index) => {
                     // Format giá tiền
                     const formattedAmount = new Intl.NumberFormat("vi-VN", {
@@ -532,10 +540,12 @@ export default function ManagerPaymentView({
                       </TableRow>
                     );
                   })}
+                  
+                  </>}
                 </TableBody>
             </Table>
           </TableContainer>
-          <Stack spacing={2} sx={{ mt: 3, alignItems: "center" }}>
+          {Payment.length !== 0  &&<Stack spacing={2} sx={{ mt: 3, alignItems: "center" }}>
             <Pagination
               key={pagination.page} // ← THÊM DÒNG NÀY ĐỂ FORCE RE-RENDER KHI PAGE THAY ĐỔI
               count={pagination.total_pages}
@@ -570,7 +580,7 @@ export default function ManagerPaymentView({
                 },
               }}
             />
-          </Stack>
+          </Stack>}
         </Paper>
       </Box>
     </LocalizationProvider>

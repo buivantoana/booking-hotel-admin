@@ -173,14 +173,6 @@ export default function BookingDetailView({
 }) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
-  const [fromDate, setFromDate] = useState<dayjs.Dayjs | null>(null);
-  const [toDate, setToDate] = useState<dayjs.Dayjs | null>(null);
-  const [openNote, setOpenNote] = useState(false);
-  const [idBooking, setIdBooking] = useState(null);
-  const [openCancel, setOpenCancel] = useState(false);
-  const [openAccepp, setOpenAccepp] = useState(false);
-
-  const [openCheckin, setOpenCheckin] = useState(false);
   const [openDetail, setOpenDetail] = useState(false);
   const [selectedBooking, setSelectedBooking] = useState(null);
   const [localFilters, setLocalFilters] = useState({
@@ -368,7 +360,9 @@ export default function BookingDetailView({
             <Stack
               direction={{ xs: "column", sm: "row" }}
               mb={4}
-              spacing={2}
+            
+              gap={2}
+              flexWrap={"wrap"}
               alignItems='end'>
               {/* Tìm kiếm */}
               <Box>
@@ -667,9 +661,9 @@ export default function BookingDetailView({
                           </span>
                         </TableCell>
                         <TableCell>
-                          {formatDateTime(row.created_at)}
-                          <br />
                           {formatDateTime(row.check_in)}
+                          <br />
+                          {formatDateTime(row.check_out)}
                         </TableCell>
 
                         <TableCell>
@@ -796,18 +790,24 @@ function BookingDetailModal({ open, onClose, booking }) {
                 {formatDateTime(booking.created_at)}
               </Typography>
             </Stack>
-
+            <Stack direction='row' justifyContent='space-between'>
+              <Typography color='text.secondary'>Tên khách sạn:</Typography>
+              <Typography fontWeight='medium'>
+                {booking?.hotel_name?JSON.parse(booking?.hotel_name)?.vi||JSON.parse(booking?.hotel_name)?.en || booking?.hotel_name:  "Nguyễn Văn A"}
+              </Typography>
+            </Stack>
             <Stack direction='row' justifyContent='space-between'>
               <Typography color='text.secondary'>Tên người đặt:</Typography>
               <Typography fontWeight='medium'>
-                {booking.customer_name || "Nguyễn Văn A"}
+                {booking.full_name || "Nguyễn Văn A"}
               </Typography>
             </Stack>
+            
 
             <Stack direction='row' justifyContent='space-between'>
               <Typography color='text.secondary'>Số điện thoại:</Typography>
               <Typography fontWeight='medium'>
-                {booking.customer_phone || "0123456789"}
+                {("0"+booking.phone?.slice(3)) || "0123456789"}
               </Typography>
             </Stack>
 

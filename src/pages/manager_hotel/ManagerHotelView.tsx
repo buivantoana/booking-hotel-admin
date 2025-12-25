@@ -80,7 +80,7 @@ function ActionMenu({ hotel, setAction, setDeleteDialogOpen, setIdHotel, setAppr
 
   const handleTogglePause = () => {
     setIdHotel(hotel);
-    setDeleteDialogOpen(true); // Dùng chung dialog toggle (đã xử lý paused/active)
+    setDeleteDialogOpen(true); 
     handleClose();
   };
 
@@ -158,7 +158,7 @@ function ActionMenu({ hotel, setAction, setDeleteDialogOpen, setIdHotel, setAppr
                 sx={{ gap: 1.5, fontSize: 14, color: "#d32f2f" }}
               >
                 <PauseCircleIcon fontSize="small" />
-                Ngừng hợp tác
+                Ngừng kinh doanh
               </MenuItem>
             ) : (
               <MenuItem
@@ -228,6 +228,18 @@ export default function ManagerHotelView({ hotels, getDataHotels,pagination,
          })
          setApproveDialogOpen(false)
       }
+      if(status == "paused"){
+        result = await updateHotelStatus(idHotel.id,{
+         action:"approve"
+        })
+        setDeleteDialogOpen(false)
+     }
+     if(status == "active"){
+      result = await updateHotelStatus(idHotel.id,{
+       action:"terminate"
+      })
+      setDeleteDialogOpen(false)
+   }
       if(result?.message && !result?.code){
         setReason("")
         toast.success(result?.message);
@@ -659,6 +671,15 @@ export default function ManagerHotelView({ hotels, getDataHotels,pagination,
                   </TableRow>
                 </TableHead>
                 <TableBody>
+                {hotels.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={8} align='center'>
+                      <Typography>Không có dữ liệu</Typography>
+                    </TableCell>
+                  </TableRow>
+                ) :
+                  <>
+                  
                   {hotels?.map((hotel, index) => (
                     <TableRow hover key={hotel.id}>
                       <TableCell>{index + 1}</TableCell>
@@ -702,10 +723,11 @@ export default function ManagerHotelView({ hotels, getDataHotels,pagination,
                       </TableCell>
                     </TableRow>
                   ))}
+                  </>}
                 </TableBody>
               </Table>
             </TableContainer>
-            <Stack spacing={2} sx={{ mt: 3, alignItems: "center" }}>
+            {hotels.length !== 0 && <Stack spacing={2} sx={{ mt: 3, alignItems: "center" }}>
               <Pagination
                 key={pagination.page} // ← THÊM DÒNG NÀY ĐỂ FORCE RE-RENDER KHI PAGE THAY ĐỔI
                 count={pagination.total_pages}
@@ -740,7 +762,7 @@ export default function ManagerHotelView({ hotels, getDataHotels,pagination,
                   },
                 }}
               />
-            </Stack>
+            </Stack>}
           </Paper>
         </>
       )}
@@ -797,15 +819,7 @@ export default function ManagerHotelView({ hotels, getDataHotels,pagination,
               }}>
               <Button
                 onClick={async () => {
-                  try {
-                    let result = await toggleHotels(idHotel?.id);
-                    if (result?.hotel_id) {
-                      getDataHotels();
-                      setDeleteDialogOpen(false);
-                    }
-                  } catch (error) {
-                    console.log(error);
-                  }
+                  handleStatusHotel(idHotel?.status == "active"?"active":"paused")
                 }}
                 variant='contained'
                 sx={{

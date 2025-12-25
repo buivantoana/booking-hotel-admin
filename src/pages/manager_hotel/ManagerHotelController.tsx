@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import ManagerHotelView from "./ManagerHotelView";
 import { getHotels } from "../../service/hotel";
+import { useSearchParams } from "react-router-dom";
 
 type Props = {};
 
@@ -12,6 +13,7 @@ const ManagerHotelController = (props: Props) => {
     total: 0,
     total_pages: 0,
   });
+  const [searchParams, setSearchParams] = useSearchParams();
   useEffect(()=>{
     getDataHotels(1)
   },[])
@@ -19,7 +21,8 @@ const ManagerHotelController = (props: Props) => {
     try {
       let query: any = {
         page: page || pagination.page,
-        limit: pagination.limit
+        limit: pagination.limit,
+        partner_email: searchParams.get("email") 
       };
       const params1 = new URLSearchParams();
       Object.entries(query).forEach(([key, value]) => {

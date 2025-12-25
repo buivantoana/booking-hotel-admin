@@ -83,7 +83,7 @@ const HomeController = (props: Props) => {
         room_type_id: "lD49C0cWJAUw",
       });
 
-      let result = await getGeneralStats(idHotel, params);
+      let result = await getGeneralStats( params);
       if (result?.hourly) {
         setDataGeneral(result);
       }
@@ -336,23 +336,10 @@ const HomeController = (props: Props) => {
     }
   };
   useEffect(() => {
-    if (idHotel)
+    
       getDataReview()
-  }, [idHotel])
-  useEffect(() => {
-    getListHotel()
   }, [])
-  const getListHotel = async () => {
-    try {
-      let result = await getHotels();
-      if (result?.hotels) {
-        setIdHotel(localStorage.getItem("hotel_id") ? result?.hotels.some((item)=>item.id == localStorage.getItem("hotel_id"))?localStorage.getItem("hotel_id"): result?.hotels[0]?.id:  result?.hotels[0]?.id)
-        setHotels(result?.hotels)
-      }
-    } catch (error) {
-
-    }
-  }
+  
   const getDataReview = async () => {
     try {
       let result = await getReviewstats(idHotel);

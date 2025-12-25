@@ -124,10 +124,10 @@ export async function getInventoryHotelDaily(id, params) {
   }
 }
 
-export async function getGeneralStats(id, params) {
+export async function getGeneralStats( params) {
   try {
     let token = localStorage.getItem("access_token");
-    const response = await api.get(`/partner/stats/${id}/general?${params}`, {
+    const response = await api.get(`admin/stats/general?${params}`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -432,10 +432,10 @@ export async function confirmHotelsSettlement(id) {
     }
   }
 }
-export async function getHotelReview(id,query) {
+export async function getHotelReview(query) {
   try {
     let token = localStorage.getItem("access_token");
-    const response = await api.get(`/partner/review/hotel/${id}?${query}`, {
+    const response = await api.get(`/admin/review/all-reviews?${query}`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -454,6 +454,49 @@ export async function getHotelReview(id,query) {
   }
 }
 
+export async function getDetailReview(id) {
+  try {
+    let token = localStorage.getItem("access_token");
+    const response = await api.get(`/admin/review/${id}/detail`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data;
+  } catch (error: any) {
+    if (error.response) {
+      console.error("Error response data:", error.response.data);
+      console.error("Error response status:", error.response.status);
+      return error.response.data;
+    } else if (error.request) {
+      console.error("No response received:", error.request);
+    } else {
+      console.error("Error setting up request:", error.message);
+    }
+  }
+}
+
+export async function toggleVisibility(id,body) {
+  try {
+    let token = localStorage.getItem("access_token");
+    const response = await api.post(`/admin/review/${id}/visibility`,body, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data;
+  } catch (error: any) {
+    if (error.response) {
+      console.error("Error response data:", error.response.data);
+      console.error("Error response status:", error.response.status);
+      return error.response.data;
+    } else if (error.request) {
+      console.error("No response received:", error.request);
+    } else {
+      console.error("Error setting up request:", error.message);
+    }
+  }
+}
 export async function replyReviewHotels(id, body) {
   try {
     let token = localStorage.getItem("access_token");

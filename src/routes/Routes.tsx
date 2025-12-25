@@ -7,18 +7,20 @@ import LayoutWebsite from "../components/layouts/LayoutWebsite";
 import PrivateRouter from "../components/PrivateRouter";
 import GuestRoute from "../components/GuestRoute";
 import { useEffect } from "react";
-import CreateHotelController from "../pages/create_hotel/CreateHotelController";
+
 import HomeController from "../pages/home/HomeController";
 import ReviewController from "../pages/review/ReviewController";
 import NotificateController from "../pages/notificate/NotificateController";
 
 import ReconciliationController from "../pages/reconciliation/ReconciliationController";
-import ProfileController from "../pages/profile/ProfileController";
+
 import ApprovalController from "../pages/approval/ApprovalController";
 import ManagerHotelController from "../pages/manager_hotel/ManagerHotelController";
 
 import ManagerPaymentController from "../pages/manager-payment/ManagerPaymentController";
 import BookingDetailController from "../pages/manager-booking/BookingDetailController";
+import ManagerReviewController from "../pages/manager-review/ManagerReviewController";
+import ManagerAccountController from "../pages/manager-account/ManagerAccountController";
 
 const Router = () => {
   const context: any = useBookingContext();
@@ -66,6 +68,15 @@ const Router = () => {
             }
           />
 
+<Route
+            path='/manager-accounts'
+            element={
+              <PrivateRouter>
+                <ManagerAccountController />
+              </PrivateRouter>
+            }
+          />
+
           <Route
             path='/notificate'
             element={
@@ -78,19 +89,12 @@ const Router = () => {
             path='/review'
             element={
               <PrivateRouter>
-                <ReviewController />
+                <ManagerReviewController />
               </PrivateRouter>
             }
           />
 
-          <Route
-            path='/manager-profile'
-            element={
-              <PrivateRouter>
-                <ProfileController />
-              </PrivateRouter>
-            }
-          />
+         
           <Route
             path='/reconciliation'
             element={
@@ -124,14 +128,7 @@ const Router = () => {
             </GuestRoute>
           }
         />
-        <Route
-          path='/create-hotel'
-          element={
-            <PrivateRouter>
-              <CreateHotelController />
-            </PrivateRouter>
-          }
-        />
+      
 
         <Route
           path='/login'
