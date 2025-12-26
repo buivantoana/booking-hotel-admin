@@ -29,6 +29,7 @@ import {
 } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import { getbankPartner, listBookingSettlement } from "../../service/booking";
+import { sendPubllish } from "../../service/hotel";
 
 
 const parseLang = (value: string, lang = "vi") => {
@@ -355,10 +356,10 @@ export default function ReconciliationView({
                   <TableCell colSpan={7} align="center">Không có dữ liệu</TableCell>
                 </TableRow>
               ) : (
-                tableData.map((row) => {
+                tableData.map((row,i) => {
                   const statusStyle = getStatusColor(row.status);
                   return (
-                    <TableRow key={row.id} hover onClick={() => setSettlement(row)}>
+                    <TableRow key={row.id} hover onClick={() => setSettlement(dataSettlement[i])}>
                       <TableCell>{row.id}</TableCell>
                       <TableCell>
                         <Typography sx={{ cursor: "pointer" }} fontWeight="500">
@@ -558,6 +559,18 @@ function HotelDetailFinal({
   const deadlineText = `${formatTime(
     settlement?.confirm_deadline
   )}, ${formatDate(settlement?.confirm_deadline)}`;
+
+  console.log("AAAAA settlement",settlement)
+  const handlePublish =async () => {
+    try {
+      let result = await sendPubllish(settlement?.id)
+      console.log("AA result ",result)
+      fetchSettlements()
+      setSettlement(null)
+    } catch (error) {
+      console.log(error)
+    }
+  }
   return (
     <Box sx={{ bgcolor: "#f9fafb", minHeight: "100vh" }}>
       {/* Header – giống 100% */}
@@ -692,7 +705,7 @@ function HotelDetailFinal({
                   <Button
                     variant='contained'
                     onClick={() => {
-                      setOpenModal(true);
+                      handlePublish()
                     }}
                     sx={{
                       bgcolor: "#98B720",
@@ -704,7 +717,7 @@ function HotelDetailFinal({
                       boxShadow: "none",
                       mb: 2,
                     }}>
-                    Hoàn tất đối soát
+                    Gửi đối soát
                   </Button>
                 ) : (
                   <>
