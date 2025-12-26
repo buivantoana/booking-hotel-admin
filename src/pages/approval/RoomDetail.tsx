@@ -30,8 +30,10 @@ export default function RoomDetail({
   room,
   getHotelDetail,
   detailHotel,
+  setDeleteDialogOpen,
+  setCancelDialogOpen
 }) {
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
   const [action, setAction] = useState("detail");
   const [searchParams, setSearchParams] = useSearchParams();
@@ -77,8 +79,8 @@ export default function RoomDetail({
   return (
     <Box sx={{ minHeight: "100vh" }}>
       {/* Dialog ngừng kinh doanh */}
-      <Dialog
-        open={deleteDialogOpen}
+      {/* <Dialog
+        open={}
         onClose={() => setDeleteDialogOpen(false)}
         maxWidth='xs'
         fullWidth
@@ -147,10 +149,10 @@ export default function RoomDetail({
             Hủy bỏ
           </Button>
         </DialogActions>
-      </Dialog>
+      </Dialog> */}
 
       {/* Dialog mở lại kinh doanh */}
-      <Dialog
+      {/* <Dialog
         open={confirmDialogOpen}
         onClose={() => setConfirmDialogOpen(false)}
         maxWidth='xs'
@@ -221,7 +223,7 @@ export default function RoomDetail({
             Hủy bỏ
           </Button>
         </DialogActions>
-      </Dialog>
+      </Dialog> */}
 
       {/* View chi tiết */}
       {action === "detail" && room && (
@@ -230,10 +232,14 @@ export default function RoomDetail({
           <Box sx={{ display: "flex", alignItems: "center", mb: 3 }}>
             <KeyboardArrowLeftIcon
               onClick={() => {
-                const params = new URLSearchParams(searchParams);
-                params.set("manager_room", "true"); // thêm params mới
-                setSearchParams(params);
-                onNext("edit_detail");
+                if(searchParams.get("tab") == "all"){
+                  onNext("manager");
+                }else{
+                  const params = new URLSearchParams(searchParams);
+                  params.set("manager_room", "true"); // thêm params mới
+                  setSearchParams(params);
+                  onNext("edit_detail");
+                }
               }}
               sx={{ fontSize: 30, mr: 1, cursor: "pointer" }}
             />
@@ -249,6 +255,7 @@ export default function RoomDetail({
             <Box display={"flex"} gap={"10px"}>
               <Button
                 variant='contained'
+                onClick={() =>setCancelDialogOpen(true)}
                 sx={{
                   bgcolor: "#F0F1F3",
                   color: "black",
@@ -264,6 +271,7 @@ export default function RoomDetail({
               </Button>
               <Button
                 variant='contained'
+                onClick={() =>setDeleteDialogOpen(true)}
                 sx={{
                   bgcolor: "#98B720",
                   color: "white",

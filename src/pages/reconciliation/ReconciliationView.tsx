@@ -1,110 +1,36 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import {
+  KeyboardArrowLeft,
+  Search as SearchIcon
+} from "@mui/icons-material";
 import {
   Box,
-  Paper,
-  Typography,
-  TextField,
-  InputAdornment,
-  Select,
-  MenuItem,
-  FormControl,
   Button,
+  Chip,
+  Divider,
+  FormControl,
+  InputAdornment,
+  MenuItem,
+  Pagination,
+  Paper,
+  Select,
+  Stack,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
-  Chip,
-  Pagination,
-  Stack,
-  useMediaQuery,
+  TextField,
   Theme,
-  Divider,
-  FormGroup,
-  FormControlLabel,
-  Checkbox,
+  Typography,
+  useMediaQuery
 } from "@mui/material";
-import {
-  CheckCircle,
-  KeyboardArrowLeft,
-  Search as SearchIcon,
-} from "@mui/icons-material";
-import { QRCodeCanvas } from "qrcode.react"; // npm install qrcode.react
-import HotelSelect from "../../components/HotelSelect";
+import React, { useEffect, useState } from "react";
 import { getbankPartner, listBookingSettlement } from "../../service/booking";
-import { list_banks } from "../../utils/utils";
-import {
-  addBankHotels,
-  confirmHotelsSettlement,
-  updateBankHotels,
-} from "../../service/hotel";
-import { toast } from "react-toastify";
-interface HotelRow {
-  id: number;
-  name: string;
-  address: string;
-  month: string;
-  status: "Chưa đối soát" | "Hoàn thành" | "Chờ thanh toán";
-  rooms: number;
-  total: number;
-  dueDate: string;
-}
 
-const data: HotelRow[] = [
-  {
-    id: 1,
-    name: "Khách sạn 123",
-    address: "110 Đ. Cầu Giấy, Quan Hoa, Cầu Giấy, Hà Nội",
-    month: "Tháng 11.2025",
-    status: "Chưa đối soát",
-    rooms: 3,
-    total: 5000000,
-    dueDate: "31/12/2025",
-  },
-  {
-    id: 2,
-    name: "Khách sạn 123",
-    address: "110 Đ. Cầu Giấy, Quan Hoa, Cầu Giấy, Hà Nội",
-    month: "Tháng 11.2025",
-    status: "Hoàn thành",
-    rooms: 3,
-    total: 5000000,
-    dueDate: "31/12/2025",
-  },
-  {
-    id: 3,
-    name: "Khách sạn 123",
-    address: "110 Đ. Cầu Giấy, Quan Hoa, Cầu Giấy, Hà Nội",
-    month: "Tháng 11.2025",
-    status: "Chưa đối soát",
-    rooms: 3,
-    total: -3600000,
-    dueDate: "31/12/2025",
-  },
-  {
-    id: 4,
-    name: "Khách sạn 123",
-    address: "110 Đ. Cầu Giấy, Quan Hoa, Cầu Giấy, Hà Nội",
-    month: "Tháng 11.2025",
-    status: "Chờ thanh toán",
-    rooms: 3,
-    total: 5000000,
-    dueDate: "31/12/2025",
-  },
-  {
-    id: 5,
-    name: "Khách sạn 123",
-    address: "110 Đ. Cầu Giấy, Quan Hoa, Cầu Giấy, Hà Nội",
-    month: "Tháng 11.2025",
-    status: "Hoàn thành",
-    rooms: 3,
-    total: 5000000,
-    dueDate: "31/12/2025",
-  },
-];
+
 const parseLang = (value: string, lang = "vi") => {
   try {
     const obj = JSON.parse(value);
@@ -132,15 +58,16 @@ const formatCurrency = (amount: number) => {
 };
 
 export default function ReconciliationView({
-  hotels,
-  pagination,
-  setSettlement,
+  dataSettlement = [],
+  pagination = { page: 1, total_pages: 1 },
+  loading = false,
   settlement,
+  setSettlement,
   onPageChange,
-  idHotel,
-  setIdHotel,
-  dataSettlement,
   fetchSettlements,
+  filters,
+  onFilterChange,
+  onResetFilter,
 }) {
   const isMobile = useMediaQuery((theme: Theme) =>
     theme.breakpoints.down("sm")
@@ -148,34 +75,77 @@ export default function ReconciliationView({
   const isTablet = useMediaQuery((theme: Theme) =>
     theme.breakpoints.between("sm", "md")
   );
+  const [localFilters, setLocalFilters] = useState({
+    hotel_name: "",
+    period_month: "",
+    status: "",
+  });
+  const [currentTab, setCurrentTab] = useState("");
 
-  const STATUS_LABEL: Record<string, string> = {
+  useEffect(() => {
+    if (filters) {
+      setLocalFilters(filters);
+      setCurrentTab(filters.status || "");
+    }
+  }, [filters]);
+  const STATUS_LABEL = {
+    draft: "Chưa đối soát",
+    pending: "Chờ xác nhận",
     confirmed: "Chờ thanh toán",
     paid: "Đã thanh toán",
-    carried: "Chuyển kỳ sau",
+    completed: "Hoàn thành", // Giả sử
   };
   const tableData = dataSettlement.map((item, index) => ({
-    id: index + 1, // hoặc item.id nếu muốn
+    id: (pagination.page - 1) * pagination.limit + index + 1,
     name: parseLang(item.hotel_name, "vi"),
     address: parseLang(item.hotel_address, "en"),
-    month: item.period_month, // 2025-11
-    status: STATUS_LABEL[item.status] ?? item.status, // confirmed
-    rooms: "-", // API chưa có → placeholder
-    total: item.closing_balance, // Tổng công nợ
-    hotel_id: item.hotel_id, // Tổng công nợ
+    month: item.period_month,
+    status: STATUS_LABEL[item.status] ?? item.status,
+    rooms: "-", // Placeholder
+    total: item.closing_balance,
+    hotel_id: item.hotel_id,
     _id: item.id,
     dueDate: new Date(item.confirm_deadline).toLocaleDateString("vi-VN"),
   }));
+
+  const handleSearch = () => {
+    onFilterChange(localFilters);
+  };
+
+  const handleReset = () => {
+    setLocalFilters({ hotel_name: "", period_month: "", status: "draft" });
+    onResetFilter();
+  };
+
+  const handleTabChange = (statusValue: string) => {
+    const newStatus = statusValue === "all" ? "" : statusValue;
+    setCurrentTab(newStatus);
+    setLocalFilters((prev) => ({ ...prev, status: newStatus }));
+    onFilterChange({ ...localFilters, status: newStatus });
+  };
+
+  const tabs = [
+    "Chưa đối soát", // draft
+    "Chờ thanh toán", // confirmed
+    "Thanh toán", // paid ?
+    "Hoàn thành" // completed ?
+  ].map(label => {
+    let value;
+    switch(label) {
+      case "Chưa đối soát": value = "draft"; break;
+      case "Chờ thanh toán": value = "confirmed"; break;
+      case "Thanh toán": value = "paid"; break;
+      case "Hoàn thành": value = "completed"; break;
+    }
+    return { label, value };
+  });
   return (
     <>
       {settlement && (
         <HotelDetailFinal
           settlement={settlement}
           setSettlement={setSettlement}
-          hotels={hotels}
           isMobile={isMobile}
-          idHotel={idHotel}
-          setIdHotel={setIdHotel}
           fetchSettlements={fetchSettlements}
         />
       )}
@@ -219,18 +189,19 @@ export default function ReconciliationView({
               border: "1px solid #e0e0e0",
               borderRadius: 2,
             }}>
-            <Typography variant='h6' fontWeight='600' mb={2}>
-              Danh sách khách sạn
-            </Typography>
 
             <Stack
               direction={{ xs: "column", md: "row" }}
               spacing={2}
-              alignItems={{ md: "center" }}
+              alignItems={{ md: "end" }}
               mb={3}>
+                <Box >
+            <Typography mb={1}>Tìm kiếm</Typography>
               <TextField
                 placeholder='Tên khách sạn'
                 size='small'
+                value={localFilters.hotel_name}
+              onChange={(e) => setLocalFilters({ ...localFilters, hotel_name: e.target.value })}
                 sx={{
                   "& .MuiOutlinedInput-root": {
                     height: 40,
@@ -254,9 +225,13 @@ export default function ReconciliationView({
                   ),
                 }}
               />
+                </Box>
+                <Box>
+                  <Typography mb={1}>Kì đối soát</Typography>
 
               <FormControl
                 size='small'
+               
                 sx={{
                   height: 40,
 
@@ -276,17 +251,20 @@ export default function ReconciliationView({
                   },
                   "& .MuiSelect-icon": { color: "#666", fontSize: "28px" },
                 }}>
-                <Select defaultValue='' displayEmpty>
+                <Select  value={localFilters.period_month}
+                onChange={(e) => setLocalFilters({ ...localFilters, period_month: e.target.value })} defaultValue='' displayEmpty>
                   <MenuItem value='' disabled>
                     Chọn kỳ đối soát
                   </MenuItem>
                   <MenuItem value='11-2025'>Tháng 11.2025</MenuItem>
                 </Select>
               </FormControl>
+                </Box>
 
-              <Box sx={{ display: "flex", gap: 1, ml: { md: "auto" } }}>
+              <Box sx={{ display: "flex", gap: 1, ml: { md: "auto" },pb:"5px" }}>
                 <Button
                   variant='contained'
+                  onClick={handleSearch}
                   color='success'
                   sx={{
                     borderRadius: 2,
@@ -297,6 +275,7 @@ export default function ReconciliationView({
                   Tìm kiếm
                 </Button>
                 <Button
+                onClick={handleReset}
                   variant='outlined'
                   sx={{
                     borderRadius: 2,
@@ -311,28 +290,27 @@ export default function ReconciliationView({
             </Stack>
 
             {/* Tabs */}
-            <Stack direction='row' spacing={1} flexWrap='wrap' gap={1}>
-              {["Tất cả", "Chưa đối soát", "Chờ thanh toán", "Hoàn thành"].map(
-                (tab) => (
-                  <Button
-                    key={tab}
-                    variant={tab === "Tất cả" ? "contained" : "outlined"}
-                    size='small'
-                    sx={{
-                      borderRadius: 3,
-                      textTransform: "none",
-                      color: tab === "Tất cả" ? "white" : "#98b720",
-                      borderColor: "#98b720",
-                      bgcolor: tab === "Tất cả" ? "#98b720" : "transparent",
-                      "&:hover": {
-                        bgcolor: tab === "Tất cả" ? "#1565c0" : "#f5f5f5",
-                      },
-                    }}>
-                    {tab}
-                  </Button>
-                )
-              )}
-            </Stack>
+            <Stack direction="row" spacing={1} flexWrap="wrap" gap={1}>
+          {tabs.map((tab) => (
+            <Button
+              key={tab.value}
+              variant={currentTab === tab.value ? "contained" : "outlined"}
+              size="small"
+              onClick={() => handleTabChange(tab.value)}
+              sx={{
+                borderRadius: 3,
+                textTransform: "none",
+                color: currentTab === tab.value ? "white" : "#98b720",
+                borderColor: "#98b720",
+                bgcolor: currentTab === tab.value ? "#98b720" : "transparent",
+                "&:hover": {
+                  bgcolor: currentTab === tab.value ? "#1565c0" : "#f5f5f5",
+                },
+              }}>
+              {tab.label}
+            </Button>
+          ))}
+        </Stack>
             <TableContainer sx={{ maxHeight: "calc(100vh - 380px)", mt: 4 }}>
               <Table stickyHeader>
                 <TableHead>
@@ -368,71 +346,64 @@ export default function ReconciliationView({
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {tableData?.map((row, index) => {
-                    const statusStyle = getStatusColor(row.status);
-
-                    return (
-                      <TableRow key={index} hover>
-                        <TableCell>{row.id}</TableCell>
-
-                        <TableCell>
-                          <Typography
-                            sx={{ cursor: "pointer" }}
-                            onClick={() => {
-                              setSettlement(dataSettlement[index]);
-                            }}
-                            fontWeight='500'>
-                            {row.name}
+              {loading ? (
+                <TableRow>
+                  <TableCell colSpan={7} align="center">Đang tải...</TableCell>
+                </TableRow>
+              ) : tableData.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={7} align="center">Không có dữ liệu</TableCell>
+                </TableRow>
+              ) : (
+                tableData.map((row) => {
+                  const statusStyle = getStatusColor(row.status);
+                  return (
+                    <TableRow key={row.id} hover onClick={() => setSettlement(row)}>
+                      <TableCell>{row.id}</TableCell>
+                      <TableCell>
+                        <Typography sx={{ cursor: "pointer" }} fontWeight="500">
+                          {row.name}
+                        </Typography>
+                        {isMobile && (
+                          <Typography variant="caption" color="text.secondary" display="block">
+                            {row.address}
                           </Typography>
-                          {isMobile && (
-                            <Typography
-                              variant='caption'
-                              color='text.secondary'
-                              display='block'>
-                              {row.address}
-                            </Typography>
-                          )}
-                        </TableCell>
-
-                        {!isMobile && (
-                          <TableCell>
-                            <Typography variant='body2' color='text.secondary'>
-                              {row.address}
-                            </Typography>
-                          </TableCell>
                         )}
-
-                        <TableCell>{row.month}</TableCell>
-
+                      </TableCell>
+                      {!isMobile && (
                         <TableCell>
-                          <Chip
-                            label={row.status}
-                            size='small'
-                            sx={{
-                              bgcolor: statusStyle.bg,
-                              color: statusStyle.color,
-                              fontWeight: 500,
-                              height: 26,
-                            }}
-                          />
+                          <Typography variant="body2" color="text.secondary">
+                            {row.address}
+                          </Typography>
                         </TableCell>
-
-                       
-
-                        <TableCell
-                          align='right'
+                      )}
+                      <TableCell>{row.month}</TableCell>
+                      <TableCell>
+                        <Chip
+                          label={row.status}
+                          size="small"
                           sx={{
-                            color: row.total < 0 ? "#e53935" : "inherit",
+                            bgcolor: statusStyle.bg,
+                            color: statusStyle.color,
                             fontWeight: 500,
-                          }}>
-                          {formatCurrency(row.total)}
-                        </TableCell>
-
-                        <TableCell align='center'>{row.dueDate}</TableCell>
-                      </TableRow>
-                    );
-                  })}
-                </TableBody>
+                            height: 26,
+                          }}
+                        />
+                      </TableCell>
+                      <TableCell
+                        align="right"
+                        sx={{
+                          color: row.total < 0 ? "#e53935" : "inherit",
+                          fontWeight: 500,
+                        }}>
+                        {formatCurrency(row.total)}
+                      </TableCell>
+                      <TableCell align="center">{row.dueDate}</TableCell>
+                    </TableRow>
+                  );
+                })
+              )}
+            </TableBody>
               </Table>
             </TableContainer>
 
@@ -488,19 +459,11 @@ export default function ReconciliationView({
   );
 }
 
-import { IconButton } from "@mui/material";
-import {
-  ArrowBack as ArrowBackIcon,
-  Download as DownloadIcon,
-} from "@mui/icons-material";
 
 function HotelDetailFinal({
-  hotels,
   isMobile,
   setSettlement,
   settlement,
-  idHotel,
-  setIdHotel,
   fetchSettlements,
 }) {
   const [dataSettlementBooking, setDataSettlementBooking] = useState([]);
@@ -988,716 +951,8 @@ function HotelDetailFinal({
           </Box>
         </Paper>
       </Box>
-      <ConfirmCompleteModal
-        fetchSettlements={fetchSettlements}
-        open={openModal}
-        settlement={settlement}
-        onClose={() => setOpenModal(false)}
-      />
+    
     </Box>
   );
 }
 
-import { Dialog, DialogContent, DialogActions } from "@mui/material";
-import { Close as CloseIcon } from "@mui/icons-material";
-import { Alert } from "@mui/material";
-import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
-function ConfirmCompleteModal({
-  open = false,
-  onClose = () => {},
-  fetchSettlements,
-  settlement,
-}) {
-  let [action, setAction] = useState(1);
-  let [banks, setBanks] = useState([]);
-  let [bankPrimary, setBankPrimary] = useState(null);
-  const [accountNumber, setAccountNumber] = useState("0123456789");
-  const [beneficiary, setBeneficiary] = useState("NGUYEN VAN A"); // Giá trị mẫu
-  const [bankCode, setBankCode] = useState("");
-  const [errors, setErrors] = useState({});
-  const [isEdit, setIsEdit] = useState(false);
-  const [checked1, setChecked1] = useState(false);
-  const [checked2, setChecked2] = useState(false);
-
-  const handleChange1 = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setChecked1(event.target.checked);
-  };
-
-  const handleChange2 = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setChecked2(event.target.checked);
-  };
-  useEffect(() => {
-    getListBankPartner();
-  }, []);
-
-  const getListBankPartner = async () => {
-    try {
-      let result = await getbankPartner(settlement?.hotel_id);
-      console.log(result);
-      if (result?.banks?.length > 0) {
-        setBankPrimary(result?.banks.find((item) => item.is_default == 1));
-      }
-    } catch (error) {
-      console.log(error);
-    }
-  };
-  const handleFetchAndValidate = async () => {
-    setErrors({}); // Reset errors
-
-    // Validate frontend
-    const newErrors = {};
-    if (!accountNumber.trim())
-      newErrors.accountNumber = "Số tài khoản không được để trống";
-    else if (!/^\d{8,15}$/.test(accountNumber))
-      newErrors.accountNumber = "Số tài khoản phải là số từ 8-15 chữ số";
-
-    if (!beneficiary.trim())
-      newErrors.beneficiary = "Người thụ hưởng không được để trống";
-    else if (beneficiary.length < 3)
-      newErrors.beneficiary = "Tên người thụ hưởng quá ngắn";
-
-    if (!bankCode) newErrors.bankCode = "Vui lòng chọn ngân hàng";
-
-    if (Object.keys(newErrors).length > 0) {
-      setErrors(newErrors);
-      return;
-    }
-
-    // Lấy dữ liệu từ API (ví dụ: fetch thông tin tài khoản từ server)
-    try {
-      if (isEdit) {
-        const response = await updateBankHotels(bankPrimary.id, {
-          bank_code: bankCode, //Bank code và bank name lấy theo link này: https://developers.momo.vn/v3/docs/payment/api/result-handling/bankcode/#bank-name-and-bank-code-mapping-list
-          bank_name: list_banks.find((item) => item.code == bankCode)?.name,
-          account_number: accountNumber,
-          account_name: beneficiary,
-        });
-        if (response?.bank_id) {
-          setAction(2);
-          toast.success(response?.msg);
-          getListBankPartner();
-        } else {
-          toast.error(response?.message);
-        }
-      } else {
-        const response = await addBankHotels({
-          hotel_id: settlement?.hotel_id,
-          bank_code: bankCode, //Bank code và bank name lấy theo link này: https://developers.momo.vn/v3/docs/payment/api/result-handling/bankcode/#bank-name-and-bank-code-mapping-list
-          bank_name: list_banks.find((item) => item.code == bankCode)?.name,
-          account_number: accountNumber,
-          account_name: beneficiary,
-        });
-        if (response?.bank_id) {
-          setAction(4);
-          toast.success(response?.msg);
-          getListBankPartner();
-        } else {
-          toast.error(response?.message);
-        }
-      }
-
-      console.log("Dữ liệu hợp lệ:", data);
-      // Ví dụ: onSuccess(data);
-    } catch (error) {
-      setErrors({ general: "Lỗi khi lấy dữ liệu: " + error.message });
-    }
-  };
-  console.log("AAA action", action);
-  const handleConfirm = async () => {
-    try {
-      let result = await confirmHotelsSettlement(settlement?.id);
-      if (result?.message) {
-        fetchSettlements(1);
-        setAction(1);
-        onClose();
-        toast.success(result?.message);
-      } else {
-        toast.error(result?.message);
-      }
-      console.log("AAA result handleConfirm", result);
-    } catch (error) {
-      console.log(error);
-    }
-  };
-  return (
-    <Dialog
-      open={open}
-      onClose={onClose}
-      maxWidth='sm'
-      fullWidth
-      PaperProps={{
-        sx: {
-          borderRadius: 4,
-          boxShadow: "0 12px 40px rgba(0,0,0,0.18)",
-          mx: { xs: 2, sm: 0 },
-        },
-      }}>
-      {/* Header */}
-      <Box sx={{ px: 4, pt: 4, pb: 2 }}>
-        <Stack
-          direction='row'
-          justifyContent='space-between'
-          alignItems='center'>
-          <Typography variant='h6' fontWeight={700} color='#111'>
-            Xác nhận hoàn tất đối soát
-          </Typography>
-          <IconButton onClick={onClose} size='small'>
-            <CloseIcon />
-          </IconButton>
-        </Stack>
-      </Box>
-      <Stack
-        direction='row'
-        alignItems='center'
-        justifyContent='center'
-        spacing={4}
-        mb={5}>
-        <Stack direction='row' alignItems='center' spacing={2}>
-          <Box
-            sx={{
-              width: 30,
-              height: 30,
-              bgcolor: "#98B720",
-              color: "white",
-              borderRadius: "50%",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              fontSize: "1rem",
-              fontWeight: 700,
-            }}>
-            1
-          </Box>
-          <Typography fontWeight={600} fontSize={"12px"} color='#98B720'>
-            Xác nhận thông tin tài khoản thanh toán
-          </Typography>
-        </Stack>
-
-        <Box sx={{ width: 40, height: 1, borderTop: "2px dashed #BDBDBD" }} />
-
-        <Stack direction='row' alignItems='center' spacing={2}>
-          <Box
-            sx={{
-              width: 30,
-              height: 30,
-              bgcolor: action == 5 ? "#98B720" : "#EEEEEE",
-              color: action == 5 ? "white" : "#9E9E9E",
-              borderRadius: "50%",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              fontWeight: 600,
-              fontSize: "1rem",
-            }}>
-            2
-          </Box>
-          <Typography
-            fontWeight={600}
-            fontSize={"12px"}
-            color={action == 5 ? "#98B720" : "#9E9E9E"}>
-            Xác nhận hoàn tất
-          </Typography>
-        </Stack>
-      </Stack>
-      {action == 1 && (
-        <DialogContent sx={{ px: 4, pb: 3 }}>
-          <Typography variant='body1' color='#424242' lineHeight={1.7} mb={4}>
-            Bằng việc <strong>xác nhận đối soát ngay</strong>, Hotel Booking và
-            khách sạn thống nhất nội dung đối soát. Sau khi đối soát hoàn tất,
-            các bên sẽ thực hiện nghĩa vụ thanh toán như trong hợp đồng được ký
-            kết.
-          </Typography>
-
-          {/* Tiêu đề yêu cầu */}
-          <Typography variant='body1' color='#424242' fontWeight={600} mb={3}>
-            Vui lòng đánh dấu xác nhận các mục bên dưới để hoàn tất:
-          </Typography>
-
-          {/* 2 mục tick xanh */}
-          <Stack spacing={2.5} mb={5}>
-            <Stack direction='row' alignItems='flex-start' spacing={2}>
-              <CheckCircle
-                sx={{ color: "#98B720", fontSize: 28, flexShrink: 0, mt: 0.3 }}
-              />
-              <Typography variant='body1' color='#424242' lineHeight={1.7}>
-                Bảng đối soát hiện tại <strong>đúng và đủ</strong> các đặt phòng
-                trong kỳ đối soát.
-              </Typography>
-            </Stack>
-
-            <Stack direction='row' alignItems='flex-start' spacing={2}>
-              <CheckCircle
-                sx={{ color: "#98B720", fontSize: 28, flexShrink: 0, mt: 0.3 }}
-              />
-              <Typography variant='body1' color='#424242' lineHeight={1.7}>
-                Số tiền công nợ <strong>là đúng</strong> theo số tiền trong kỳ
-                đối soát
-              </Typography>
-            </Stack>
-          </Stack>
-
-          {/* Dòng cảnh báo đỏ – giống hệt ảnh */}
-          <Typography
-            variant='body2'
-            color='#E53935'
-            fontWeight={500}
-            lineHeight={1.7}
-            sx={{
-              bgcolor: "#FFEBEE",
-              padding: "14px 20px",
-              borderRadius: 2,
-              borderLeft: "4px solid #E53935",
-            }}>
-            Lưu ý: Nếu bạn thấy <strong>đối tượng</strong> thông tin tài khoản
-            thanh toán, bạn cần chờ Hotel Booking xử lý yêu cầu và cập nhật
-            thông tin trên hệ thống.
-          </Typography>
-        </DialogContent>
-      )}
-      {action == 4 && (
-        <DialogContent sx={{ px: 4, pb: 3 }}>
-          <PaymentQRInfo bankPrimary={bankPrimary} />
-        </DialogContent>
-      )}
-      {action == 5 && (
-        <DialogContent sx={{ px: 4, pb: 3 }}>
-          <Box>
-            {/* Tiêu đề chính */}
-            <Typography variant='body2' gutterBottom>
-              Bằng việc xác nhận đặt chỗ ngay, Hotel Booking và khách sạn thống
-              nhất nội dung đối soát. Sau khi đối soát hoàn tất, các bên sẽ thực
-              hiện nghĩa vụ thanh toán như trong hợp đồng được ký kết.
-            </Typography>
-
-            <Typography variant='body2' gutterBottom sx={{ mt: 2 }}>
-              Vui lòng đánh dấu xác nhận các mục bên dưới để hoàn tất:
-            </Typography>
-
-            {/* Các checkbox */}
-            <FormGroup sx={{ mt: 2 }}>
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={checked1}
-                    onChange={handleChange1}
-                    icon={<CheckCircleOutlineIcon sx={{ color: "grey.500" }} />}
-                    checkedIcon={
-                      <CheckCircleOutlineIcon sx={{ color: "#98B720" }} />
-                    }
-                    sx={{
-                      "& .MuiSvgIcon-root": { fontSize: 25 },
-                    }}
-                  />
-                }
-                label={
-                  <Typography fontSize={"15px"}>
-                    Bảng đối soát hiện tại đúng và đủ các đặt phòng trong kỳ đối
-                    soát.
-                  </Typography>
-                }
-                sx={{ alignItems: "center", mt: 1 }}
-              />
-
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={checked2}
-                    onChange={handleChange2}
-                    icon={<CheckCircleOutlineIcon sx={{ color: "grey.500" }} />}
-                    checkedIcon={
-                      <CheckCircleOutlineIcon sx={{ color: "#98B720" }} />
-                    }
-                    sx={{
-                      "& .MuiSvgIcon-root": { fontSize: 25 },
-                    }}
-                  />
-                }
-                label={
-                  <Typography fontSize={"15px"}>
-                    Số tiền công nợ là đúng theo số tiền trong kỳ đối soát
-                  </Typography>
-                }
-                sx={{ alignItems: "center", mt: 2 }}
-              />
-            </FormGroup>
-
-            <Divider sx={{ my: 3 }} />
-
-            {/* Thông báo cảnh báo */}
-
-            <Typography variant='body2' color='red' fontWeight='medium'>
-              Lưu ý: Nếu bạn thay đổi thông tin tài khoản thanh toán, bạn cần
-              cho Hotel Booking xử lý yêu cầu và cập nhật thông tin trên hệ
-              thống.
-            </Typography>
-          </Box>
-        </DialogContent>
-      )}
-      {action == 2 && (
-        <DialogContent sx={{ px: 4, pb: 3 }}>
-          <Box display={"flex"} justifyContent={"space-between"}>
-            <Typography variant='h6' fontWeight={600} color='#111' mb={4}>
-              Thông tin tài khoản thanh toán
-            </Typography>
-            <Typography
-              onClick={() => {
-                setIsEdit(true);
-                setBankCode(bankPrimary?.bank_code);
-                setAccountNumber(bankPrimary?.account_number);
-                setBeneficiary(bankPrimary?.account_name);
-                setAction(3);
-              }}
-              sx={{ textDecoration: "underline", cursor: "pointer" }}
-              color='#4E6AFF'>
-              Chỉnh sửa
-            </Typography>
-          </Box>
-
-          <Stack spacing={2.5}>
-            {" "}
-            <Divider sx={{ mt: 1, borderColor: "#EEEEEE" }} />
-            {/* Số tài khoản */}
-            <Box
-              display={"flex"}
-              justifyContent={"space-between"}
-              alignItems={"center"}>
-              <Typography color='#424242' fontWeight={500} mb={1}>
-                Số tài khoản
-              </Typography>
-              <Typography fontWeight={"700"}>
-                {bankPrimary?.account_number}
-              </Typography>
-            </Box>
-            <Divider sx={{ mt: 1, borderColor: "#EEEEEE" }} />
-            {/* Người thụ hưởng */}
-            <Box
-              display={"flex"}
-              justifyContent={"space-between"}
-              alignItems={"center"}>
-              <Typography color='#424242' fontWeight={500} mb={1}>
-                Người thụ hưởng
-              </Typography>
-              <Typography fontWeight={"700"}>
-                {bankPrimary?.account_name}
-              </Typography>
-            </Box>
-            <Divider sx={{ mt: 1, borderColor: "#EEEEEE" }} />
-            {/* Tên ngân hàng - SELECT thật 100% giống ảnh */}
-            <Box
-              display={"flex"}
-              justifyContent={"space-between"}
-              alignItems={"center"}>
-              <Typography color='#424242' fontWeight={500} mb={1}>
-                Tên ngân hàng
-              </Typography>
-              <FormControl>
-                <Typography fontWeight={"700"}>
-                  {bankPrimary?.bank_name}
-                </Typography>
-              </FormControl>
-            </Box>
-          </Stack>
-        </DialogContent>
-      )}
-      {action == 3 && (
-        <DialogContent sx={{ px: 4, pb: 3 }}>
-          {/* Step 1 - 2 */}
-
-          {/* Tiêu đề + nút Chỉnh sửa */}
-          <Stack
-            direction='row'
-            justifyContent='space-between'
-            alignItems='center'
-            mb={3}>
-            <Typography variant='h6' fontWeight={600} color='#111' mb={4}>
-              Thông tin tài khoản thanh toán
-            </Typography>
-          </Stack>
-
-          {/* Card thông tin tài khoản – giống hệt ảnh */}
-          <Box
-            sx={{
-              borderRadius: 3,
-              textAlign: "left",
-            }}>
-            <Stack spacing={2.5}>
-              {/* Số tài khoản */}
-              <Stack
-                direction='row'
-                justifyContent='space-between'
-                alignItems='center'>
-                <Typography color='#616161' fontWeight={500}>
-                  Số tài khoản
-                </Typography>
-                <TextField
-                  fullWidth
-                  value={accountNumber}
-                  onChange={(e) => setAccountNumber(e.target.value)}
-                  variant='outlined'
-                  error={!!errors.accountNumber}
-                  helperText={errors.accountNumber}
-                  sx={{
-                    width: "60%",
-                    "& .MuiOutlinedInput-root": {
-                      height: 40,
-                      bgcolor: "#FAFAFA",
-                      borderRadius: 2,
-                      fontWeight: 600,
-                      fontSize: "1rem",
-                      "& fieldset": {
-                        borderColor: errors.accountNumber
-                          ? "#F44336"
-                          : "#cddc39",
-                      },
-                      "&.Mui-focused fieldset": {
-                        borderColor: errors.accountNumber
-                          ? "#F44336"
-                          : "#cddc39",
-                      },
-                    },
-                  }}
-                />
-              </Stack>
-              <Divider sx={{ my: 2 }} />
-              {/* Người thụ hưởng */}
-              <Stack
-                direction='row'
-                justifyContent='space-between'
-                alignItems='center'>
-                <Typography color='#616161' fontWeight={500}>
-                  Người thụ hưởng
-                </Typography>
-                <TextField
-                  fullWidth
-                  value={beneficiary}
-                  onChange={(e) => setBeneficiary(e.target.value)}
-                  variant='outlined'
-                  error={!!errors.beneficiary}
-                  helperText={errors.beneficiary}
-                  sx={{
-                    width: "60%",
-                    "& .MuiOutlinedInput-root": {
-                      height: 40,
-                      bgcolor: "#FAFAFA",
-                      borderRadius: 2,
-                      fontWeight: 600,
-                      fontSize: "1rem",
-                      "& fieldset": {
-                        borderColor: errors.beneficiary ? "#F44336" : "#cddc39",
-                      },
-                      "&.Mui-focused fieldset": {
-                        borderColor: errors.beneficiary ? "#F44336" : "#cddc39",
-                      },
-                    },
-                  }}
-                />
-              </Stack>
-              <Divider sx={{ my: 2 }} />
-              {/* Tên ngân hàng */}
-              <Stack
-                direction='row'
-                justifyContent='space-between'
-                alignItems='center'>
-                <Typography color='#616161' fontWeight={500}>
-                  Tên ngân hàng
-                </Typography>
-                <Select
-                  value={bankCode}
-                  onChange={(e) => setBankCode(e.target.value)}
-                  displayEmpty
-                  error={!!errors.bankCode}
-                  sx={{
-                    width: "60%",
-                    height: 40,
-                    bgcolor: "#FAFAFA",
-                    borderRadius: 2,
-                    fontWeight: 500,
-                    fontSize: "1rem",
-                    "& .MuiOutlinedInput-notchedOutline": {
-                      borderColor: errors.bankCode ? "#F44336" : "#cddc39",
-                    },
-                    "&:hover .MuiOutlinedInput-notchedOutline": {
-                      borderColor: errors.bankCode ? "#F44336" : "#cddc39",
-                    },
-                    "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-                      borderColor: errors.bankCode ? "#F44336" : "#cddc39",
-                    },
-                    "& .MuiSelect-icon": { color: "#666", fontSize: "28px" },
-                  }}>
-                  <MenuItem value='' disabled>
-                    Chọn ngân hàng
-                  </MenuItem>
-                  {list_banks.map((item) => (
-                    <MenuItem key={item.code} value={item.code}>
-                      {item.name}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </Stack>
-              <Divider sx={{ my: 2 }} />
-            </Stack>
-          </Box>
-        </DialogContent>
-      )}
-
-      {/* Nút hành động */}
-      <DialogActions
-        sx={{ px: 4, pb: 4, pt: 2, justifyContent: "end", gap: 2 }}>
-        <Button
-          variant='outlined'
-          onClick={() => {
-            if (action == 4) {
-              setAction(2);
-            } else if (isEdit && action == 3) {
-              setAction(2);
-            } else {
-              setAction(1);
-              onClose();
-            }
-          }}
-          sx={{
-            minWidth: 120,
-            borderRadius: 10,
-            py: 1.4,
-            textTransform: "none",
-            borderColor: "#BDBDBD",
-            color: "#424242",
-            fontWeight: 600,
-          }}>
-          {action == 3 ? "Quay lại" : "Hủy"}
-        </Button>
-
-        <Button
-          variant='contained'
-          onClick={() => {
-            if (!bankPrimary && action != 3) {
-              setAction(3);
-            } else if (action == 3) {
-              console.log("AAAA add");
-              handleFetchAndValidate();
-            } else if (action == 4) {
-              setAction(2);
-            } else if (action == 2 && bankPrimary) {
-              setAction(5);
-            } else if (action == 5) {
-              handleConfirm();
-            } else {
-              setAction(++action);
-            }
-          }}
-          sx={{
-            minWidth: 140,
-            bgcolor: "#98B720",
-            borderRadius: 10,
-            py: 1.4,
-            textTransform: "none",
-            fontWeight: 600,
-            fontSize: "1rem",
-            boxShadow: "none",
-            "&:hover": { bgcolor: "#388E3C", boxShadow: "none" },
-          }}>
-          {action == 3 ? "Lưu" : action == 5 ? "Xác nhận hoàn tất" : "Tiếp tục"}
-        </Button>
-      </DialogActions>
-    </Dialog>
-  );
-}
-
-function PaymentQRInfo({ bankPrimary }) {
-  const qrData = "0123456789|Nguyễn Văn A|Techcombank";
-
-  return (
-    <Box
-      sx={{
-        mx: "auto",
-
-        textAlign: "center",
-        fontFamily: "Roboto, sans-serif",
-      }}>
-      {/* QR Code */}
-      <Box>
-        <QRCodeCanvas
-          value={qrData}
-          size={220}
-          level='M'
-          includeMargin={true}
-        />
-      </Box>
-
-      {/* Tiêu đề */}
-      <Typography
-        variant='h6'
-        textAlign={"left"}
-        fontWeight={600}
-        color='#111'
-        mb={2}>
-        Thông tin tài khoản thanh toán
-      </Typography>
-
-      {/* Thông tin chi tiết */}
-      <Stack spacing={3}>
-        {/* Số tài khoản */}
-        <Stack
-          direction='row'
-          justifyContent='space-between'
-          alignItems='center'>
-          <Typography color='#616161' fontWeight={500}>
-            Số tài khoản
-          </Typography>
-          <Typography fontWeight={700} color='#111' fontSize='1.1rem'>
-            {bankPrimary?.account_number}
-          </Typography>
-        </Stack>
-        <Divider sx={{ borderColor: "#EEEEEE" }} />
-
-        {/* Người thụ hưởng */}
-        <Stack
-          direction='row'
-          justifyContent='space-between'
-          alignItems='center'>
-          <Typography color='#616161' fontWeight={500}>
-            Người thụ hưởng
-          </Typography>
-          <Typography fontWeight={600} color='#111'>
-            {bankPrimary?.account_name}
-          </Typography>
-        </Stack>
-        <Divider sx={{ borderColor: "#EEEEEE" }} />
-
-        {/* Tên ngân hàng */}
-        <Stack
-          direction='row'
-          justifyContent='space-between'
-          alignItems='flex-start'>
-          <Typography color='#616161' fontWeight={500}>
-            Tên ngân hàng
-          </Typography>
-          <Typography
-            fontWeight={600}
-            color='#111'
-            textAlign='right'
-            sx={{ maxWidth: "60%" }}>
-            {bankPrimary?.bank_name}
-          </Typography>
-        </Stack>
-        <Divider sx={{ borderColor: "#EEEEEE" }} />
-
-        {/* Nội dung thanh toán */}
-        <Stack
-          direction='row'
-          justifyContent='space-between'
-          alignItems='flex-start'>
-          <Typography color='#616161' fontWeight={500}>
-            Nội dung thanh toán
-          </Typography>
-          <Typography
-            fontWeight={600}
-            textAlign='right'
-            sx={{ maxWidth: "60%", lineHeight: 1.4 }}>
-            Tên khách sạn - Email - Số điện thoại
-          </Typography>
-        </Stack>
-      </Stack>
-    </Box>
-  );
-}

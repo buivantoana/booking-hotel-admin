@@ -253,7 +253,27 @@ export async function getHotels(query) {
     }
   }
 }
-
+export async function getRooms(query) {
+  try {
+    let token = localStorage.getItem("access_token");
+    const response = await api.get(`/admin/hotel/all-room-types?${query}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data;
+  } catch (error: any) {
+    if (error.response) {
+      console.error("Error response data:", error.response.data);
+      console.error("Error response status:", error.response.status);
+      return error.response.data;
+    } else if (error.request) {
+      console.error("No response received:", error.request);
+    } else {
+      console.error("Error setting up request:", error.message);
+    }
+  }
+}
 export async function getHotel(id) {
   try {
     let token = localStorage.getItem("access_token");
@@ -280,6 +300,28 @@ export async function updateHotelStatus(id, body) {
   try {
     let token = localStorage.getItem("access_token");
     const response = await api.post(`/admin/hotel/${id}/status`, body, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data;
+  } catch (error: any) {
+    if (error.response) {
+      console.error("Error response data:", error.response.data);
+      console.error("Error response status:", error.response.status);
+      return error.response.data;
+    } else if (error.request) {
+      console.error("No response received:", error.request);
+    } else {
+      console.error("Error setting up request:", error.message);
+    }
+  }
+}
+
+export async function updateRoomStatus(id, body) {
+  try {
+    let token = localStorage.getItem("access_token");
+    const response = await api.post(`/admin/hotel/room-types/${id}/status`, body, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -523,7 +565,7 @@ export async function getMySettlements(query) {
   try {
     let token = localStorage.getItem("access_token");
     const response = await api.get(
-      `/partner/settlement/my-settlements?${query}`,
+      `/admin/settlement/all-settlements?${query}`,
       {
         headers: {
           Authorization: `Bearer ${token}`,

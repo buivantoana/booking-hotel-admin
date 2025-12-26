@@ -39,7 +39,7 @@ const ManagerRooms = ({ onNext, detailHotel, setRoom }: Props) => {
       return [];
     }
 
-    return detailHotel.room_types.map((room: any) => ({
+    return detailHotel.room_types.filter((item)=>item.status=="pending").map((room: any) => ({
       ...room,
       parsedName: parseRoomName(room.name) || "Không có tên",
       price_hourly_formatted: formatPrice(room.price_hourly),
