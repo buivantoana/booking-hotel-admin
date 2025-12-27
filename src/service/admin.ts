@@ -110,7 +110,7 @@ export async function userUpdate(body: any, accessToken) {
     if (!accessToken) {
       accessToken = localStorage.getItem("access_token");
     }
-    const response = await api.put(`/partner/update`, body, {
+    const response = await api.put(`/admin/account`, body, {
       headers: {
         Authorization: `Bearer ${accessToken}`,
       },

@@ -21,6 +21,8 @@ import ManagerPaymentController from "../pages/manager-payment/ManagerPaymentCon
 import BookingDetailController from "../pages/manager-booking/BookingDetailController";
 import ManagerReviewController from "../pages/manager-review/ManagerReviewController";
 import ManagerAccountController from "../pages/manager-account/ManagerAccountController";
+import ProfileController from "../pages/profile/ProfileController";
+import ManagerStaffController from "../pages/manager-staff/ManagerStaffController";
 
 const Router = () => {
   const context: any = useBookingContext();
@@ -68,11 +70,19 @@ const Router = () => {
             }
           />
 
-<Route
+          <Route
             path='/manager-accounts'
             element={
               <PrivateRouter>
                 <ManagerAccountController />
+              </PrivateRouter>
+            }
+          />
+          <Route
+            path='/manager-staff'
+            element={
+              <PrivateRouter>
+                <ManagerStaffController />
               </PrivateRouter>
             }
           />
@@ -94,7 +104,6 @@ const Router = () => {
             }
           />
 
-         
           <Route
             path='/reconciliation'
             element={
@@ -108,6 +117,14 @@ const Router = () => {
             element={
               <PrivateRouter>
                 <BookingDetailController />
+              </PrivateRouter>
+            }
+          />
+          <Route
+            path='/manager-profile'
+            element={
+              <PrivateRouter>
+                <ProfileController />
               </PrivateRouter>
             }
           />
@@ -128,7 +145,6 @@ const Router = () => {
             </GuestRoute>
           }
         />
-      
 
         <Route
           path='/login'

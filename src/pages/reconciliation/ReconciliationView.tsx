@@ -1,15 +1,13 @@
 "use client";
 
-import {
-  KeyboardArrowLeft,
-  Search as SearchIcon
-} from "@mui/icons-material";
+import { KeyboardArrowLeft, Search as SearchIcon } from "@mui/icons-material";
 import {
   Box,
   Button,
   Chip,
   Divider,
   FormControl,
+  IconButton,
   InputAdornment,
   MenuItem,
   Pagination,
@@ -25,12 +23,11 @@ import {
   TextField,
   Theme,
   Typography,
-  useMediaQuery
+  useMediaQuery,
 } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import { getbankPartner, listBookingSettlement } from "../../service/booking";
-import { sendPubllish } from "../../service/hotel";
-
+import { sendPay, sendPubllish } from "../../service/hotel";
 
 const parseLang = (value: string, lang = "vi") => {
   try {
@@ -102,6 +99,8 @@ export default function ReconciliationView({
     address: parseLang(item.hotel_address, "en"),
     month: item.period_month,
     status: STATUS_LABEL[item.status] ?? item.status,
+    status_key: item.status,
+
     rooms: "-", // Placeholder
     total: item.closing_balance,
     hotel_id: item.hotel_id,
@@ -126,20 +125,22 @@ export default function ReconciliationView({
   };
 
   const tabs = [
-    "Chưa đối soát", // draft
-    "Chờ thanh toán", // confirmed
-    "Thanh toán", // paid ?
-    "Hoàn thành" // completed ?
-  ].map(label => {
-    let value;
-    switch(label) {
-      case "Chưa đối soát": value = "draft"; break;
-      case "Chờ thanh toán": value = "confirmed"; break;
-      case "Thanh toán": value = "paid"; break;
-      case "Hoàn thành": value = "completed"; break;
+    { label: "Chưa đối soát", value: "draft" },
+    { label: "Chờ xác nhận", value: "pending" }, // ← THÊM DÒNG NÀY
+    { label: "Chờ thanh toán", value: "confirmed" }, // ← GIỮ NGUYÊN
+    { label: "Đã thanh toán", value: "paid" }, // ← Đổi tên cho rõ hơn
+    { label: "Hoàn thành", value: "completed" },
+  ];
+  const handlePublish = async (id) => {
+    try {
+      let result = await sendPubllish(id || settlement?.id);
+      console.log("AA result ", result);
+      fetchSettlements();
+      setSettlement(null);
+    } catch (error) {
+      console.log(error);
     }
-    return { label, value };
-  });
+  };
   return (
     <>
       {settlement && (
@@ -148,6 +149,7 @@ export default function ReconciliationView({
           setSettlement={setSettlement}
           isMobile={isMobile}
           fetchSettlements={fetchSettlements}
+          handlePublish={handlePublish}
         />
       )}
       {!settlement && (
@@ -190,79 +192,91 @@ export default function ReconciliationView({
               border: "1px solid #e0e0e0",
               borderRadius: 2,
             }}>
-
             <Stack
               direction={{ xs: "column", md: "row" }}
               spacing={2}
               alignItems={{ md: "end" }}
               mb={3}>
-                <Box >
-            <Typography mb={1}>Tìm kiếm</Typography>
-              <TextField
-                placeholder='Tên khách sạn'
-                size='small'
-                value={localFilters.hotel_name}
-              onChange={(e) => setLocalFilters({ ...localFilters, hotel_name: e.target.value })}
-                sx={{
-                  "& .MuiOutlinedInput-root": {
+              <Box>
+                <Typography mb={1}>Tìm kiếm</Typography>
+                <TextField
+                  placeholder='Tên khách sạn'
+                  size='small'
+                  value={localFilters.hotel_name}
+                  onChange={(e) =>
+                    setLocalFilters({
+                      ...localFilters,
+                      hotel_name: e.target.value,
+                    })
+                  }
+                  sx={{
+                    "& .MuiOutlinedInput-root": {
+                      height: 40,
+
+                      borderRadius: 2,
+                      fontWeight: 600,
+                      fontSize: "1rem",
+                      "& fieldset": {
+                        borderColor: "#cddc39",
+                      },
+                      "&.Mui-focused fieldset": {
+                        borderColor: "#cddc39",
+                      },
+                    },
+                  }}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position='start'>
+                        <SearchIcon />
+                      </InputAdornment>
+                    ),
+                  }}
+                />
+              </Box>
+              <Box>
+                <Typography mb={1}>Kì đối soát</Typography>
+
+                <FormControl
+                  size='small'
+                  sx={{
                     height: 40,
 
-                    borderRadius: 2,
-                    fontWeight: 600,
+                    fontWeight: 500,
                     fontSize: "1rem",
-                    "& fieldset": {
+                    "& .MuiOutlinedInput-root": {
+                      borderRadius: 2,
+                    },
+                    "& .MuiOutlinedInput-notchedOutline": {
                       borderColor: "#cddc39",
                     },
-                    "&.Mui-focused fieldset": {
+                    "&:hover .MuiOutlinedInput-notchedOutline": {
                       borderColor: "#cddc39",
                     },
-                  },
-                }}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position='start'>
-                      <SearchIcon />
-                    </InputAdornment>
-                  ),
-                }}
-              />
-                </Box>
-                <Box>
-                  <Typography mb={1}>Kì đối soát</Typography>
+                    "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                      borderColor: "#cddc39",
+                    },
+                    "& .MuiSelect-icon": { color: "#666", fontSize: "28px" },
+                  }}>
+                  <Select
+                    value={localFilters.period_month}
+                    onChange={(e) =>
+                      setLocalFilters({
+                        ...localFilters,
+                        period_month: e.target.value,
+                      })
+                    }
+                    defaultValue=''
+                    displayEmpty>
+                    <MenuItem value='' disabled>
+                      Chọn kỳ đối soát
+                    </MenuItem>
+                    <MenuItem value='11-2025'>Tháng 11.2025</MenuItem>
+                  </Select>
+                </FormControl>
+              </Box>
 
-              <FormControl
-                size='small'
-               
-                sx={{
-                  height: 40,
-
-                  fontWeight: 500,
-                  fontSize: "1rem",
-                  "& .MuiOutlinedInput-root": {
-                    borderRadius: 2,
-                  },
-                  "& .MuiOutlinedInput-notchedOutline": {
-                    borderColor: "#cddc39",
-                  },
-                  "&:hover .MuiOutlinedInput-notchedOutline": {
-                    borderColor: "#cddc39",
-                  },
-                  "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-                    borderColor: "#cddc39",
-                  },
-                  "& .MuiSelect-icon": { color: "#666", fontSize: "28px" },
-                }}>
-                <Select  value={localFilters.period_month}
-                onChange={(e) => setLocalFilters({ ...localFilters, period_month: e.target.value })} defaultValue='' displayEmpty>
-                  <MenuItem value='' disabled>
-                    Chọn kỳ đối soát
-                  </MenuItem>
-                  <MenuItem value='11-2025'>Tháng 11.2025</MenuItem>
-                </Select>
-              </FormControl>
-                </Box>
-
-              <Box sx={{ display: "flex", gap: 1, ml: { md: "auto" },pb:"5px" }}>
+              <Box
+                sx={{ display: "flex", gap: 1, ml: { md: "auto" }, pb: "5px" }}>
                 <Button
                   variant='contained'
                   onClick={handleSearch}
@@ -276,7 +290,7 @@ export default function ReconciliationView({
                   Tìm kiếm
                 </Button>
                 <Button
-                onClick={handleReset}
+                  onClick={handleReset}
                   variant='outlined'
                   sx={{
                     borderRadius: 2,
@@ -291,27 +305,28 @@ export default function ReconciliationView({
             </Stack>
 
             {/* Tabs */}
-            <Stack direction="row" spacing={1} flexWrap="wrap" gap={1}>
-          {tabs.map((tab) => (
-            <Button
-              key={tab.value}
-              variant={currentTab === tab.value ? "contained" : "outlined"}
-              size="small"
-              onClick={() => handleTabChange(tab.value)}
-              sx={{
-                borderRadius: 3,
-                textTransform: "none",
-                color: currentTab === tab.value ? "white" : "#98b720",
-                borderColor: "#98b720",
-                bgcolor: currentTab === tab.value ? "#98b720" : "transparent",
-                "&:hover": {
-                  bgcolor: currentTab === tab.value ? "#1565c0" : "#f5f5f5",
-                },
-              }}>
-              {tab.label}
-            </Button>
-          ))}
-        </Stack>
+            <Stack direction='row' spacing={1} flexWrap='wrap' gap={1}>
+              {tabs.map((tab) => (
+                <Button
+                  key={tab.value}
+                  variant={currentTab === tab.value ? "contained" : "outlined"}
+                  size='small'
+                  onClick={() => handleTabChange(tab.value)}
+                  sx={{
+                    borderRadius: 3,
+                    textTransform: "none",
+                    color: currentTab === tab.value ? "white" : "#98b720",
+                    borderColor: "#98b720",
+                    bgcolor:
+                      currentTab === tab.value ? "#98b720" : "transparent",
+                    "&:hover": {
+                      bgcolor: currentTab === tab.value ? "#1565c0" : "#f5f5f5",
+                    },
+                  }}>
+                  {tab.label}
+                </Button>
+              ))}
+            </Stack>
             <TableContainer sx={{ maxHeight: "calc(100vh - 380px)", mt: 4 }}>
               <Table stickyHeader>
                 <TableHead>
@@ -333,7 +348,7 @@ export default function ReconciliationView({
                     <TableCell sx={{ fontWeight: 600, color: "#424242" }}>
                       Trạng thái
                     </TableCell>
-                  
+
                     <TableCell
                       align='right'
                       sx={{ fontWeight: 600, color: "#424242" }}>
@@ -344,67 +359,124 @@ export default function ReconciliationView({
                       sx={{ fontWeight: 600, color: "#424242" }}>
                       Hạn đối soát
                     </TableCell>
+                    <TableCell
+                      align='center'
+                      sx={{ fontWeight: 600, color: "#424242" }}>
+                      Thao tác
+                    </TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
-              {loading ? (
-                <TableRow>
-                  <TableCell colSpan={7} align="center">Đang tải...</TableCell>
-                </TableRow>
-              ) : tableData.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={7} align="center">Không có dữ liệu</TableCell>
-                </TableRow>
-              ) : (
-                tableData.map((row,i) => {
-                  const statusStyle = getStatusColor(row.status);
-                  return (
-                    <TableRow key={row.id} hover onClick={() => setSettlement(dataSettlement[i])}>
-                      <TableCell>{row.id}</TableCell>
-                      <TableCell>
-                        <Typography sx={{ cursor: "pointer" }} fontWeight="500">
-                          {row.name}
-                        </Typography>
-                        {isMobile && (
-                          <Typography variant="caption" color="text.secondary" display="block">
-                            {row.address}
-                          </Typography>
-                        )}
+                  {loading ? (
+                    <TableRow>
+                      <TableCell colSpan={7} align='center'>
+                        Đang tải...
                       </TableCell>
-                      {!isMobile && (
-                        <TableCell>
-                          <Typography variant="body2" color="text.secondary">
-                            {row.address}
-                          </Typography>
-                        </TableCell>
-                      )}
-                      <TableCell>{row.month}</TableCell>
-                      <TableCell>
-                        <Chip
-                          label={row.status}
-                          size="small"
-                          sx={{
-                            bgcolor: statusStyle.bg,
-                            color: statusStyle.color,
-                            fontWeight: 500,
-                            height: 26,
-                          }}
-                        />
-                      </TableCell>
-                      <TableCell
-                        align="right"
-                        sx={{
-                          color: row.total < 0 ? "#e53935" : "inherit",
-                          fontWeight: 500,
-                        }}>
-                        {formatCurrency(row.total)}
-                      </TableCell>
-                      <TableCell align="center">{row.dueDate}</TableCell>
                     </TableRow>
-                  );
-                })
-              )}
-            </TableBody>
+                  ) : tableData.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={7} align='center'>
+                        Không có dữ liệu
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    tableData.map((row, i) => {
+                      const statusStyle = getStatusColor(row.status);
+                      return (
+                        <TableRow
+                          key={row.id}
+                          hover
+                          onClick={() => setSettlement(dataSettlement[i])}>
+                          <TableCell>{row.id}</TableCell>
+                          <TableCell>
+                            <Typography
+                              sx={{ cursor: "pointer" }}
+                              fontWeight='500'>
+                              {row.name}
+                            </Typography>
+                            {isMobile && (
+                              <Typography
+                                variant='caption'
+                                color='text.secondary'
+                                display='block'>
+                                {row.address}
+                              </Typography>
+                            )}
+                          </TableCell>
+                          {!isMobile && (
+                            <TableCell>
+                              <Typography
+                                variant='body2'
+                                color='text.secondary'>
+                                {row.address}
+                              </Typography>
+                            </TableCell>
+                          )}
+                          <TableCell>{row.month}</TableCell>
+                          <TableCell>
+                            <Chip
+                              label={row.status}
+                              size='small'
+                              sx={{
+                                bgcolor: statusStyle.bg,
+                                color: statusStyle.color,
+                                fontWeight: 500,
+                                height: 26,
+                              }}
+                            />
+                          </TableCell>
+                          <TableCell
+                            align='right'
+                            sx={{
+                              color: row.total < 0 ? "#e53935" : "inherit",
+                              fontWeight: 500,
+                            }}>
+                            {formatCurrency(row.total)}
+                          </TableCell>
+                          <TableCell align='center'>{row.dueDate}</TableCell>
+                          <TableCell align='center'>
+                            {" "}
+                            {row.status_key == "draft" ? (
+                              <Button
+                                variant={"contained"}
+                                onClick={() => handlePublish(row._id)}
+                                size='small'
+                                sx={{
+                                  borderRadius: 3,
+                                  textTransform: "none",
+                                  color: "white",
+                                  borderColor: "#98b720",
+                                  bgcolor: "#98b720",
+                                  "&:hover": {
+                                    bgcolor: "#1565c0",
+                                  },
+                                }}>
+                                Gửi
+                              </Button>
+                            ) : (
+                              <Button
+                                variant={"outlined"}
+                                size='small'
+                                onClick={() => setSettlement(dataSettlement[i])}
+                                sx={{
+                                  borderRadius: 3,
+                                  textTransform: "none",
+                                  color: "#98b720",
+                                  borderColor: "#98b720",
+                                  bgcolor: "transparent",
+                                  "&:hover": {
+                                    bgcolor: "#f5f5f5",
+                                  },
+                                }}>
+                                Chi tiết
+                              </Button>
+                            )}
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })
+                  )}
+                </TableBody>
               </Table>
             </TableContainer>
 
@@ -460,15 +532,15 @@ export default function ReconciliationView({
   );
 }
 
-
 function HotelDetailFinal({
   isMobile,
   setSettlement,
   settlement,
   fetchSettlements,
+  handlePublish,
 }) {
   const [dataSettlementBooking, setDataSettlementBooking] = useState([]);
-  const [openModal, setOpenModal] = useState(false);
+  const [openModalPay, setOpenModalPay] = useState(false);
   const [pagination, setPagination] = useState({
     page: 1,
     limit: 10,
@@ -560,17 +632,8 @@ function HotelDetailFinal({
     settlement?.confirm_deadline
   )}, ${formatDate(settlement?.confirm_deadline)}`;
 
-  console.log("AAAAA settlement",settlement)
-  const handlePublish =async () => {
-    try {
-      let result = await sendPubllish(settlement?.id)
-      console.log("AA result ",result)
-      fetchSettlements()
-      setSettlement(null)
-    } catch (error) {
-      console.log(error)
-    }
-  }
+  console.log("AAAAA settlement", settlement);
+
   return (
     <Box sx={{ bgcolor: "#f9fafb", minHeight: "100vh" }}>
       {/* Header – giống 100% */}
@@ -705,7 +768,7 @@ function HotelDetailFinal({
                   <Button
                     variant='contained'
                     onClick={() => {
-                      handlePublish()
+                      handlePublish();
                     }}
                     sx={{
                       bgcolor: "#98B720",
@@ -721,57 +784,79 @@ function HotelDetailFinal({
                   </Button>
                 ) : (
                   <>
-                    <Typography
-                      variant='body2'
-                      color='#616161'
-                      sx={{ maxWidth: 340 }}>
-                      Hotel Booking sẽ thanh toán công nợ cho khách vào{" "}
-                      <strong>{deadlineText}</strong> qua tài khoản:
-                    </Typography>
+                    {settlement?.status == "confirmed" ? (
+                      <Button
+                        variant='contained'
+                        onClick={() => {
+                          setOpenModalPay(true);
+                        }}
+                        sx={{
+                          bgcolor: "#98B720",
+                          borderRadius: 10,
+                          px: 5,
+                          py: 1.5,
+                          fontWeight: 600,
+                          textTransform: "none",
+                          boxShadow: "none",
+                          mb: 2,
+                        }}>
+                        Thanh toán
+                      </Button>
+                    ) : (
+                      <>
+                        <Typography
+                          variant='body2'
+                          color='#616161'
+                          sx={{ maxWidth: 340 }}>
+                          Hotel Booking sẽ thanh toán công nợ cho khách vào{" "}
+                          <strong>{deadlineText}</strong> qua tài khoản:
+                        </Typography>
 
-                    <Stack spacing={1.5} mt={2}>
-                      {" "}
-                      {/* Số tài khoản */}
-                      <Box
-                        display={"flex"}
-                        justifyContent={"space-between"}
-                        alignItems={"center"}>
-                        <Typography color='#424242' mb={1}>
-                          Số tài khoản
-                        </Typography>
-                        <Typography fontWeight={"700"}>
-                          {bankPrimary?.account_number}
-                        </Typography>
-                      </Box>
-                      <Divider sx={{ mt: 1, borderColor: "#EEEEEE" }} />
-                      {/* Người thụ hưởng */}
-                      <Box
-                        display={"flex"}
-                        justifyContent={"space-between"}
-                        alignItems={"center"}>
-                        <Typography color='#424242' mb={1}>
-                          Người thụ hưởng
-                        </Typography>
-                        <Typography fontWeight={"700"}>
-                          {bankPrimary?.account_name}
-                        </Typography>
-                      </Box>
-                      <Divider sx={{ mt: 1, borderColor: "#EEEEEE" }} />
-                      {/* Tên ngân hàng - SELECT thật 100% giống ảnh */}
-                      <Box
-                        display={"flex"}
-                        justifyContent={"space-between"}
-                        alignItems={"center"}>
-                        <Typography color='#424242' mb={1}>
-                          Tên ngân hàng
-                        </Typography>
-                        <FormControl>
-                          <Typography fontWeight={"700"}>
-                            {bankPrimary?.bank_name}
-                          </Typography>
-                        </FormControl>
-                      </Box>
-                    </Stack>
+                        <Stack spacing={1.5} mt={2}>
+                          {" "}
+                          {/* Số tài khoản */}
+                          <Box
+                            display={"flex"}
+                            justifyContent={"space-between"}
+                            alignItems={"center"}>
+                            <Typography color='#424242' mb={1}>
+                              Số tài khoản
+                            </Typography>
+                            <Typography fontWeight={"700"}>
+                              {bankPrimary?.account_number}
+                            </Typography>
+                          </Box>
+                          <Divider sx={{ mt: 1, borderColor: "#EEEEEE" }} />
+                          {/* Người thụ hưởng */}
+                          <Box
+                            display={"flex"}
+                            justifyContent={"space-between"}
+                            alignItems={"center"}>
+                            <Typography color='#424242' mb={1}>
+                              Người thụ hưởng
+                            </Typography>
+                            <Typography fontWeight={"700"}>
+                              {bankPrimary?.account_name}
+                            </Typography>
+                          </Box>
+                          <Divider sx={{ mt: 1, borderColor: "#EEEEEE" }} />
+                          {/* Tên ngân hàng - SELECT thật 100% giống ảnh */}
+                          <Box
+                            display={"flex"}
+                            justifyContent={"space-between"}
+                            alignItems={"center"}>
+                            <Typography color='#424242' mb={1}>
+                              Tên ngân hàng
+                            </Typography>
+                            <FormControl>
+                              <Typography fontWeight={"700"}>
+                                {bankPrimary?.bank_name}
+                              </Typography>
+                            </FormControl>
+                          </Box>
+                        </Stack>
+                      </>
+                    )}
                   </>
                 )}
 
@@ -963,9 +1048,184 @@ function HotelDetailFinal({
             />
           </Box>
         </Paper>
+        <ConfirmCompleteModal
+          fetchSettlements={fetchSettlements}
+          settlement={settlement}
+          open={openModalPay}
+          onClose={() => setOpenModalPay(false)}
+          setSettlement={setSettlement}
+        />
       </Box>
-    
     </Box>
   );
 }
 
+import { Dialog, DialogContent, DialogActions } from "@mui/material";
+import { Close as CloseIcon } from "@mui/icons-material";
+import { Alert } from "@mui/material";
+import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
+import { toast } from "react-toastify";
+function ConfirmCompleteModal({
+  open = false,
+  onClose = () => {},
+  fetchSettlements,
+  settlement,
+  setSettlement,
+}) {
+  let [bankPrimary, setBankPrimary] = useState(null);
+
+  useEffect(() => {
+    getListBankPartner();
+  }, []);
+
+  const getListBankPartner = async () => {
+    try {
+      let result = await getbankPartner(settlement?.hotel_id);
+      console.log(result);
+      if (result?.banks?.length > 0) {
+        setBankPrimary(result?.banks.find((item) => item.is_default == 1));
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const handleConfirm = async () => {
+    try {
+      let result = await sendPay(settlement?.id);
+      if (result?.message && !result?.code) {
+        fetchSettlements(1);
+        setSettlement(null);
+        onClose();
+        toast.success(result?.message);
+      } else {
+        toast.error(result?.message);
+      }
+      console.log("AAA result handleConfirm", result);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  return (
+    <Dialog
+      open={open}
+      onClose={onClose}
+      maxWidth='sm'
+      fullWidth
+      PaperProps={{
+        sx: {
+          borderRadius: 4,
+          boxShadow: "0 12px 40px rgba(0,0,0,0.18)",
+          mx: { xs: 2, sm: 0 },
+        },
+      }}>
+      {/* Header */}
+      <Box sx={{ px: 4, pt: 4, pb: 2 }}>
+        <Stack
+          direction='row'
+          justifyContent='space-between'
+          alignItems='center'>
+          <Typography variant='h6' fontWeight={700} color='#111'>
+            Xác nhận thanh toán
+          </Typography>
+          <IconButton onClick={onClose} size='small'>
+            <CloseIcon />
+          </IconButton>
+        </Stack>
+      </Box>
+
+      <DialogContent sx={{ px: 4, pb: 3 }}>
+        <Box display={"flex"} justifyContent={"space-between"}>
+          <Typography variant='h6' fontWeight={600} color='#111' mb={4}>
+            Thông tin tài khoản thanh toán
+          </Typography>
+        </Box>
+
+        <Stack spacing={2.5}>
+          {" "}
+          <Divider sx={{ mt: 1, borderColor: "#EEEEEE" }} />
+          {/* Số tài khoản */}
+          <Box
+            display={"flex"}
+            justifyContent={"space-between"}
+            alignItems={"center"}>
+            <Typography color='#424242' fontWeight={500} mb={1}>
+              Số tài khoản
+            </Typography>
+            <Typography fontWeight={"700"}>
+              {bankPrimary?.account_number}
+            </Typography>
+          </Box>
+          <Divider sx={{ mt: 1, borderColor: "#EEEEEE" }} />
+          {/* Người thụ hưởng */}
+          <Box
+            display={"flex"}
+            justifyContent={"space-between"}
+            alignItems={"center"}>
+            <Typography color='#424242' fontWeight={500} mb={1}>
+              Người thụ hưởng
+            </Typography>
+            <Typography fontWeight={"700"}>
+              {bankPrimary?.account_name}
+            </Typography>
+          </Box>
+          <Divider sx={{ mt: 1, borderColor: "#EEEEEE" }} />
+          {/* Tên ngân hàng - SELECT thật 100% giống ảnh */}
+          <Box
+            display={"flex"}
+            justifyContent={"space-between"}
+            alignItems={"center"}>
+            <Typography color='#424242' fontWeight={500} mb={1}>
+              Tên ngân hàng
+            </Typography>
+            <FormControl>
+              <Typography fontWeight={"700"}>
+                {bankPrimary?.bank_name}
+              </Typography>
+            </FormControl>
+          </Box>
+        </Stack>
+      </DialogContent>
+
+      {/* Nút hành động */}
+      <DialogActions
+        sx={{ px: 4, pb: 4, pt: 2, justifyContent: "end", gap: 2 }}>
+        <Button
+          variant='outlined'
+          onClick={() => {
+            onClose();
+          }}
+          sx={{
+            minWidth: 120,
+            borderRadius: 10,
+            py: 1.4,
+            textTransform: "none",
+            borderColor: "#BDBDBD",
+            color: "#424242",
+            fontWeight: 600,
+          }}>
+          Hủy
+        </Button>
+
+        <Button
+          variant='contained'
+          onClick={() => {
+            handleConfirm();
+          }}
+          sx={{
+            minWidth: 140,
+            bgcolor: "#98B720",
+            borderRadius: 10,
+            py: 1.4,
+            textTransform: "none",
+            fontWeight: 600,
+            fontSize: "1rem",
+            boxShadow: "none",
+            "&:hover": { bgcolor: "#388E3C", boxShadow: "none" },
+          }}>
+          Hoàn thành
+        </Button>
+      </DialogActions>
+    </Dialog>
+  );
+}

@@ -124,10 +124,10 @@ export async function getInventoryHotelDaily(id, params) {
   }
 }
 
-export async function getGeneralStats( params) {
+export async function getGeneralStats(params) {
   try {
     let token = localStorage.getItem("access_token");
-    const response = await api.get(`admin/stats/general?${params}`, {
+    const response = await api.get(`/admin/stats/general?${params}`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -321,11 +321,15 @@ export async function updateHotelStatus(id, body) {
 export async function updateRoomStatus(id, body) {
   try {
     let token = localStorage.getItem("access_token");
-    const response = await api.post(`/admin/hotel/room-types/${id}/status`, body, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
+    const response = await api.post(
+      `/admin/hotel/room-types/${id}/status`,
+      body,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
     return response.data;
   } catch (error: any) {
     if (error.response) {
@@ -340,7 +344,7 @@ export async function updateRoomStatus(id, body) {
   }
 }
 
-export async function listPayment( query) {
+export async function listPayment(query) {
   try {
     let token = localStorage.getItem("access_token");
     const response = await api.get(`/admin/payment/all-payments?${query}`, {
@@ -518,10 +522,10 @@ export async function getDetailReview(id) {
   }
 }
 
-export async function toggleVisibility(id,body) {
+export async function toggleVisibility(id, body) {
   try {
     let token = localStorage.getItem("access_token");
-    const response = await api.post(`/admin/review/${id}/visibility`,body, {
+    const response = await api.post(`/admin/review/${id}/visibility`, body, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -589,14 +593,11 @@ export async function getMySettlements(query) {
 export async function sendPubllish(id) {
   try {
     let token = localStorage.getItem("access_token");
-    const response = await api.post(
-      `/admin/settlement/${id}/publish`,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
+    const response = await api.post(`/admin/settlement/${id}/publish`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
     return response.data;
   } catch (error: any) {
     if (error.response) {
@@ -611,3 +612,24 @@ export async function sendPubllish(id) {
   }
 }
 
+export async function sendPay(id) {
+  try {
+    let token = localStorage.getItem("access_token");
+    const response = await api.post(`/admin/settlement/${id}/pay`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data;
+  } catch (error: any) {
+    if (error.response) {
+      console.error("Error response data:", error.response.data);
+      console.error("Error response status:", error.response.status);
+      return error.response.data;
+    } else if (error.request) {
+      console.error("No response received:", error.request);
+    } else {
+      console.error("Error setting up request:", error.message);
+    }
+  }
+}

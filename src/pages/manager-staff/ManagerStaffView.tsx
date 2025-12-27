@@ -24,6 +24,7 @@ import {
   DialogTitle,
   useTheme,
   useMediaQuery,
+  Select,
 } from "@mui/material";
 import {
   Search as SearchIcon,
@@ -35,14 +36,21 @@ import {
   Close,
   CheckCircle,
   HighlightOff,
+  Add,
+  Edit,
 } from "@mui/icons-material";
 import { toast } from "react-toastify";
 import remove from "../../images/delete.png";
 import success from "../../images/Frame.png";
 import { useNavigate } from "react-router-dom";
-import { updateAccounts, updatePartner } from "../../service/account";
+import { createAccounts, updateAccounts } from "../../service/account";
 
-function ActionMenu({ account, onToggleStatus, onViewDetail }) {
+function ActionMenu({
+  account,
+  onToggleStatus,
+  onViewDetail,
+  setSelectedAccount,
+}) {
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
 
@@ -52,6 +60,7 @@ function ActionMenu({ account, onToggleStatus, onViewDetail }) {
   };
 
   const handleClose = (e) => {
+    setSelectedAccount(null);
     e?.stopPropagation();
     setAnchorEl(null);
   };
@@ -90,8 +99,8 @@ function ActionMenu({ account, onToggleStatus, onViewDetail }) {
             handleClose(e);
             onViewDetail(account);
           }}>
-          <DescriptionIcon fontSize='small' sx={{ mr: 1.5 }} />
-          Chi tiết
+          <Edit fontSize='small' sx={{ mr: 1.5 }} />
+          Chỉnh sửa
         </MenuItem>
 
         {account.active ? (
@@ -101,7 +110,7 @@ function ActionMenu({ account, onToggleStatus, onViewDetail }) {
               onToggleStatus(account, false);
             }}>
             <HighlightOff fontSize='small' sx={{ mr: 1.5 }} />
-            Ngừng hợp tác
+            Khóa tài khoản
           </MenuItem>
         ) : (
           <MenuItem
@@ -110,7 +119,7 @@ function ActionMenu({ account, onToggleStatus, onViewDetail }) {
               onToggleStatus(account, true);
             }}>
             <CheckCircle fontSize='small' sx={{ mr: 1.5 }} />
-            Tiếp tục hợp tác
+            Mở tài khoản
           </MenuItem>
         )}
       </Menu>
@@ -118,7 +127,7 @@ function ActionMenu({ account, onToggleStatus, onViewDetail }) {
   );
 }
 
-export default function ManagerAccountView({
+export default function ManagerStaffView({
   accounts = [],
   pagination = { page: 1, total_pages: 1 },
   loading = false,
@@ -133,8 +142,10 @@ export default function ManagerAccountView({
   const [action, setAction] = useState("manager");
   // State cho modal chi tiết và xác nhận trạng thái
   const [selectedAccount, setSelectedAccount] = useState(null);
-  const [detailOpen, setDetailOpen] = useState(false);
+  const [modalOpen, setModalOpen] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
+  const [detailOpen, setDetailOpen] = useState(false);
+
   const [pendingStatus, setPendingStatus] = useState(null); // true: active, false: inactive
   const theme = useTheme();
   const navigate = useNavigate();
@@ -209,7 +220,7 @@ export default function ManagerAccountView({
   ];
   const handlePause = async () => {
     try {
-      let result = await updatePartner(selectedAccount.id, {
+      let result = await updateAccounts(selectedAccount.id, {
         active: selectedAccount.active == 1 ? false : true,
       });
       if (result?.message && !result?.code) {
@@ -226,9 +237,49 @@ export default function ManagerAccountView({
   };
   return (
     <Box sx={{ p: { xs: 2, sm: 3, md: 4 } }}>
-      <Typography variant='h5' fontWeight='bold' mb={4}>
-        Quản lý tài khoản
-      </Typography>
+      <AccountModal
+        open={modalOpen}
+        onClose={() => setModalOpen(false)}
+        account={selectedAccount}
+        onSuccess={() => {
+          fetchAccounts();
+          setSelectedAccount(null);
+        }}
+      />
+      <Box
+        mb={4}
+        display={"flex"}
+        justifyContent={"space-between"}
+        alignItems={"center"}>
+        <Typography variant='h5' fontWeight='bold'>
+          Quản lý nhân viên
+        </Typography>
+
+        <Button
+          variant='contained'
+          startIcon={<Add />}
+          onClick={() => {
+            setModalOpen(true);
+          }}
+          sx={{
+            backgroundColor: "#98b720", // xanh lá chính xác như hình
+            "&:hover": {
+              backgroundColor: "#98b720",
+            },
+            color: "white",
+            fontWeight: "bold",
+            fontSize: "16px",
+            padding: "12px 24px",
+            borderRadius: "12px", // bo tròn mạnh
+            textTransform: "none", // không in hoa tự động
+            boxShadow: "none",
+            "& .MuiSvgIcon-root": {
+              fontSize: "28px", // icon lớn hơn một chút
+            },
+          }}>
+          Thêm người dùng
+        </Button>
+      </Box>
 
       <Paper sx={{ p: 3 }}>
         <Typography variant='h6' fontWeight='bold' mb={3}>
@@ -389,8 +440,10 @@ export default function ManagerAccountView({
                       onClick={(e) => e.stopPropagation()}>
                       <ActionMenu
                         account={account}
+                        setSelectedAccount={setSelectedAccount}
                         onViewDetail={() => {
-                          navigate(`/manager-hotel?email=${account.email}`);
+                          setSelectedAccount(account);
+                          setModalOpen(true);
                         }}
                         onToggleStatus={handleToggleStatus}
                       />
@@ -534,3 +587,202 @@ Chủ khách sạn có thể ngừng hợp tác lại trong tương lai.`
     </Box>
   );
 }
+
+import { FormControl, InputLabel } from "@mui/material";
+
+import axios from "axios"; // hoặc dùng fetch
+
+interface AccountModalProps {
+  open: boolean;
+  onClose: () => void;
+  account?: {
+    id?: number;
+    name: string;
+    email: string;
+    phone: string;
+    role: "admin" | "accountant";
+  } | null; // null = thêm mới, có data = chỉnh sửa
+  onSuccess?: () => void; // callback sau khi thành công
+}
+
+const AccountModal: React.FC<AccountModalProps> = ({
+  open,
+  onClose,
+  account,
+  onSuccess,
+}) => {
+  const isEdit = !!account;
+
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    role: "admin" as "admin" | "accountant",
+    password: "",
+    confirmPassword: "",
+  });
+
+  useEffect(() => {
+    if (account) {
+      setFormData({
+        name: account.name || "",
+        email: account.email || "",
+        phone: account.phone || "",
+        role: account.role || "admin",
+        password: "",
+        confirmPassword: "",
+      });
+    } else {
+      setFormData({
+        name: "",
+        email: "",
+        phone: "",
+        role: "admin",
+        password: "",
+        confirmPassword: "",
+      });
+    }
+  }, [account]);
+
+  const handleChange =
+    (field: keyof typeof formData) =>
+    (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+      setFormData({ ...formData, [field]: e.target.value });
+    };
+
+  const handleRoleChange = (e: any) => {
+    setFormData({ ...formData, role: e.target.value });
+  };
+
+  const handleSubmit = async () => {
+    const payload = {
+      name: formData.name,
+      email: formData.email,
+      phone: formData.phone,
+      role: formData.role,
+    };
+    if (formData.password !== formData.confirmPassword) {
+      alert("Mật khẩu xác nhận không khớp!");
+      return;
+    } else {
+      if (formData.password && formData.password == formData.confirmPassword)
+        payload.password = formData.password;
+    }
+
+    try {
+      let result;
+      if (isEdit && account?.id) {
+        // API chỉnh sửa (PUT)
+        result = await updateAccounts(account?.id, payload);
+      } else {
+        // API thêm mới (POST)
+        result = await createAccounts(payload);
+      }
+
+      if (result?.message && !result?.code) {
+        onSuccess?.();
+        onClose();
+        toast.success(result?.message);
+      } else {
+        toast.error(result?.message);
+      }
+    } catch (error: any) {
+      console.error(error);
+      alert(
+        error.response?.data?.message ||
+          "Có lỗi xảy ra khi lưu thông tin tài khoản."
+      );
+    }
+  };
+
+  return (
+    <Dialog open={open} onClose={onClose} maxWidth='sm' fullWidth>
+      <DialogTitle>
+        <Box display='flex' justifyContent='space-between' alignItems='center'>
+          <Typography variant='h6' fontWeight='bold'>
+            {isEdit ? "Chỉnh sửa thông tin" : "Thêm mới tài khoản"}
+          </Typography>
+          <IconButton onClick={onClose}>
+            <CloseIcon />
+          </IconButton>
+        </Box>
+      </DialogTitle>
+
+      <DialogContent dividers>
+        <Box display='grid' gridTemplateColumns='1fr 1fr' gap={2} mt={1}>
+          <TextField
+            label='Tên người dùng'
+            value={formData.name}
+            onChange={handleChange("name")}
+            fullWidth
+            required
+          />
+          <TextField
+            label='Email'
+            type='email'
+            value={formData.email}
+            onChange={handleChange("email")}
+            fullWidth
+            required
+          />
+
+          <TextField
+            label='Số điện thoại'
+            value={formData.phone}
+            onChange={handleChange("phone")}
+            fullWidth
+            required
+          />
+
+          <FormControl fullWidth required>
+            <InputLabel>Vai trò</InputLabel>
+            <Select
+              value={formData.role}
+              onChange={handleRoleChange}
+              label='Vai trò'>
+              <MenuItem value='admin'>Admin</MenuItem>
+              <MenuItem value='accountant'>Kế toán</MenuItem>
+            </Select>
+          </FormControl>
+        </Box>
+
+        <>
+          <TextField
+            label='Mật khẩu mới'
+            type='password'
+            value={formData.password}
+            onChange={handleChange("password")}
+            fullWidth
+            required
+            sx={{ mt: 3 }}
+          />
+          <TextField
+            label='Xác nhận mật khẩu'
+            type='password'
+            value={formData.confirmPassword}
+            onChange={handleChange("confirmPassword")}
+            fullWidth
+            required
+            sx={{ mt: 2 }}
+          />
+        </>
+
+        <Box mt={4}>
+          <Button
+            variant='contained'
+            fullWidth
+            size='large'
+            sx={{
+              backgroundColor: "#8bc34a",
+              "&:hover": { backgroundColor: "#7cb342" },
+              py: 1.5,
+              borderRadius: "8px",
+            }}
+            onClick={handleSubmit}>
+            {isEdit ? "Cập nhật thông tin" : "Thêm mới tài khoản"}
+          </Button>
+        </Box>
+      </DialogContent>
+    </Dialog>
+  );
+};

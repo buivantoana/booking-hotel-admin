@@ -15,31 +15,69 @@ import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import { useLocation, useNavigate } from "react-router-dom";
 import InsightsIcon from "@mui/icons-material/Insights";
 
-import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
-import HotelOutlinedIcon from '@mui/icons-material/HotelOutlined';
-import CalendarMonthOutlinedIcon from '@mui/icons-material/CalendarMonthOutlined';
-import PaymentOutlinedIcon from '@mui/icons-material/PaymentOutlined';
-import StarBorderOutlinedIcon from '@mui/icons-material/StarBorderOutlined';
-import AccountCircleOutlinedIcon from '@mui/icons-material/AccountCircleOutlined';
-import GroupOutlinedIcon from '@mui/icons-material/GroupOutlined';
-import InsightsOutlinedIcon from '@mui/icons-material/InsightsOutlined';
-import logo from "../../src/images/Frame 1321318032.png"
+import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
+import HotelOutlinedIcon from "@mui/icons-material/HotelOutlined";
+import CalendarMonthOutlinedIcon from "@mui/icons-material/CalendarMonthOutlined";
+import PaymentOutlinedIcon from "@mui/icons-material/PaymentOutlined";
+import StarBorderOutlinedIcon from "@mui/icons-material/StarBorderOutlined";
+import AccountCircleOutlinedIcon from "@mui/icons-material/AccountCircleOutlined";
+import GroupOutlinedIcon from "@mui/icons-material/GroupOutlined";
+import InsightsOutlinedIcon from "@mui/icons-material/InsightsOutlined";
+import logo from "../../src/images/Frame 1321318032.png";
 export default function SidebarMenu() {
   const location = useLocation();
   const navigate = useNavigate();
 
- 
-  
   const menuItems = [
     { id: "home", label: "Trang chủ", icon: <HomeOutlinedIcon />, path: "/" },
-    { id: "approval", label: "Phê duyệt", icon: <CheckCircleOutlineIcon />, path: "/approval" },
-    { id: "hotelManagement", label: "Quản lý khách sạn", icon: <HotelOutlinedIcon />, path: "/manager-hotel" },
-    { id: "booking", label: "Quản lý đặt phòng", icon: <CalendarMonthOutlinedIcon />, path: "/manager-bookings" },
-    { id: "payment", label: "Quản lý thanh toán", icon: <PaymentOutlinedIcon />, path: "/manager-payments" },
-    { id: "review", label: "Quản lý đánh giá", icon: <StarBorderOutlinedIcon />, path: "/review" },
-    { id: "account", label: "Quản lý tài khoản", icon: <AccountCircleOutlinedIcon />, path: "/manager-accounts" },
-    { id: "staff", label: "Quản lý nhân viên", icon: <GroupOutlinedIcon />, path: "/manager-staff" },
-    { id: "reconciliation", label: "Quản lý đối soát", icon: <InsightsOutlinedIcon />, path: "/reconciliation" },
+    {
+      id: "approval",
+      label: "Phê duyệt",
+      icon: <CheckCircleOutlineIcon />,
+      path: "/approval",
+    },
+    {
+      id: "hotelManagement",
+      label: "Quản lý khách sạn",
+      icon: <HotelOutlinedIcon />,
+      path: "/manager-hotel",
+    },
+    {
+      id: "booking",
+      label: "Quản lý đặt phòng",
+      icon: <CalendarMonthOutlinedIcon />,
+      path: "/manager-bookings",
+    },
+    {
+      id: "payment",
+      label: "Quản lý thanh toán",
+      icon: <PaymentOutlinedIcon />,
+      path: "/manager-payments",
+    },
+    {
+      id: "review",
+      label: "Quản lý đánh giá",
+      icon: <StarBorderOutlinedIcon />,
+      path: "/review",
+    },
+    {
+      id: "account",
+      label: "Quản lý tài khoản",
+      icon: <AccountCircleOutlinedIcon />,
+      path: "/manager-accounts",
+    },
+    {
+      id: "staff",
+      label: "Quản lý nhân viên",
+      icon: <GroupOutlinedIcon />,
+      path: "/manager-staff",
+    },
+    {
+      id: "reconciliation",
+      label: "Quản lý đối soát",
+      icon: <InsightsOutlinedIcon />,
+      path: "/reconciliation",
+    },
   ];
 
   return (
@@ -53,12 +91,11 @@ export default function SidebarMenu() {
           bgcolor: "#fff",
           flex: 0.7,
         }}>
-          <Box my={3} display={"flex"} justifyContent={"center"}>
+        <Box my={3} display={"flex"} justifyContent={"center"}>
+          <img src={logo} width={200} alt='' />
+        </Box>
 
-        <img src={logo} width={200} alt="" />
-          </Box>
-
-        <List>
+        <List sx={{ height: "70vh", overflowY: "scroll" }}>
           {menuItems.map((item) => {
             const isActive = location.pathname === item.path;
 
@@ -109,7 +146,7 @@ export default function SidebarMenu() {
       <Box
         sx={{
           position: "absolute",
-          bottom: 30,
+          bottom: 10,
           width: "100%",
           display: "flex",
           justifyContent: "center",
@@ -174,8 +211,10 @@ const UserProfileButton = () => {
           <Typography
             variant='subtitle1'
             fontWeight='bold'
+            width={"120px"}
+            overflow={"hidden"}
             color='text.primary'>
-            {context?.state?.user?.name}
+            {context?.state?.user?.email}
           </Typography>
           {context?.state?.user?.phone && (
             <Typography variant='body2' color='text.secondary'>

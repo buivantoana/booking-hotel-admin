@@ -1,12 +1,12 @@
 // ManagerBookingController.tsx
 import React, { useEffect, useState } from "react";
-import ManagerAccountView from "./ManagerAccountView";
+import ManagerStaffView from "./ManagerStaffView";
 import { getHotelReview, getHotels } from "../../service/hotel";
 import { listBooking } from "../../service/booking";
 import dayjs from "dayjs";
-import { getAccounts } from "../../service/account";
+import { getAccounts, getStaffs } from "../../service/account";
 
-const ManagerAccountController = () => {
+const ManagerStaffController = () => {
   // State cho booking và phân trang
   const [Account, setAccount] = useState<any[]>([]);
   const [pagination, setPagination] = useState({
@@ -84,9 +84,9 @@ const ManagerAccountController = () => {
       console.log("Cách 2 (Manual build):", queryString1);
 
       // Chọn cách 2 (manual build) để kiểm soát tốt hơn
-      const result = await getAccounts(queryString1);
+      const result = await getStaffs(queryString1);
 
-      setAccount(result.partners || []);
+      setAccount(result.accounts || []);
       setPagination({
         page: result.page || 1,
         limit: result.limit || 10,
@@ -142,7 +142,7 @@ const ManagerAccountController = () => {
   // Xử lý khi dateRange thay đổi
 
   return (
-    <ManagerAccountView
+    <ManagerStaffView
       accounts={Account}
       pagination={pagination}
       loading={loading}
@@ -156,4 +156,4 @@ const ManagerAccountController = () => {
   );
 };
 
-export default ManagerAccountController;
+export default ManagerStaffController;
