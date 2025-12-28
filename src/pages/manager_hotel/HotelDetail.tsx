@@ -11,21 +11,35 @@ export default function HotelDetail({
   setRoom,
   detailHotel,
   getHotelDetail,
+  room,
+  setCancelDialogOpen,
+  setApproveDialogOpen,
 }) {
   return (
     <Box sx={{ minHeight: "100vh" }}>
-      <HotelHeader detailHotel={detailHotel} setAction={setAction} />
+      <HotelHeader
+        detailHotel={detailHotel}
+        setCancelDialogOpen={setCancelDialogOpen}
+        setApproveDialogOpen={setApproveDialogOpen}
+        setAction={setAction}
+      />
       <HotelInfoDetail
         detailHotel={detailHotel}
         onNext={setAction}
         getHotelDetail={getHotelDetail}
         setRoom={setRoom}
+        room={room}
       />
     </Box>
   );
 }
 
-function HotelHeader({ setAction, detailHotel }) {
+function HotelHeader({
+  setAction,
+  detailHotel,
+  setCancelDialogOpen,
+  setApproveDialogOpen,
+}) {
   const parseVi = (str) => {
     if (!str) return "";
     try {
@@ -37,7 +51,41 @@ function HotelHeader({ setAction, detailHotel }) {
   };
 
   const hotelName = parseVi(detailHotel.name) || "Khách sạn";
+  const { status } = detailHotel;
+  const renderStatusChip = (status) => {
+    const map = {
+      active: {
+        label: "Đang hoạt động",
+        sx: { bgcolor: "#98B720", color: "white" },
+      },
+      paused: {
+        label: "Tạm dừng",
+        sx: { bgcolor: "#FFB020", color: "white" },
+      },
+      pending: {
+        label: "Chờ duyệt",
+        sx: { bgcolor: "#1976D2", color: "white" },
+      },
+      terminated: {
+        label: "Đã chấm dứt",
+        sx: { bgcolor: "#D32F2F", color: "white" },
+      },
+      rejected: {
+        label: "Bị từ chối ",
+        sx: { bgcolor: "#a5a5a5", color: "white" },
+      },
+    };
 
+    const config = map[status];
+
+    return (
+      <Chip
+        label={config?.label || "Không xác định"}
+        size='small'
+        sx={config?.sx || { bgcolor: "#9E9E9E", color: "white" }}
+      />
+    );
+  };
   return (
     <Box
       sx={{
@@ -69,22 +117,18 @@ function HotelHeader({ setAction, detailHotel }) {
           </Typography>
         </Box>
 
-        <Chip
-          label='Đang hoạt động'
-          size='small'
-          sx={{
-            bgcolor: "#98B720",
-            color: "white",
-            fontWeight: 600,
-            fontSize: 13,
-            height: 28,
-            borderRadius: "16px",
-          }}
-        />
+        {renderStatusChip(status)}
       </Box>
       <Box>
         <Button
           variant='outlined'
+          onClick={() => {
+            if (status === "active" || status === "paused") {
+              setCancelDialogOpen(true);
+            } else {
+              setApproveDialogOpen(true);
+            }
+          }}
           sx={{
             borderRadius: "24px",
             height: 40,
@@ -93,14 +137,22 @@ function HotelHeader({ setAction, detailHotel }) {
             background: "rgba(240, 241, 243, 1)",
             color: "black",
           }}>
-          Ngừng hợp tác
+          {status === "active" || status === "paused"
+            ? "Ngừng kinh doanh"
+            : "Tiếp tục kinh doanh"}
         </Button>
       </Box>
     </Box>
   );
 }
 
-function HotelInfoDetail({ onNext, setRoom, detailHotel, getHotelDetail }) {
+function HotelInfoDetail({
+  onNext,
+  setRoom,
+  detailHotel,
+  getHotelDetail,
+  room,
+}) {
   const [action, setAction] = useState("manager");
   const parseVi = (str) => {
     if (!str) return "";
@@ -184,6 +236,7 @@ function HotelInfoDetail({ onNext, setRoom, detailHotel, getHotelDetail }) {
           setRoom={setRoom}
           detailHotel={detailHotel}
           getHotelDetail={getHotelDetail}
+          room={room}
         />
       )}
 

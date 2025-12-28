@@ -246,7 +246,7 @@ export default function RoomDetail({
 
             <Box sx={{ flexGrow: 1 }} />
 
-            <Box display={"flex"} gap={"10px"}>
+            {/* <Box display={"flex"} gap={"10px"}>
               <Button
                 variant='outlined'
                 sx={{
@@ -259,7 +259,7 @@ export default function RoomDetail({
                 }}>
                 Ngừng hợp tác
               </Button>
-            </Box>
+            </Box> */}
           </Box>
 
           {/* Container chính */}

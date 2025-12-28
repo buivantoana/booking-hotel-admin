@@ -127,7 +127,8 @@ export async function getInventoryHotelDaily(id, params) {
 export async function getGeneralStats(params) {
   try {
     let token = localStorage.getItem("access_token");
-    const response = await api.get(`/admin/stats/general?${params}`, {
+    const response = await api.get(`/admin/stats/general`, {
+      params,
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -146,10 +147,11 @@ export async function getGeneralStats(params) {
   }
 }
 
-export async function getGeneralWeek(id, params) {
+export async function getGeneralWeek(params) {
   try {
     let token = localStorage.getItem("access_token");
-    const response = await api.get(`/partner/stats/${id}/revenue?${params}`, {
+    const response = await api.get(`/admin/stats/revenue`, {
+      params,
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -168,10 +170,11 @@ export async function getGeneralWeek(id, params) {
   }
 }
 
-export async function getGeneralWeekRoomType(id, params) {
+export async function getGeneralWeekRoomType(params) {
   try {
     let token = localStorage.getItem("access_token");
-    const response = await api.get(`/partner/stats/${id}/revenue?${params}`, {
+    const response = await api.get(`/admin/stats/revenue`, {
+      params,
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -190,10 +193,11 @@ export async function getGeneralWeekRoomType(id, params) {
   }
 }
 
-export async function getEventMonth(id, params) {
+export async function getEventMonth(params) {
   try {
     let token = localStorage.getItem("access_token");
-    const response = await api.get(`/partner/stats/${id}/events?${params}`, {
+    const response = await api.get(`/admin/stats/events`, {
+      params,
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -299,7 +303,7 @@ export async function getHotel(id) {
 export async function updateHotelStatus(id, body) {
   try {
     let token = localStorage.getItem("access_token");
-    const response = await api.post(`/admin/hotel/${id}/status`, body, {
+    const response = await api.post(`/admin/hotel/${id}/action`, body, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -322,7 +326,7 @@ export async function updateRoomStatus(id, body) {
   try {
     let token = localStorage.getItem("access_token");
     const response = await api.post(
-      `/admin/hotel/room-types/${id}/status`,
+      `/admin/hotel/room-types/${id}/action`,
       body,
       {
         headers: {

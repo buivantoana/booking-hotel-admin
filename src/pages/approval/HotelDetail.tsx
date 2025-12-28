@@ -6,18 +6,42 @@ import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { getHotel } from "../../service/hotel";
 
-export default function HotelDetail({ setAction, setRoom, detailHotel, getHotelDetail, 
+export default function HotelDetail({
+  setAction,
+  setRoom,
+  detailHotel,
+  getHotelDetail,
   setDeleteDialogOpen,
-  setCancelDialogOpen }) {
+  setCancelDialogOpen,
+  room,
+}) {
   return (
     <Box sx={{ minHeight: "100vh" }}>
-      <HotelHeader detailHotel={detailHotel} setAction={setAction} setDeleteDialogOpen={setDeleteDialogOpen} setCancelDialogOpen={setCancelDialogOpen} />
-      <HotelInfoDetail detailHotel={detailHotel} onNext={setAction} setDeleteDialogOpen={setDeleteDialogOpen} setCancelDialogOpen={setCancelDialogOpen} getHotelDetail={getHotelDetail} setRoom={setRoom} />
+      <HotelHeader
+        detailHotel={detailHotel}
+        setAction={setAction}
+        setDeleteDialogOpen={setDeleteDialogOpen}
+        setCancelDialogOpen={setCancelDialogOpen}
+      />
+      <HotelInfoDetail
+        detailHotel={detailHotel}
+        room={room}
+        onNext={setAction}
+        setDeleteDialogOpen={setDeleteDialogOpen}
+        setCancelDialogOpen={setCancelDialogOpen}
+        getHotelDetail={getHotelDetail}
+        setRoom={setRoom}
+      />
     </Box>
   );
 }
 
-function HotelHeader({ setAction, detailHotel,setDeleteDialogOpen ,setCancelDialogOpen}) {
+function HotelHeader({
+  setAction,
+  detailHotel,
+  setDeleteDialogOpen,
+  setCancelDialogOpen,
+}) {
   const parseVi = (str) => {
     if (!str) return "";
     try {
@@ -79,7 +103,15 @@ function HotelHeader({ setAction, detailHotel,setDeleteDialogOpen ,setCancelDial
   );
 }
 
-function HotelInfoDetail({ onNext, setRoom, detailHotel, getHotelDetail,setDeleteDialogOpen ,setCancelDialogOpen }) {
+function HotelInfoDetail({
+  onNext,
+  setRoom,
+  room,
+  detailHotel,
+  getHotelDetail,
+  setDeleteDialogOpen,
+  setCancelDialogOpen,
+}) {
   const [action, setAction] = useState("manager");
   const parseVi = (str) => {
     if (!str) return "";
@@ -94,10 +126,10 @@ function HotelInfoDetail({ onNext, setRoom, detailHotel, getHotelDetail,setDelet
   useEffect(() => {
     if (searchParams.get("manager_room") == "true") {
       searchParams.delete("manager_room");
-      setAction("rooms")
+      setAction("rooms");
       setSearchParams(searchParams, { replace: true });
     }
-  }, [searchParams])
+  }, [searchParams]);
   const hotelName = parseVi(detailHotel.name);
   const hotelAddress = parseVi(detailHotel.address);
   const hotelDescription = parseVi(detailHotel.description);
@@ -105,8 +137,9 @@ function HotelInfoDetail({ onNext, setRoom, detailHotel, getHotelDetail,setDelet
   const rentTypes = detailHotel.rent_types
     ? JSON.parse(detailHotel.rent_types)
     : {};
-  const rentStr = `08:00 ~ 22:00 / ${rentTypes.overnight?.from || "22:00"} ~ ${rentTypes.overnight?.to || "08:00"
-    } / ${rentTypes.daily?.from || "14:00"} ~ ${rentTypes.daily?.to || "12:00"}`;
+  const rentStr = `08:00 ~ 22:00 / ${rentTypes.overnight?.from || "22:00"} ~ ${
+    rentTypes.overnight?.to || "08:00"
+  } / ${rentTypes.daily?.from || "14:00"} ~ ${rentTypes.daily?.to || "12:00"}`;
 
   const images = detailHotel.images ? JSON.parse(detailHotel.images) : [];
   const mainImage = images[0] || null;
@@ -155,43 +188,42 @@ function HotelInfoDetail({ onNext, setRoom, detailHotel, getHotelDetail,setDelet
           </Typography>
         </Box>
 
-      {action != "rooms" &&  <Box display={"flex"} gap={"10px"}>
-          <Button
-            variant='contained'
-
-            onClick={() =>setCancelDialogOpen(true)}
-            sx={{
-              bgcolor: "#F0F1F3",
-              color: "black",
-              fontWeight: 600,
-              fontSize: 15,
-              px: 4,
-              py: 1.4,
-              borderRadius: "50px",
-              textTransform: "none",
-              boxShadow: "none"
-            }}>
-            Từ chối
-          </Button>
-          <Button
-            variant='contained'
-
-            onClick={() =>setDeleteDialogOpen(true)}
-            sx={{
-              bgcolor: "#98B720",
-              color: "white",
-              fontWeight: 600,
-              fontSize: 15,
-              px: 4,
-              py: 1.4,
-              borderRadius: "50px",
-              textTransform: "none",
-              boxShadow: "none"
-            }}>
-            Phê duyệt
-          </Button>
-        </Box>}
-
+        {action != "rooms" && (
+          <Box display={"flex"} gap={"10px"}>
+            <Button
+              variant='contained'
+              onClick={() => setCancelDialogOpen(true)}
+              sx={{
+                bgcolor: "#F0F1F3",
+                color: "black",
+                fontWeight: 600,
+                fontSize: 15,
+                px: 4,
+                py: 1.4,
+                borderRadius: "50px",
+                textTransform: "none",
+                boxShadow: "none",
+              }}>
+              Từ chối
+            </Button>
+            <Button
+              variant='contained'
+              onClick={() => setDeleteDialogOpen(true)}
+              sx={{
+                bgcolor: "#98B720",
+                color: "white",
+                fontWeight: 600,
+                fontSize: 15,
+                px: 4,
+                py: 1.4,
+                borderRadius: "50px",
+                textTransform: "none",
+                boxShadow: "none",
+              }}>
+              Phê duyệt
+            </Button>
+          </Box>
+        )}
       </Box>
 
       {action === "rooms" && (
@@ -200,6 +232,7 @@ function HotelInfoDetail({ onNext, setRoom, detailHotel, getHotelDetail,setDelet
           setRoom={setRoom}
           detailHotel={detailHotel}
           getHotelDetail={getHotelDetail}
+          room={room}
         />
       )}
 
@@ -348,10 +381,6 @@ function HotelInfoDetail({ onNext, setRoom, detailHotel, getHotelDetail,setDelet
                   </Typography>
                 </Box>
 
-
-
-
-
                 <Box>
                   <Typography fontSize={14} color='black' fontWeight={600}>
                     Tình trạng hợp tác
@@ -387,11 +416,8 @@ function HotelInfoDetail({ onNext, setRoom, detailHotel, getHotelDetail,setDelet
               </Stack>
             </Grid>
           </Grid>
-
-
         </>
       )}
     </Paper>
   );
 }
-

@@ -40,13 +40,25 @@ import success from "../../images/Frame.png";
 import HotelDetail from "./HotelDetail";
 
 import RoomDetail from "./RoomDetail";
-import { getHotel, toggleHotels, updateHotelStatus, updateRoomStatus } from "../../service/hotel";
+import {
+  getHotel,
+  toggleHotels,
+  updateHotelStatus,
+  updateRoomStatus,
+} from "../../service/hotel";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import { parseRoomName } from "../../utils/utils";
 
 // Component menu thao tác
-function ActionMenu({ setAction, setDeleteDialogOpen, setIdHotel, hotel, setCancelDialogOpen,activeTab }) {
+function ActionMenu({
+  setAction,
+  setDeleteDialogOpen,
+  setIdHotel,
+  hotel,
+  setCancelDialogOpen,
+  activeTab,
+}) {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
 
@@ -93,15 +105,14 @@ function ActionMenu({ setAction, setDeleteDialogOpen, setIdHotel, hotel, setCanc
         {/* Chi tiết */}
         <MenuItem
           onClick={() => {
-            setIdHotel(hotel)
-            if(activeTab == "rooms"){
+            setIdHotel(hotel);
+            if (activeTab == "rooms") {
               setAction("detail");
               navigate(`/approval?tab=all`);
-            }else{
+            } else {
               setAction("edit_detail");
               navigate(`/approval?id=${hotel.id}`);
             }
-            
           }}
           sx={{ gap: 1.5, fontSize: 14, color: "#424242" }} // Màu xám đậm nhẹ
         >
@@ -112,8 +123,8 @@ function ActionMenu({ setAction, setDeleteDialogOpen, setIdHotel, hotel, setCanc
         {/* Phê duyệt khách sạn */}
         <MenuItem
           onClick={() => {
-            setIdHotel(hotel)
-            setDeleteDialogOpen(true)
+            setIdHotel(hotel);
+            setDeleteDialogOpen(true);
           }}
           sx={{ gap: 1.5, fontSize: 14, color: "#2e7d32" }} // Màu xanh lá đậm (success)
         >
@@ -124,8 +135,8 @@ function ActionMenu({ setAction, setDeleteDialogOpen, setIdHotel, hotel, setCanc
         {/* Từ chối khách sạn */}
         <MenuItem
           onClick={() => {
-            setIdHotel(hotel)
-            setCancelDialogOpen(true)
+            setIdHotel(hotel);
+            setCancelDialogOpen(true);
           }}
           sx={{ gap: 1.5, fontSize: 14, color: "#d32f2f" }} // Màu đỏ (error)
         >
@@ -139,11 +150,16 @@ function ActionMenu({ setAction, setDeleteDialogOpen, setIdHotel, hotel, setCanc
   );
 }
 
-export default function ApprovalView({ hotels, getDataHotels, pagination,
+export default function ApprovalView({
+  hotels,
+  getDataHotels,
+  pagination,
   getDataRooms,
-  onPageChange, paginationRooms,
+  onPageChange,
+  paginationRooms,
   onPageChangeRooms,
-  rooms, }) {
+  rooms,
+}) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -165,6 +181,11 @@ export default function ApprovalView({ hotels, getDataHotels, pagination,
       getHotelDetail();
     }
   }, [searchParams]);
+  useEffect(() => {
+    if (action == "detail") {
+      setActiveTab("rooms");
+    }
+  }, [action]);
   const getHotelDetail = async () => {
     try {
       let result = await getHotel(searchParams.get("id"));
@@ -178,52 +199,53 @@ export default function ApprovalView({ hotels, getDataHotels, pagination,
       console.log(error);
     }
   };
+
   const handleStatusHotel = async (status) => {
     try {
-      let result
+      let result;
       if (status == "reject") {
-        if(activeTab=="manager"){
+        if (activeTab == "manager") {
           result = await updateHotelStatus(idHotel.id, {
             action: "reject",
-            reason
-          })
-        }else{
+            reason,
+          });
+        } else {
           result = await updateRoomStatus(room.id, {
             action: "reject",
-            reason
-          })
+            reason,
+          });
         }
-       
-        setCancelDialogOpen(false)
+
+        setCancelDialogOpen(false);
       }
       if (status == "approve") {
-        if(activeTab=="manager"){
+        if (activeTab == "manager") {
           result = await updateHotelStatus(idHotel.id, {
-            action: "approve"
-          })
-        }else{
+            action: "approve",
+          });
+        } else {
           result = await updateRoomStatus(room.id, {
-            action: "approve"
-          })
+            action: "approve",
+          });
         }
-        setDeleteDialogOpen(false)
+        setDeleteDialogOpen(false);
       }
       if (result?.message && !result?.code) {
-        setReason("")
+        setReason("");
         toast.success(result?.message);
-        if(activeTab=="manager"){
-          getDataHotels()
-        }else{
-          getDataRooms()
+        if (activeTab == "manager") {
+          getDataHotels();
+        } else {
+          getDataRooms();
         }
       } else {
         toast.error(result?.message);
       }
-      console.log("AAA result", result)
+      console.log("AAA result", result);
     } catch (error) {
-      console.log(error)
+      console.log(error);
     }
-  }
+  };
   const formatPrice = (price: number | null | undefined): string => {
     if (!price || price === 0) return "-";
     return new Intl.NumberFormat("vi-VN", {
@@ -237,6 +259,7 @@ export default function ApprovalView({ hotels, getDataHotels, pagination,
     setAction("detail");
     navigate(`/approval?tab=all`);
   };
+
   return (
     <Box sx={{ p: { xs: 2, sm: 3, md: 4 }, minHeight: "100vh" }}>
       {action == "detail" && (
@@ -259,6 +282,7 @@ export default function ApprovalView({ hotels, getDataHotels, pagination,
           handleStatusHotel={handleStatusHotel}
           setDeleteDialogOpen={setDeleteDialogOpen}
           setCancelDialogOpen={setCancelDialogOpen}
+          room={room}
         />
       )}
       {action == "manager" && (
@@ -318,267 +342,289 @@ export default function ApprovalView({ hotels, getDataHotels, pagination,
               </Typography>
             </Box>
 
-            {activeTab == "manager"&&
+            {activeTab == "manager" && (
+              <>
+                <Box sx={{ mb: 3 }}>
+                  <Stack direction='row' spacing={4} color='#555' fontSize={14}>
+                    <Box>
+                      Phê duyệt <strong>{total}</strong>
+                    </Box>
+                    <Box>
+                      Đã duyệt <strong>{active}</strong>
+                    </Box>
+                    <Box>
+                      Bị từ chối <strong>{inactive}</strong>
+                    </Box>
+                  </Stack>
+                </Box>
 
-            <>
-            <Box sx={{ mb: 3 }}>
-              <Stack direction='row' spacing={4} color='#555' fontSize={14}>
-                <Box>
-                  Phê duyệt <strong>{total}</strong>
-                </Box>
-                <Box>
-                  Đã duyệt <strong>{active}</strong>
-                </Box>
-                <Box>
-                  Bị từ chối <strong>{inactive}</strong>
-                </Box>
-              </Stack>
-            </Box>
-            
-            <TableContainer>
-              <Table sx={{ minWidth: 1000 }}>
-                <TableHead>
-                  <TableRow sx={{ bgcolor: "#f8f9fa" }}>
-                    {[
-                      "#",
-                      "Tên khách sạn",
-                      "Hình thức",
-                      "Tình trạng",
-                      "Địa chỉ",
-                      "Mail",
-                      "Số điện thoại",
-                      "",
-                    ].map((head) => (
-                      <TableCell
-                        key={head}
-                        sx={{ fontWeight: 600, color: "#555", fontSize: 14 }}>
-                        {head}
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {hotels.length === 0 ? (
-                    <TableRow>
-                      <TableCell colSpan={8} align='center'>
-                        <Typography>Không có dữ liệu</Typography>
-                      </TableCell>
-                    </TableRow>
-                  ) :
-                    <>
-                      {hotels?.map((hotel, index) => (
-                        <TableRow hover key={hotel.id}>
-                          <TableCell>{index + 1}</TableCell>
-
+                <TableContainer>
+                  <Table sx={{ minWidth: 1000 }}>
+                    <TableHead>
+                      <TableRow sx={{ bgcolor: "#f8f9fa" }}>
+                        {[
+                          "#",
+                          "Tên khách sạn",
+                          "Hình thức",
+                          "Tình trạng",
+                          "Địa chỉ",
+                          "Mail",
+                          "Số điện thoại",
+                          "",
+                        ].map((head) => (
                           <TableCell
-                            onClick={() => {
-                              setIdHotel(hotel)
-                              navigate(`/approval?id=${hotel.id}`);
-                              setAction("edit_detail");
-                            }}
-                            sx={{ fontWeight: 500, cursor: "pointer" }}>
-                            {parseLang(hotel.name)}
+                            key={head}
+                            sx={{
+                              fontWeight: 600,
+                              color: "#555",
+                              fontSize: 14,
+                            }}>
+                            {head}
                           </TableCell>
-
-                          <TableCell>
-                            {renderCooperationChip(hotel.cooperation_type)}
-                          </TableCell>
-
-                          <TableCell >{renderStatusChip(hotel.status)}</TableCell>
-
-                          <TableCell sx={{ maxWidth: 280 }}>
-                            {parseLang(hotel.address)}
-                          </TableCell>
-
-                          <TableCell>{hotel.commission_rate}%</TableCell>
-
-                          <TableCell>
-                            {hotel.cooperation_type === "listing"
-                              ? "Online"
-                              : "Cả hai"}
-                          </TableCell>
-
-                          <TableCell>
-                            <ActionMenu
-                              hotel={hotel}
-                              setIdHotel={setIdHotel}
-                              setAction={setAction}
-                              setDeleteDialogOpen={setDeleteDialogOpen}
-                              setCancelDialogOpen={setCancelDialogOpen}
-                            />
+                        ))}
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {hotels.length === 0 ? (
+                        <TableRow>
+                          <TableCell colSpan={8} align='center'>
+                            <Typography>Không có dữ liệu</Typography>
                           </TableCell>
                         </TableRow>
-                      ))}
-                    </>}
-                </TableBody>
-              </Table>
-            </TableContainer>
-            {hotels.length !== 0 && <Stack spacing={2} sx={{ mt: 3, alignItems: "center" }}>
-              <Pagination
-                key={pagination.page} // ← THÊM DÒNG NÀY ĐỂ FORCE RE-RENDER KHI PAGE THAY ĐỔI
-                count={pagination.total_pages}
-                page={pagination.page}
-                onChange={onPageChange}
-                siblingCount={1}
-                boundaryCount={1}
-                color='primary'
-                size={isMobile ? "medium" : "large"}
-                sx={{
-                  // Tùy chỉnh trang active
-                  "& .MuiPaginationItem-root.Mui-selected": {
-                    backgroundColor: "#98b720 !important", // Màu xanh lá bạn đang dùng trong app
-                    color: "white",
-                    fontWeight: "bold",
-                    boxShadow: "0 4px 8px rgba(139,195,74,0.4)",
-                    "&:hover": {
-                      backgroundColor: "#7cb342 !important",
-                    },
-                  },
-                  // Tùy chỉnh các trang thường (nếu muốn)
-                  "& .MuiPaginationItem-root": {
-                    borderRadius: "8px",
-                    margin: "0 4px",
-                    "&:hover": {
-                      backgroundColor: "#e8f5e9",
-                    },
-                  },
-                  // Tùy chỉnh nút ellipsis (...) nếu cần
-                  "& .MuiPaginationItem-ellipsis": {
-                    color: "#666",
-                  },
-                }}
-              />
-            </Stack>}
-            
-            </>}
-            {activeTab == "rooms"&&
-            <>
-            <Box sx={{ mb: 3 }}>
-              <Stack direction='row' spacing={4} color='#555' fontSize={14}>
-                <Box>
-                  Phê duyệt <strong>{total}</strong>
-                </Box>
-                <Box>
-                  Đã duyệt <strong>{active}</strong>
-                </Box>
-                <Box>
-                  Bị từ chối <strong>{inactive}</strong>
-                </Box>
-              </Stack>
-            </Box>
-             <TableContainer>
-          <Table sx={{ minWidth: 1000 }}>
-            <TableHead>
-              <TableRow sx={{ bgcolor: "#f8f9fa" }}>
-                {[
-                  "Tên loại phòng",
-                  "Trang thái",
-                  "Giá theo giờ",
-                  "Giá qua đêm",
-                  "Giá qua ngày",
-                  "",
-                ].map((head) => (
-                  <TableCell
-                    key={head}
-                    sx={{ fontWeight: 600, color: "#555", fontSize: 14 }}>
-                    {head}
-                  </TableCell>
-                ))}
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {rooms.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={7} align='center' sx={{ py: 6 }}>
-                    <Typography color='#999'>Chưa có loại phòng nào</Typography>
-                  </TableCell>
-                </TableRow>
-              ) : (
-                rooms.map((room: any) => (
-                  <TableRow key={room.id} hover>
-                    {/* Tên loại phòng */}
-                    <TableCell
-                      onClick={() => handleRoomClick(room)}
+                      ) : (
+                        <>
+                          {hotels?.map((hotel, index) => (
+                            <TableRow hover key={hotel.id}>
+                              <TableCell>{index + 1}</TableCell>
+
+                              <TableCell
+                                onClick={() => {
+                                  setIdHotel(hotel);
+                                  navigate(`/approval?id=${hotel.id}`);
+                                  setAction("edit_detail");
+                                }}
+                                sx={{ fontWeight: 500, cursor: "pointer" }}>
+                                {parseLang(hotel.name)}
+                              </TableCell>
+
+                              <TableCell>
+                                {renderCooperationChip(hotel.cooperation_type)}
+                              </TableCell>
+
+                              <TableCell>
+                                {renderStatusChip(hotel.status)}
+                              </TableCell>
+
+                              <TableCell sx={{ maxWidth: 280 }}>
+                                {parseLang(hotel.address)}
+                              </TableCell>
+
+                              <TableCell>{hotel.commission_rate}%</TableCell>
+
+                              <TableCell>
+                                {hotel.cooperation_type === "listing"
+                                  ? "Online"
+                                  : "Cả hai"}
+                              </TableCell>
+
+                              <TableCell>
+                                <ActionMenu
+                                  hotel={hotel}
+                                  setIdHotel={setIdHotel}
+                                  setAction={setAction}
+                                  setDeleteDialogOpen={setDeleteDialogOpen}
+                                  setCancelDialogOpen={setCancelDialogOpen}
+                                />
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </>
+                      )}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
+                {hotels.length !== 0 && (
+                  <Stack spacing={2} sx={{ mt: 3, alignItems: "center" }}>
+                    <Pagination
+                      key={pagination.page} // ← THÊM DÒNG NÀY ĐỂ FORCE RE-RENDER KHI PAGE THAY ĐỔI
+                      count={pagination.total_pages}
+                      page={pagination.page}
+                      onChange={onPageChange}
+                      siblingCount={1}
+                      boundaryCount={1}
+                      color='primary'
+                      size={isMobile ? "medium" : "large"}
                       sx={{
-                        fontWeight: 500,
-                        cursor: "pointer",
-                        "&:hover": {
-                          textDecoration: "underline",
-                          color: "#98B720",
+                        // Tùy chỉnh trang active
+                        "& .MuiPaginationItem-root.Mui-selected": {
+                          backgroundColor: "#98b720 !important", // Màu xanh lá bạn đang dùng trong app
+                          color: "white",
+                          fontWeight: "bold",
+                          boxShadow: "0 4px 8px rgba(139,195,74,0.4)",
+                          "&:hover": {
+                            backgroundColor: "#7cb342 !important",
+                          },
                         },
-                      }}>
-                      {parseRoomName(room.name) || "Không có tên"}
-                    </TableCell>
+                        // Tùy chỉnh các trang thường (nếu muốn)
+                        "& .MuiPaginationItem-root": {
+                          borderRadius: "8px",
+                          margin: "0 4px",
+                          "&:hover": {
+                            backgroundColor: "#e8f5e9",
+                          },
+                        },
+                        // Tùy chỉnh nút ellipsis (...) nếu cần
+                        "& .MuiPaginationItem-ellipsis": {
+                          color: "#666",
+                        },
+                      }}
+                    />
+                  </Stack>
+                )}
+              </>
+            )}
+            {activeTab == "rooms" && (
+              <>
+                <Box sx={{ mb: 3 }}>
+                  <Stack direction='row' spacing={4} color='#555' fontSize={14}>
+                    <Box>
+                      Phê duyệt <strong>{total}</strong>
+                    </Box>
+                    <Box>
+                      Đã duyệt <strong>{active}</strong>
+                    </Box>
+                    <Box>
+                      Bị từ chối <strong>{inactive}</strong>
+                    </Box>
+                  </Stack>
+                </Box>
+                <TableContainer>
+                  <Table sx={{ minWidth: 1000 }}>
+                    <TableHead>
+                      <TableRow sx={{ bgcolor: "#f8f9fa" }}>
+                        {[
+                          "Tên loại phòng",
+                          "Trang thái",
+                          "Giá theo giờ",
+                          "Giá qua đêm",
+                          "Giá qua ngày",
+                          "",
+                        ].map((head) => (
+                          <TableCell
+                            key={head}
+                            sx={{
+                              fontWeight: 600,
+                              color: "#555",
+                              fontSize: 14,
+                            }}>
+                            {head}
+                          </TableCell>
+                        ))}
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {rooms.length === 0 ? (
+                        <TableRow>
+                          <TableCell colSpan={7} align='center' sx={{ py: 6 }}>
+                            <Typography color='#999'>
+                              Chưa có loại phòng nào
+                            </Typography>
+                          </TableCell>
+                        </TableRow>
+                      ) : (
+                        rooms.map((room: any) => (
+                          <TableRow key={room.id} hover>
+                            {/* Tên loại phòng */}
+                            <TableCell
+                              onClick={() => handleRoomClick(room)}
+                              sx={{
+                                fontWeight: 500,
+                                cursor: "pointer",
+                                "&:hover": {
+                                  textDecoration: "underline",
+                                  color: "#98B720",
+                                },
+                              }}>
+                              {parseRoomName(room.name) || "Không có tên"}
+                            </TableCell>
 
-                    {/* Trang thái */}
-                    <TableCell>
-                     {renderStatusChip(room.status)}
-                    </TableCell>
+                            {/* Trang thái */}
+                            <TableCell>
+                              {renderStatusChip(room.status)}
+                            </TableCell>
 
-                  
+                            {/* Giá theo giờ */}
+                            <TableCell>
+                              {formatPrice(room.price_hourly)}
+                            </TableCell>
 
-                    {/* Giá theo giờ */}
-                    <TableCell>{formatPrice(room.price_hourly)}</TableCell>
+                            {/* Giá qua đêm */}
+                            <TableCell>
+                              {formatPrice(room.price_overnight)}
+                            </TableCell>
 
-                    {/* Giá qua đêm */}
-                    <TableCell>{formatPrice(room.price_overnight)}</TableCell>
+                            {/* Giá qua ngày */}
+                            <TableCell>
+                              {formatPrice(room.price_daily)}
+                            </TableCell>
 
-                    {/* Giá qua ngày */}
-                    <TableCell>{formatPrice(room.price_daily)}</TableCell>
-
-                    {/* Thao tác */}
-                    <TableCell align='right'>
-                      <ActionMenu hotel={room}
-                      activeTab={activeTab}
-                              setIdHotel={setRoom}
-                              setAction={setAction}  setDeleteDialogOpen={setDeleteDialogOpen}
-                              setCancelDialogOpen={setCancelDialogOpen} />
-                    </TableCell>
-                  </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
-        </TableContainer>
-        {rooms.length !== 0 && <Stack spacing={2} sx={{ mt: 3, alignItems: "center" }}>
-              <Pagination
-                key={paginationRooms.page} // ← THÊM DÒNG NÀY ĐỂ FORCE RE-RENDER KHI PAGE THAY ĐỔI
-                count={paginationRooms.total_pages}
-                page={paginationRooms.page}
-                onChange={onPageChangeRooms}
-                siblingCount={1}
-                boundaryCount={1}
-                color='primary'
-                size={isMobile ? "medium" : "large"}
-                sx={{
-                  // Tùy chỉnh trang active
-                  "& .MuiPaginationItem-root.Mui-selected": {
-                    backgroundColor: "#98b720 !important", // Màu xanh lá bạn đang dùng trong app
-                    color: "white",
-                    fontWeight: "bold",
-                    boxShadow: "0 4px 8px rgba(139,195,74,0.4)",
-                    "&:hover": {
-                      backgroundColor: "#7cb342 !important",
-                    },
-                  },
-                  // Tùy chỉnh các trang thường (nếu muốn)
-                  "& .MuiPaginationItem-root": {
-                    borderRadius: "8px",
-                    margin: "0 4px",
-                    "&:hover": {
-                      backgroundColor: "#e8f5e9",
-                    },
-                  },
-                  // Tùy chỉnh nút ellipsis (...) nếu cần
-                  "& .MuiPaginationItem-ellipsis": {
-                    color: "#666",
-                  },
-                }}
-              />
-            </Stack>}
-            </>
-            }
-
+                            {/* Thao tác */}
+                            <TableCell align='right'>
+                              <ActionMenu
+                                hotel={room}
+                                activeTab={activeTab}
+                                setIdHotel={setRoom}
+                                setAction={setAction}
+                                setDeleteDialogOpen={setDeleteDialogOpen}
+                                setCancelDialogOpen={setCancelDialogOpen}
+                              />
+                            </TableCell>
+                          </TableRow>
+                        ))
+                      )}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
+                {rooms.length !== 0 && (
+                  <Stack spacing={2} sx={{ mt: 3, alignItems: "center" }}>
+                    <Pagination
+                      key={paginationRooms.page} // ← THÊM DÒNG NÀY ĐỂ FORCE RE-RENDER KHI PAGE THAY ĐỔI
+                      count={paginationRooms.total_pages}
+                      page={paginationRooms.page}
+                      onChange={onPageChangeRooms}
+                      siblingCount={1}
+                      boundaryCount={1}
+                      color='primary'
+                      size={isMobile ? "medium" : "large"}
+                      sx={{
+                        // Tùy chỉnh trang active
+                        "& .MuiPaginationItem-root.Mui-selected": {
+                          backgroundColor: "#98b720 !important", // Màu xanh lá bạn đang dùng trong app
+                          color: "white",
+                          fontWeight: "bold",
+                          boxShadow: "0 4px 8px rgba(139,195,74,0.4)",
+                          "&:hover": {
+                            backgroundColor: "#7cb342 !important",
+                          },
+                        },
+                        // Tùy chỉnh các trang thường (nếu muốn)
+                        "& .MuiPaginationItem-root": {
+                          borderRadius: "8px",
+                          margin: "0 4px",
+                          "&:hover": {
+                            backgroundColor: "#e8f5e9",
+                          },
+                        },
+                        // Tùy chỉnh nút ellipsis (...) nếu cần
+                        "& .MuiPaginationItem-ellipsis": {
+                          color: "#666",
+                        },
+                      }}
+                    />
+                  </Stack>
+                )}
+              </>
+            )}
           </Paper>
         </>
       )}
@@ -602,10 +648,7 @@ export default function ApprovalView({ hotels, getDataHotels, pagination,
                 mx: "auto",
                 mb: 2,
               }}>
-              <img
-                src={success}
-                alt=''
-              />
+              <img src={success} alt='' />
             </Box>
             <IconButton
               onClick={() => setDeleteDialogOpen(false)}
@@ -616,14 +659,14 @@ export default function ApprovalView({ hotels, getDataHotels, pagination,
         </DialogTitle>
         <DialogContent sx={{ textAlign: "center", px: 4, pb: 3 }}>
           <Typography fontWeight={600} fontSize='20px' mb={1}>
-              {activeTab=="manager"?" Xác nhận phê duyệt khách sạn":" Xác nhận phê duyệt loại phòng"}
-           
-
+            {activeTab == "manager"
+              ? " Xác nhận phê duyệt khách sạn"
+              : " Xác nhận phê duyệt loại phòng"}
           </Typography>
           <Typography fontSize='14px' color='#666'>
-          {activeTab=="manager"?` Hãy đảm bảo đầy đủ thông tin, giá và tình trạng sãn sàng trước khi duyệt khách sạn để tránh sai sót trong quá trình đặt phòng.`:` Hãy đảm bảo đầy đủ thông tin, giá và tình trạng sãn sàng trước khi duyệt phòng để tránh sai sót trong quá trình đặt phòng.`}
-           
-
+            {activeTab == "manager"
+              ? ` Hãy đảm bảo đầy đủ thông tin, giá và tình trạng sãn sàng trước khi duyệt khách sạn để tránh sai sót trong quá trình đặt phòng.`
+              : ` Hãy đảm bảo đầy đủ thông tin, giá và tình trạng sãn sàng trước khi duyệt phòng để tránh sai sót trong quá trình đặt phòng.`}
           </Typography>
         </DialogContent>
         <DialogActions
@@ -635,9 +678,8 @@ export default function ApprovalView({ hotels, getDataHotels, pagination,
           }}>
           <Button
             onClick={async () => {
-              handleStatusHotel("approve")
+              handleStatusHotel("approve");
             }}
-
             variant='contained'
             sx={{
               borderRadius: "24px",
@@ -646,9 +688,7 @@ export default function ApprovalView({ hotels, getDataHotels, pagination,
               "&:hover": { bgcolor: "#8ab020" },
               width: "100%",
             }}>
-
             Gửi duyệt
-
           </Button>
           <Button
             onClick={() => setDeleteDialogOpen(false)}
@@ -673,7 +713,7 @@ export default function ApprovalView({ hotels, getDataHotels, pagination,
         <DialogTitle sx={{ textAlign: "left", p: 1 }}>
           <Box sx={{ position: "relative" }}>
             <Typography fontWeight={600} fontSize='20px' mb={1}>
-            {activeTab=="manager"?`Từ chối khách sạn`:`Từ chối phòng`} 
+              {activeTab == "manager" ? `Từ chối khách sạn` : `Từ chối phòng`}
             </Typography>
             <IconButton
               onClick={() => setCancelDialogOpen(false)}
@@ -683,14 +723,12 @@ export default function ApprovalView({ hotels, getDataHotels, pagination,
           </Box>
         </DialogTitle>
         <DialogContent sx={{ pb: 3, padding: 1 }}>
-
           <Typography fontSize='14px' color='#666'>
-
-            Từ chối kinh doanh khách sạn. Bạn có thể mở kinh doanh lại trong tương lai.
+            Từ chối kinh doanh khách sạn. Bạn có thể mở kinh doanh lại trong
+            tương lai.
           </Typography>
           <TextField
             multiline
-
             rows={4}
             placeholder='Nhập nội dung từ chối loại phòng...'
             value={reason}
@@ -700,13 +738,12 @@ export default function ApprovalView({ hotels, getDataHotels, pagination,
             sx={{
               mt: 2,
               "& .MuiOutlinedInput-root": {
-
                 borderRadius: 1,
 
                 backgroundColor: "#fff",
                 "& fieldset": {
                   borderColor: "#cddc39", // Border mặc định
-                  borderWidth: "1px",     // Tăng độ dày nếu muốn nổi bật hơn
+                  borderWidth: "1px", // Tăng độ dày nếu muốn nổi bật hơn
                 },
                 "&:hover fieldset": {
                   borderColor: "#c0ca33", // Hover: đậm hơn một chút (tùy chọn)
@@ -735,7 +772,7 @@ export default function ApprovalView({ hotels, getDataHotels, pagination,
           <Button
             disabled={!reason}
             onClick={async () => {
-              handleStatusHotel("reject")
+              handleStatusHotel("reject");
             }}
             variant='contained'
             sx={{
@@ -745,7 +782,6 @@ export default function ApprovalView({ hotels, getDataHotels, pagination,
               "&:hover": { bgcolor: "#8ab020" },
               width: "100%",
             }}>
-
             Xác nhận từ chối kinh doanh
           </Button>
           <Button
