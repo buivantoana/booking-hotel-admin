@@ -129,7 +129,7 @@ function ActionMenu({
           sx={{ gap: 1.5, fontSize: 14, color: "#2e7d32" }} // Màu xanh lá đậm (success)
         >
           <CheckCircle fontSize='small' />
-          Phê duyệt khách sạn
+          {activeTab == "rooms" ? "Phê duyệt phòng" : "Phê duyệt khách sạn"}
         </MenuItem>
 
         {/* Từ chối khách sạn */}
@@ -141,7 +141,7 @@ function ActionMenu({
           sx={{ gap: 1.5, fontSize: 14, color: "#d32f2f" }} // Màu đỏ (error)
         >
           <HighlightOff fontSize='small' />
-          Từ chối khách sạn
+          {activeTab == "rooms" ? "Từ chối phòng" : "Từ chối khách sạn"}
         </MenuItem>
 
         {/* Hủy đặt phòng - giữ nguyên như code cũ của bạn */}
