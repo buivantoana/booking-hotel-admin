@@ -126,7 +126,7 @@ function ActionMenu({
             setIdHotel(hotel);
             setDeleteDialogOpen(true);
           }}
-          sx={{ gap: 1.5, fontSize: 14, color: "#2e7d32" }} // Màu xanh lá đậm (success)
+          sx={{ gap: 1.5, fontSize: 14, color: "#98b720" }} // Màu xanh lá đậm (success)
         >
           <CheckCircle fontSize='small' />
           {activeTab == "rooms" ? "Phê duyệt phòng" : "Phê duyệt khách sạn"}
@@ -134,6 +134,7 @@ function ActionMenu({
 
         {/* Từ chối khách sạn */}
         <MenuItem
+        
           onClick={() => {
             setIdHotel(hotel);
             setCancelDialogOpen(true);

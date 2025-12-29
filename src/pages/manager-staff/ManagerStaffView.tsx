@@ -105,6 +105,7 @@ function ActionMenu({
 
         {account.active ? (
           <MenuItem
+          sx={{color:"red"}}
             onClick={(e) => {
               handleClose(e);
               onToggleStatus(account, false);
@@ -114,6 +115,7 @@ function ActionMenu({
           </MenuItem>
         ) : (
           <MenuItem
+          sx={{color:"#98b720"}}
             onClick={(e) => {
               handleClose(e);
               onToggleStatus(account, true);
@@ -352,13 +354,12 @@ export default function ManagerStaffView({
           {tabs.map((tab) => (
             <Chip
               key={tab.value}
-              label={`${tab.label} ${
-                tab.value === "all"
+              label={`${tab.label} ${tab.value === "all"
                   ? accounts.length
                   : tab.value === "active"
-                  ? accounts.filter((a) => a.active).length
-                  : accounts.filter((a) => !a.active).length
-              }`}
+                    ? accounts.filter((a) => a.active).length
+                    : accounts.filter((a) => !a.active).length
+                }`}
               onClick={() => handleTabChange(tab.value)}
               sx={{
                 cursor: "pointer",
@@ -530,7 +531,7 @@ export default function ManagerStaffView({
           <Box sx={{ position: "relative" }}>
             <img src={selectedAccount?.active == 0 ? success : remove} alt='' />
             <Typography fontWeight={600} fontSize='20px' mb={1}>
-              Bạn Chắc chứ?
+         {selectedAccount?.active == 1?` Bạn muốn khóa tài khoản này?`:` Bạn muốn mở khoản này?`}  
             </Typography>
             <IconButton
               onClick={() => setConfirmOpen(false)}
@@ -541,10 +542,11 @@ export default function ManagerStaffView({
         </DialogTitle>
         <DialogContent sx={{ pb: 3, padding: 1 }}>
           <Typography fontSize='14px' textAlign={"center"} color='#666'>
-            {selectedAccount?.active == 0
-              ? `Sau khi tiếp tục hợp tác, khách sẽ nhìn thấy lại toàn bộ khách sạn của tài khoản này.
-Chủ khách sạn có thể ngừng hợp tác lại trong tương lai.`
-              : ` Khách sẽ không nhìn thấy toàn bộ khách sạn của tài khoản này sau khi bạn ngừng hợp tác khách sạn. Chủ khách sạn có thể hợp tác lại trong tương lai.`}
+            {selectedAccount?.active == 1
+              ? `Bạn có muốn khóa tài khoản này ngay bây giờ không?
+              Bạn không thể hoàn tác hành động này.`
+              : ` Bạn có muốn mở tài khoản này ngay bây giờ không?
+              Bạn không thể hoàn tác hành động này.`}
           </Typography>
         </DialogContent>
         <DialogActions
@@ -566,9 +568,8 @@ Chủ khách sạn có thể ngừng hợp tác lại trong tương lai.`
               "&:hover": { bgcolor: "#8ab020" },
               width: "100%",
             }}>
-            {selectedAccount?.active == 0
-              ? "Xác nhận tiếp tục hợp tác"
-              : "Xác nhận ngừng hợp tác"}
+            Xác nhận tiếp tục
+             
           </Button>
           <Button
             onClick={() => setConfirmOpen(false)}
@@ -646,9 +647,9 @@ const AccountModal: React.FC<AccountModalProps> = ({
 
   const handleChange =
     (field: keyof typeof formData) =>
-    (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-      setFormData({ ...formData, [field]: e.target.value });
-    };
+      (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+        setFormData({ ...formData, [field]: e.target.value });
+      };
 
   const handleRoleChange = (e: any) => {
     setFormData({ ...formData, role: e.target.value });
@@ -690,7 +691,7 @@ const AccountModal: React.FC<AccountModalProps> = ({
       console.error(error);
       alert(
         error.response?.data?.message ||
-          "Có lỗi xảy ra khi lưu thông tin tài khoản."
+        "Có lỗi xảy ra khi lưu thông tin tài khoản."
       );
     }
   };
@@ -710,61 +711,177 @@ const AccountModal: React.FC<AccountModalProps> = ({
 
       <DialogContent dividers>
         <Box display='grid' gridTemplateColumns='1fr 1fr' gap={2} mt={1}>
-          <TextField
-            label='Tên người dùng'
-            value={formData.name}
-            onChange={handleChange("name")}
-            fullWidth
-            required
-          />
-          <TextField
-            label='Email'
-            type='email'
-            value={formData.email}
-            onChange={handleChange("email")}
-            fullWidth
-            required
-          />
+          <Box>
+            <Typography variant='subtitle2' color='text.secondary' mb={0.5}>
+              Tên người dùng
+            </Typography>
+            <TextField
 
-          <TextField
-            label='Số điện thoại'
-            value={formData.phone}
-            onChange={handleChange("phone")}
-            fullWidth
-            required
-          />
+              value={formData.name}
+              onChange={handleChange("name")}
+              fullWidth
+              required
+              variant='outlined'
+              sx={{
+                "& .MuiOutlinedInput-root": {
+                  borderRadius: "16px",
+                  height: "45px",
+                  backgroundColor: "#fff",
+                  "&.Mui-focused fieldset": {
+                    borderColor: "#98b720",
+                    borderWidth: 1.5,
+                  },
+                },
+              }}
+            />
+          </Box>
+          <Box>
+            <Typography variant='subtitle2' color='text.secondary' mb={0.5}>
+              Email
+            </Typography>
+            <TextField
 
-          <FormControl fullWidth required>
-            <InputLabel>Vai trò</InputLabel>
-            <Select
-              value={formData.role}
-              onChange={handleRoleChange}
-              label='Vai trò'>
-              <MenuItem value='admin'>Admin</MenuItem>
-              <MenuItem value='accountant'>Kế toán</MenuItem>
-            </Select>
-          </FormControl>
+              type='email'
+              value={formData.email}
+              onChange={handleChange("email")}
+              fullWidth
+              required
+              variant='outlined'
+              sx={{
+                "& .MuiOutlinedInput-root": {
+                  borderRadius: "16px",
+                  height: "45px",
+                  backgroundColor: "#fff",
+                  "&.Mui-focused fieldset": {
+                    borderColor: "#98b720",
+                    borderWidth: 1.5,
+                  },
+                },
+              }}
+            />
+          </Box>
+          <Box >
+            <Typography variant='subtitle2' color='text.secondary' mb={0.5}>
+              Số điện thoại
+            </Typography>
+            <TextField
+
+              value={formData.phone}
+              onChange={handleChange("phone")}
+              fullWidth
+              required
+              variant='outlined'
+              sx={{
+                "& .MuiOutlinedInput-root": {
+                  borderRadius: "16px",
+                  height: "45px",
+                  backgroundColor: "#fff",
+                  "&.Mui-focused fieldset": {
+                    borderColor: "#98b720",
+                    borderWidth: 1.5,
+                  },
+                },
+              }}
+            />
+          </Box>
+          <Box>
+            <Typography variant='subtitle2' color='text.secondary' mb={0.5}>
+              Vai trò
+            </Typography>
+            <FormControl fullWidth required>
+
+              <Select
+                sx={{
+
+                  height: 45,
+                  borderRadius: "16px",
+                  bgcolor: "#fff",
+                  // "& .MuiOutlinedInput-notchedOutline": {
+                  //   borderColor: "#cddc39", // Màu đỏ mặc định (có thể dùng #f44336, #d32f2f...)
+                  //   borderWidth: "1px",
+                  // },
+                  "&:hover .MuiOutlinedInput-notchedOutline": {
+                    borderColor: "#cddc39", // Hover: đỏ đậm hơn
+                    borderWidth: "1px",
+                  },
+                  "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                    borderColor: "#cddc39 !important", // QUAN TRỌNG: Focus vẫn màu đỏ rực
+                    borderWidth: "1px !important",
+                  },
+                  // Tùy chọn: đổi màu mũi tên dropdown cho đồng bộ
+                  // "& .MuiSelect-icon": {
+                  //   color: "#cddc39",
+                  // },
+                  // Nếu có label, giữ màu khi focus
+                  "&.Mui-focused .MuiInputLabel-root": {
+                    color: "#cddc39",
+                  },
+                }}
+                value={formData.role}
+                onChange={handleRoleChange}
+              >
+                <MenuItem value='admin'>Admin</MenuItem>
+                <MenuItem value='accountant'>Kế toán</MenuItem>
+              </Select>
+            </FormControl>
+          </Box>
         </Box>
 
         <>
-          <TextField
-            label='Mật khẩu mới'
-            type='password'
-            value={formData.password}
-            onChange={handleChange("password")}
-            fullWidth
-            required
-            sx={{ mt: 3 }}
-          />
-          <TextField
-            label='Xác nhận mật khẩu'
-            type='password'
-            value={formData.confirmPassword}
-            onChange={handleChange("confirmPassword")}
-            fullWidth
-            required
-            sx={{ mt: 2 }}
-          />
+          <Box mt={2}>
+            <Typography variant='subtitle2' color='text.secondary' mb={0.5}>
+              Mật khẩu mới
+
+            </Typography>
+            <TextField
+
+              type='password'
+              value={formData.password}
+              onChange={handleChange("password")}
+              fullWidth
+              required
+              variant='outlined'
+              sx={{
+                "& .MuiOutlinedInput-root": {
+                  borderRadius: "16px",
+                  height: "45px",
+                  backgroundColor: "#fff",
+                  "&.Mui-focused fieldset": {
+                    borderColor: "#98b720",
+                    borderWidth: 1.5,
+                  },
+                },
+                
+              }}
+            />
+          </Box>
+          <Box mt={2}>
+            <Typography variant='subtitle2' color='text.secondary' mb={0.5}>
+              Xác nhận mật khẩu
+
+            </Typography>
+            <TextField
+
+              type='password'
+              value={formData.confirmPassword}
+              onChange={handleChange("confirmPassword")}
+              fullWidth
+              required
+              variant='outlined'
+              sx={{
+                "& .MuiOutlinedInput-root": {
+                  borderRadius: "16px",
+                  height: "45px",
+                  backgroundColor: "#fff",
+                  "&.Mui-focused fieldset": {
+                    borderColor: "#98b720",
+                    borderWidth: 1.5,
+                  },
+                },
+                
+              }}
+            />
+          </Box>
         </>
 
         <Box mt={4}>
@@ -773,10 +890,10 @@ const AccountModal: React.FC<AccountModalProps> = ({
             fullWidth
             size='large'
             sx={{
-              backgroundColor: "#8bc34a",
-              "&:hover": { backgroundColor: "#7cb342" },
+              backgroundColor: "#98b720",
+              "&:hover": { backgroundColor: "#98b720" },
               py: 1.5,
-              borderRadius: "8px",
+              borderRadius: "16px",
             }}
             onClick={handleSubmit}>
             {isEdit ? "Cập nhật thông tin" : "Thêm mới tài khoản"}

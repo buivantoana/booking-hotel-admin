@@ -27,59 +27,77 @@ import logo from "../../src/images/Frame 1321318032.png";
 export default function SidebarMenu() {
   const location = useLocation();
   const navigate = useNavigate();
+  const user = JSON.parse(localStorage.getItem("user") || "{}");
+const role = user?.role;
 
-  const menuItems = [
-    { id: "home", label: "Trang chủ", icon: <HomeOutlinedIcon />, path: "/" },
-    {
-      id: "approval",
-      label: "Phê duyệt",
-      icon: <CheckCircleOutlineIcon />,
-      path: "/approval",
-    },
-    {
-      id: "hotelManagement",
-      label: "Quản lý khách sạn",
-      icon: <HotelOutlinedIcon />,
-      path: "/manager-hotel",
-    },
-    {
-      id: "booking",
-      label: "Quản lý đặt phòng",
-      icon: <CalendarMonthOutlinedIcon />,
-      path: "/manager-bookings",
-    },
-    {
-      id: "payment",
-      label: "Quản lý thanh toán",
-      icon: <PaymentOutlinedIcon />,
-      path: "/manager-payments",
-    },
-    {
-      id: "review",
-      label: "Quản lý đánh giá",
-      icon: <StarBorderOutlinedIcon />,
-      path: "/review",
-    },
-    {
-      id: "account",
-      label: "Quản lý tài khoản",
-      icon: <AccountCircleOutlinedIcon />,
-      path: "/manager-accounts",
-    },
-    {
-      id: "staff",
-      label: "Quản lý nhân viên",
-      icon: <GroupOutlinedIcon />,
-      path: "/manager-staff",
-    },
-    {
-      id: "reconciliation",
-      label: "Quản lý đối soát",
-      icon: <InsightsOutlinedIcon />,
-      path: "/reconciliation",
-    },
-  ];
-
+const menuItems = [
+  {
+    id: "home",
+    label: "Trang chủ",
+    icon: <HomeOutlinedIcon />,
+    path: "/",
+    roles: ["admin", "super_admin"],
+  },
+  {
+    id: "approval",
+    label: "Phê duyệt",
+    icon: <CheckCircleOutlineIcon />,
+    path: "/approval",
+    roles: ["admin", "super_admin"],
+  },
+  {
+    id: "hotelManagement",
+    label: "Quản lý khách sạn",
+    icon: <HotelOutlinedIcon />,
+    path: "/manager-hotel",
+    roles: ["admin", "super_admin"],
+  },
+  {
+    id: "booking",
+    label: "Quản lý đặt phòng",
+    icon: <CalendarMonthOutlinedIcon />,
+    path: "/manager-bookings",
+    roles: ["admin", "super_admin"],
+  },
+  {
+    id: "payment",
+    label: "Quản lý thanh toán",
+    icon: <PaymentOutlinedIcon />,
+    path: "/manager-payments",
+    roles: ["admin", "super_admin"],
+  },
+  {
+    id: "review",
+    label: "Quản lý đánh giá",
+    icon: <StarBorderOutlinedIcon />,
+    path: "/review",
+    roles: ["admin", "super_admin"],
+  },
+  {
+    id: "account",
+    label: "Quản lý tài khoản",
+    icon: <AccountCircleOutlinedIcon />,
+    path: "/manager-accounts",
+    roles: ["admin", "super_admin"],
+  },
+  {
+    id: "staff",
+    label: "Quản lý nhân viên",
+    icon: <GroupOutlinedIcon />,
+    path: "/manager-staff",
+    roles: ["admin", "super_admin"],
+  },
+  {
+    id: "reconciliation",
+    label: "Quản lý đối soát",
+    icon: <InsightsOutlinedIcon />,
+    path: "/reconciliation",
+    roles: ["accountant", "admin", "super_admin"],
+  },
+];
+const filteredMenu = menuItems.filter(item =>
+  item.roles.includes(role)
+);
   return (
     <Box sx={{ position: "relative", height: "100vh" }}>
       <Box
@@ -95,8 +113,8 @@ export default function SidebarMenu() {
           <img src={logo} width={200} alt='' />
         </Box>
 
-        <List sx={{ height: "70vh", overflowY: "scroll" }}>
-          {menuItems.map((item) => {
+        <List sx={{ height: "70vh", overflowY: "auto" }}>
+          {filteredMenu.map((item) => {
             const isActive = location.pathname === item.path;
 
             return (
