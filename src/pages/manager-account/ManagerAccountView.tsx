@@ -96,6 +96,7 @@ function ActionMenu({ account, onToggleStatus, onViewDetail }) {
 
         {account.active ? (
           <MenuItem
+            sx={{color:"red"}}
             onClick={(e) => {
               handleClose(e);
               onToggleStatus(account, false);
@@ -105,6 +106,7 @@ function ActionMenu({ account, onToggleStatus, onViewDetail }) {
           </MenuItem>
         ) : (
           <MenuItem
+          sx={{color:"#98b720"}}
             onClick={(e) => {
               handleClose(e);
               onToggleStatus(account, true);
