@@ -211,7 +211,7 @@ const RegistrationForm = () => {
                 )}
               </Button>
 
-              <Typography sx={{ fontSize: "14px" }} color='text.secondary'>
+              {/* <Typography sx={{ fontSize: "14px" }} color='text.secondary'>
                 <Link
                   href='/register'
                   sx={{
@@ -222,7 +222,7 @@ const RegistrationForm = () => {
                   }}>
                   Đăng Ký trở thành đối tác Hotel Booking
                 </Link>
-              </Typography>
+              </Typography> */}
             </Box>
           </Box>
         </Grid>
