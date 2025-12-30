@@ -43,6 +43,7 @@ import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import dayjs from "dayjs";
 import edit from "../../images/brush-square.png";
 import SimpleDateSearchBar from "../../components/SimpleDateSearchBar";
+import { parseRoomName } from "../../utils/utils";
 const getRentTypeLabel = (rent_type: string) => {
   switch (rent_type) {
     case "hourly":
@@ -217,7 +218,10 @@ export default function BookingDetailView({
 
   // Xử lý thay đổi tab (status)
   const handleTabChange = (tabLabel: string) => {
-    const status = STATUS_LABEL_TO_API[tabLabel] || "all";
+    const selectedTab = tabs.find(tab => tab.label === tabLabel);
+    if (!selectedTab) return;
+
+    const status = selectedTab.value;
 
     const updatedLocalFilters = {
       ...localFilters,
@@ -226,23 +230,19 @@ export default function BookingDetailView({
 
     setLocalFilters(updatedLocalFilters);
 
-    // Format dateRange thành chuỗi cho API
-    const formatDateForAPI = (date: dayjs.Dayjs) => {
-      if (!date) {
-        return;
-      }
-      return date.format("YYYY-MM-DDTHH:mm:ssZ");
-    };
-
+    // Cập nhật filter cho controller (giữ nguyên date range hiện tại)
     const updatedFilters = {
       ...updatedLocalFilters,
-      check_in_from: formatDateForAPI(dateRange.checkIn),
-      check_in_to: formatDateForAPI(dateRange.checkOut),
+      check_in_from: dateRange?.checkIn ? formatDateForAPI(dateRange.checkIn) : "",
+      check_in_to: dateRange?.checkOut ? formatDateForAPI(dateRange.checkOut) : "",
     };
 
     onFilterChange(updatedFilters);
   };
-
+  const formatDateForAPI = (date: dayjs.Dayjs | null) => {
+    if (!date) return "";
+    return date.format("YYYY-MM-DDTHH:mm:ss+07:00"); // giữ nguyên định dạng như Controller
+  };
   // Reset filter
   const handleReset = () => {
     setLocalFilters({
@@ -306,38 +306,13 @@ export default function BookingDetailView({
 
   // Danh sách tab với số lượng
   const tabs = [
-    { label: "Tất cả", count: statusCounts["Tất cả"], value: "all" },
-    {
-      label: "Chờ nhận phòng",
-      count: statusCounts["Chờ nhận phòng"],
-      value: "pending",
-    },
-    {
-      label: "Đã nhận phòng",
-      count: statusCounts["Đã nhận phòng"],
-      value: "checked_in",
-    },
-    {
-      label: "Chờ khách xác nhận",
-      count: statusCounts["Chờ khách xác nhận"],
-      value: "confirmed",
-    },
-    { label: "Đã hủy", count: statusCounts["Đã hủy"], value: "cancelled" },
-    {
-      label: "Không nhận phòng",
-      count: statusCounts["Không nhận phòng"],
-      value: "no_show",
-    },
-    {
-      label: "Hoàn thành",
-      count: statusCounts["Hoàn thành"],
-      value: "checked_out",
-    },
-    {
-      label: "Chờ Hotel Booking xử lý",
-      count: statusCounts["Chờ Hotel Booking xử lý"],
-      value: "pending",
-    },
+    { label: "Tất cả", value: "all" },
+    { label: "Chờ khách xác nhận", value: "pending" },
+    { label: "Chờ nhận phòng", value: "confirmed" },
+    { label: "Đã nhận phòng", value: "checked_in" },
+    { label: "Đã trả phòng", value: "checked_out" },
+    { label: "Đã huỷ", value: "cancelled" },
+    { label: "Không nhận phòng", value: "no_show" },
   ];
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
@@ -541,12 +516,12 @@ export default function BookingDetailView({
 
             {/* Chip */}
             <Stack direction='row' flexWrap='wrap' gap={1.5} mt={3}>
-              {tabs.map((tab) => {
+            {tabs.map((tab) => {
                 const isActive = localFilters.status === tab.value;
                 return (
                   <Chip
                     key={tab.label}
-                    label={`${tab.label} ${tab.count}`}
+                    label={tab.label}  // Chỉ hiển thị label, không có count
                     onClick={() => handleTabChange(tab.label)}
                     sx={{
                       cursor: "pointer",
@@ -571,6 +546,9 @@ export default function BookingDetailView({
                 <TableRow sx={{ backgroundColor: "#f5f5f5" }}>
                   <TableCell>
                     <strong>Mã đặt phòng</strong>
+                  </TableCell>
+                  <TableCell>
+                    <strong> Tên khách sạn </strong>
                   </TableCell>
                   <TableCell>
                     <strong>Tổng số tiền thanh toán</strong>
@@ -637,6 +615,9 @@ export default function BookingDetailView({
                           }}>
                           {row.code}
                         </TableCell>
+                        <TableCell>
+                            {parseRoomName(row.hotel_name)}
+                          </TableCell>
                         <TableCell>
                           <div>{row.total_price.toLocaleString()}đ</div>
                           <div style={{ marginTop: 8 }}>
