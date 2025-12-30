@@ -75,14 +75,6 @@ export default function ManagerPaymentView({
 }) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
-  const [fromDate, setFromDate] = useState<dayjs.Dayjs | null>(null);
-  const [toDate, setToDate] = useState<dayjs.Dayjs | null>(null);
-  const [openNote, setOpenNote] = useState(false);
-  const [idBooking, setIdBooking] = useState(null);
-  const [openCancel, setOpenCancel] = useState(false);
-  const [openAccepp, setOpenAccepp] = useState(false);
-
-  const [openCheckin, setOpenCheckin] = useState(false);
   const [openDetail, setOpenDetail] = useState(false);
   const [selectedBooking, setSelectedBooking] = useState(null);
   const [localFilters, setLocalFilters] = useState({
@@ -125,7 +117,10 @@ export default function ManagerPaymentView({
 
   // Xử lý thay đổi tab (status)
   const handleTabChange = (tabLabel: string) => {
-    const status = STATUS_LABEL_TO_API[tabLabel] || "all";
+    const selectedTab = tabs.find(tab => tab.label === tabLabel);
+    if (!selectedTab) return;
+
+    const status = selectedTab.value;
 
     const updatedLocalFilters = {
       ...localFilters,
@@ -134,21 +129,18 @@ export default function ManagerPaymentView({
 
     setLocalFilters(updatedLocalFilters);
 
-    // Format dateRange thành chuỗi cho API
-    const formatDateForAPI = (date: dayjs.Dayjs) => {
-      if (!date) {
-        return;
-      }
-      return date.format("YYYY-MM-DDTHH:mm:ssZ");
-    };
-
+    // Cập nhật filter cho controller (giữ nguyên date range hiện tại)
     const updatedFilters = {
       ...updatedLocalFilters,
-      check_in_from: formatDateForAPI(dateRange.checkIn),
-      check_in_to: formatDateForAPI(dateRange.checkOut),
+      check_in_from: dateRange?.checkIn ? formatDateForAPI(dateRange.checkIn) : "",
+      check_in_to: dateRange?.checkOut ? formatDateForAPI(dateRange.checkOut) : "",
     };
 
     onFilterChange(updatedFilters);
+  };
+  const formatDateForAPI = (date: dayjs.Dayjs | null) => {
+    if (!date) return "";
+    return date.format("YYYY-MM-DDTHH:mm:ss+07:00"); // giữ nguyên định dạng như Controller
   };
 
   // Reset filter
@@ -168,67 +160,15 @@ export default function ManagerPaymentView({
     onResetFilter();
   };
 
-  // Đếm số lượng booking theo status
-  const countByStatus = () => {
-    const counts: Record<string, number> = {
-      "Tất cả": Payment.length, // Tổng số luôn là toàn bộ
-      "Thành công": 0,
-      "Thất bại": 0,
-      "Chờ xử lý": 0,
-      "Hoàn trả": 0,
-    };
-  
-    Payment.forEach((payment) => {
-      switch (payment.status) {
-        case "paid":
-          counts["Thành công"]++;
-          break;
-        case "failed":
-          counts["Thất bại"]++;
-          break;
-        case "pending":
-          counts["Chờ xử lý"]++;
-          break;
-        case "refunded":
-          counts["Hoàn trả"]++;
-          break;
-        default:
-          // Nếu có status lạ, vẫn tính vào tổng nhưng không tăng riêng
-          break;
-      }
-    });
-  
-    return counts;
-  };
 
-  const statusCounts = countByStatus();
 
-  // Danh sách tab với số lượng
   const tabs = [
-    { label: "Tất cả", count: statusCounts["Tất cả"], value: "all" },
-    {
-      label: "Thành công",
-      count: statusCounts["Thành công"],
-      value: "pending",
-    },
-    {
-      label: "Thất bại",
-      count: statusCounts["Thất bại"],
-      value: "failed",
-    },
-    {
-      label: "Chờ xử lý",
-      count: statusCounts["Chờ xử lý"],
-      value: "pending",
-    },
-
-    {
-      label: "Hoàn trả",
-      count: statusCounts["Hoàn trả"],
-      value: "no_show",
-    },
+    { label: "Tất cả", value: "all" },
+    { label: "Thành công", value: "paid" },
+    { label: "Thất bại", value: "failed" },
+    { label: "Chờ xử lý", value: "pending" },
+    { label: "Hoàn trả", value: "refunded" },
   ];
-  
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
       <Box sx={{ p: { xs: 2, sm: 3, md: 4 }, minHeight: "100vh" }}>
@@ -389,12 +329,12 @@ export default function ManagerPaymentView({
 
             {/* Chip */}
             <Stack direction='row' flexWrap='wrap' gap={1.5} mt={3}>
-              {tabs.map((tab) => {
+            {tabs.map((tab) => {
                 const isActive = localFilters.status === tab.value;
                 return (
                   <Chip
                     key={tab.label}
-                    label={`${tab.label} ${tab.count}`}
+                    label={tab.label}  // Chỉ hiển thị label, không có count
                     onClick={() => handleTabChange(tab.label)}
                     sx={{
                       cursor: "pointer",

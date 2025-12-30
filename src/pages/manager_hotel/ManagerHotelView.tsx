@@ -183,8 +183,12 @@ export default function ManagerHotelView({
   hotels,
   getDataHotels,
   pagination,
-
+  locations,
   onPageChange,
+  filters,
+  onFilterChange,
+  onResetFilter,
+  loading
 }) {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [action, setAction] = useState("manager");
@@ -201,11 +205,43 @@ export default function ManagerHotelView({
   const [reason, setReason] = useState("");
   const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
   const [approveDialogOpen, setApproveDialogOpen] = useState(false);
+  const [localFilters, setLocalFilters] = useState({
+    name: "",
+    cooperation_type:"",
+    city: "",
+   
+  });
+  useEffect(() => {
+    if (filters) {
+      setLocalFilters({
+        name: filters.name || "",
+        cooperation_type: filters.cooperation_type || "",
+        city: filters.city || "",
+      });
+    }
+  }, [filters]);
   useEffect(() => {
     if (searchParams.get("id")) {
       getHotelDetail();
     }
   }, [searchParams]);
+  const handleSearch = () => {
+    // Format dateRange thành chuỗi cho API
+    const updatedFilters = {
+      ...localFilters,
+    };
+
+    onFilterChange(updatedFilters);
+  };
+
+  const handleReset = () => {
+    setLocalFilters({
+      name: "",
+    cooperation_type:"",
+    city: "",
+    });
+    onResetFilter();
+  };
   const getHotelDetail = async () => {
     try {
       let result = await getHotel(searchParams.get("id"));
@@ -490,6 +526,13 @@ export default function ManagerHotelView({
                 <Typography sx={{ mb: 1.5 }}>Tìm kiếm</Typography>
                 <TextField
                   placeholder='Tên khách sạn'
+                  value={localFilters.name}
+                  onChange={(e) =>
+                    setLocalFilters({
+                      ...localFilters,
+                      name: e.target.value,
+                    })
+                  }
                   InputProps={{
                     startAdornment: (
                       <InputAdornment position='start'>
@@ -530,6 +573,13 @@ export default function ManagerHotelView({
                 <Select
                   displayEmpty
                   defaultValue=''
+                  value={localFilters.city}
+                  onChange={(e) =>
+                    setLocalFilters({
+                      ...localFilters,
+                      city: e.target.value,
+                    })
+                  }
                   sx={{
                     width: 200,
                     height: 40,
@@ -560,9 +610,12 @@ export default function ManagerHotelView({
                   <MenuItem value='' disabled>
                     Chọn địa điểm
                   </MenuItem>
-                  <MenuItem value='theogio'>Theo giờ</MenuItem>
-                  <MenuItem value='quadem'>Qua đêm</MenuItem>
-                  <MenuItem value='quangay'>Qua ngày</MenuItem>{" "}
+
+                  {locations?.map((item)=>{
+                    return <MenuItem value={item.id}>{item?.name?.vi}</MenuItem>
+                  })}
+                  
+                  
                   {/* Nếu cần thêm */}
                 </Select>
               </Box>
@@ -573,6 +626,13 @@ export default function ManagerHotelView({
                 <Select
                   displayEmpty
                   defaultValue=''
+                  value={localFilters.cooperation_type}
+                  onChange={(e) =>
+                    setLocalFilters({
+                      ...localFilters,
+                      cooperation_type: e.target.value,
+                    })
+                  }
                   sx={{
                     width: 200,
                     height: 40,
@@ -602,9 +662,9 @@ export default function ManagerHotelView({
                   <MenuItem value='' disabled>
                     Chọn tình trạng
                   </MenuItem>
-                  <MenuItem value='theogio'>Theo giờ</MenuItem>
-                  <MenuItem value='quadem'>Qua đêm</MenuItem>
-                  <MenuItem value='quangay'>Qua ngày</MenuItem>{" "}
+                  <MenuItem value='listing'>Listing</MenuItem>
+                  <MenuItem value='contract'>Contract</MenuItem>
+                 
                   {/* Nếu cần thêm */}
                 </Select>
               </Box>
@@ -613,6 +673,7 @@ export default function ManagerHotelView({
               <Stack direction='row' alignItems={"end"} spacing={1}>
                 <Button
                   variant='contained'
+                  onClick={handleSearch}
                   sx={{
                     borderRadius: "24px",
                     bgcolor: "#98b720",
@@ -623,6 +684,7 @@ export default function ManagerHotelView({
                 </Button>
                 <Button
                   variant='outlined'
+                  onClick={handleReset}
                   sx={{
                     borderRadius: "24px",
                     height: 40,
@@ -671,6 +733,13 @@ export default function ManagerHotelView({
                   </TableRow>
                 </TableHead>
                 <TableBody>
+                {loading ? (
+                  <TableRow>
+                    <TableCell colSpan={8} align='center'>
+                      <Typography>Đang tải...</Typography>
+                    </TableCell>
+                  </TableRow>
+                ) :<>
                   {hotels.length === 0 ? (
                     <TableRow>
                       <TableCell colSpan={8} align='center'>
@@ -728,6 +797,8 @@ export default function ManagerHotelView({
                       ))}
                     </>
                   )}
+                  
+                  </>}
                 </TableBody>
               </Table>
             </TableContainer>

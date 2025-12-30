@@ -241,7 +241,7 @@ export default function ManagerReviewView({
   };
 
   const tabs = [
-    { label: "Hiện thị", value: "false" },
+    { label: "Hiển thị", value: "false" },
     { label: "Đã ẩn", value: "true" },
   ];
 
