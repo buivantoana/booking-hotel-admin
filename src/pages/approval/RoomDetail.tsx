@@ -39,9 +39,9 @@ export default function RoomDetail({
   const [searchParams, setSearchParams] = useSearchParams();
   // Parse dữ liệu từ room props
   const parsedName = room ? parseRoomName(room.name) || "Không có tên" : "";
-  const parsedNameHotel = detailHotel
-    ? parseRoomName(detailHotel.name) || "Không có tên"
-    : "";
+  const parsedNameHotel = room
+    ? parseRoomName(room.hotel_name) || "Không có tên"
+    : parseRoomName(detailHotel.name);
   const parsedBedType = room?.bed_type
     ? typeof room.bed_type === "string"
       ? JSON.parse(room.bed_type).vi

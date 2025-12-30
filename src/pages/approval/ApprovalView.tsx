@@ -505,6 +505,7 @@ export default function ApprovalView({
                       <TableRow sx={{ bgcolor: "#f8f9fa" }}>
                         {[
                           "Tên loại phòng",
+                          "Tên khách sạn",
                           "Trang thái",
                           "Giá theo giờ",
                           "Giá qua đêm",
@@ -547,6 +548,15 @@ export default function ApprovalView({
                                 },
                               }}>
                               {parseRoomName(room.name) || "Không có tên"}
+                            </TableCell>
+                            <TableCell
+                             
+                              sx={{
+                                fontWeight: 500,
+                                cursor: "pointer",
+                               
+                              }}>
+                              {parseRoomName(room.hotel_name) || "Không có tên"}
                             </TableCell>
 
                             {/* Trang thái */}

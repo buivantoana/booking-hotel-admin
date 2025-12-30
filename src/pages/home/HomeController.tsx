@@ -228,12 +228,12 @@ const HomeController = (props: Props) => {
       };
 
       let result_start = await getEventMonth(params_start);
-      if (result_start?.revenue_by_day) {
-        result.start = result_start?.revenue_by_day;
+      if (result_start?.daily) {
+        result.start = result_start?.daily;
       }
       let result_end = await getEventMonth(params_end);
-      if (result_end?.revenue_by_day) {
-        result.end = result_end?.revenue_by_day;
+      if (result_end?.daily) {
+        result.end = result_end?.daily;
       }
       setDataEventBooked(result);
     } catch (error) {
@@ -286,12 +286,12 @@ const HomeController = (props: Props) => {
       };
 
       let result_start = await getEventMonth(params_start);
-      if (result_start?.revenue_by_day) {
-        result.start = result_start?.revenue_by_day;
+      if (result_start?.daily) {
+        result.start = result_start?.daily;
       }
       let result_end = await getEventMonth(params_end);
-      if (result_end?.revenue_by_day) {
-        result.end = result_end?.revenue_by_day;
+      if (result_end?.daily) {
+        result.end = result_end?.daily;
       }
       setDataEventCheckin(result);
     } catch (error) {
@@ -413,6 +413,8 @@ const HomeController = (props: Props) => {
   console.log("AAA dataGeneralMethod", dataGeneralMethod);
   console.log("AAA dataGeneralRoomType", dataGeneralRoomType);
   console.log("AAA dataEventVisit", dataEventVisit);
+  console.log("AAA dataEventBooked", dataEventBooked);
+  console.log("AAA dataEventCheckin", dataEventCheckin);
   return (
     <HomeView
       setDateRange={setDateRange}

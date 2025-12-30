@@ -658,7 +658,7 @@ export default function ManagerHotelView({
                       "Hình thức",
                       "Tình trạng",
                       "Địa chỉ",
-                      "Mail",
+                     
                       "Số điện thoại",
                       "",
                     ].map((head) => (
@@ -704,12 +704,10 @@ export default function ManagerHotelView({
                             {parseLang(hotel.address)}
                           </TableCell>
 
-                          <TableCell>{hotel.commission_rate}%</TableCell>
+                          {/* <TableCell>{hotel?.email}</TableCell> */}
 
                           <TableCell>
-                            {hotel.cooperation_type === "listing"
-                              ? "Online"
-                              : "Cả hai"}
+                            {hotel.phone }
                           </TableCell>
 
                           <TableCell>
