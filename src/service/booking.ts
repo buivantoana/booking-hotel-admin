@@ -208,7 +208,7 @@ export async function listBookingSettlement(id: any,query) {
 export async function getbankPartner(id) {
   try {
     let token = localStorage.getItem("access_token");
-    const response = await api.get(`/partner/settlement/banks?hotel_id=${id}`, {
+    const response = await api.get(`/admin/settlement/banks?hotel_id=${id}`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },

@@ -19,7 +19,7 @@ const ReconciliationController = (props: Props) => {
   const [filters, setFilters] = useState({
     hotel_name: "",
     period_month: "",
-    status: "draft", // "" = all, or 'draft', 'pending', 'confirmed', 'paid'
+    status: "all", // "" = all, or 'draft', 'pending', 'confirmed', 'paid'
   });
   useEffect(() => {
     fetchSettlements(1); // Reset về trang 1 khi đổi khách sạn
@@ -39,7 +39,7 @@ const ReconciliationController = (props: Props) => {
       if (filterParams.period_month) {
         query.period_month = filterParams.period_month;
       }
-      if (filterParams.status) {
+      if (filterParams.status&& filterParams.status !== "all") {
         query.status = filterParams.status;
       }
 

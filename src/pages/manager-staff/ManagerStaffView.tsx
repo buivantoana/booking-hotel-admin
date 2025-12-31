@@ -170,10 +170,7 @@ export default function ManagerStaffView({
     acc.email.toLowerCase().includes(localFilters.email.toLowerCase())
   );
 
-  const paginatedAccounts = displayedAccounts.slice(
-    (pagination.page - 1) * pagination.limit,
-    pagination.page * pagination.limit
-  );
+  
 
   const handleSearch = () => {
     onFilterChange({ email: localFilters.email });
@@ -410,7 +407,7 @@ export default function ManagerStaffView({
                   </TableCell>
                 </TableRow>
               ) : (
-                paginatedAccounts.map((account, index) => (
+                displayedAccounts.map((account, index) => (
                   <TableRow
                     key={account.id}
                     hover

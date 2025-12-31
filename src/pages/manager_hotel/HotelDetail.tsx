@@ -291,12 +291,13 @@ function HotelInfoDetail({
 
             {/* Cột 2: Thông tin chính */}
             <Grid item xs={12} md={4}>
-              <Typography fontSize={16} fontWeight={600} color='#333' mb={2}>
-                Tên khách sạn/ Mã
+              <Typography fontSize={16} fontWeight={600} color='#333' >
+                Tên khách sạn
               </Typography>
-              <Typography fontSize={18} fontWeight={700} color='#222' mb={3}>
-                {hotelName} ({detailHotel.id || "ABC_123456"})
-              </Typography>
+              <Typography fontSize={15} color='#333' mb={2}>
+              {hotelName} ({detailHotel.id || "ABC_123456"})
+                  </Typography>
+           
 
               <Stack spacing={2.5}>
                 <Box>
@@ -372,7 +373,7 @@ function HotelInfoDetail({
                     Mô tả
                   </Typography>
                   <Typography fontSize={15} color='#333'>
-                    {hotelDescription ? "Có" : "Không"}
+                    {hotelDescription }
                   </Typography>
                 </Box>
 

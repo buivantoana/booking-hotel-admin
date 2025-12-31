@@ -11,7 +11,7 @@ const ManagerStaffController = () => {
   const [Account, setAccount] = useState<any[]>([]);
   const [pagination, setPagination] = useState({
     page: 1,
-    limit: 10,
+    limit: 2,
     total: 0,
     total_pages: 0,
   });

@@ -1,10 +1,11 @@
 "use client";
 
-import { KeyboardArrowLeft, Search as SearchIcon } from "@mui/icons-material";
+import { Close, KeyboardArrowLeft, Search as SearchIcon } from "@mui/icons-material";
 import {
   Box,
   Button,
   Chip,
+  DialogTitle,
   Divider,
   FormControl,
   IconButton,
@@ -28,7 +29,7 @@ import {
 import React, { useEffect, useState } from "react";
 import { getbankPartner, listBookingSettlement } from "../../service/booking";
 import { sendPay, sendPubllish } from "../../service/hotel";
-
+import success from "../../images/Frame.png";
 const parseLang = (value: string, lang = "vi") => {
   try {
     const obj = JSON.parse(value);
@@ -67,6 +68,8 @@ export default function ReconciliationView({
   onFilterChange,
   onResetFilter,
 }) {
+  const [approveDialogOpen, setApproveDialogOpen] = useState(false);
+  const [action, setAction] = useState("manager");
   const isMobile = useMediaQuery((theme: Theme) =>
     theme.breakpoints.down("sm")
   );
@@ -76,7 +79,7 @@ export default function ReconciliationView({
   const [localFilters, setLocalFilters] = useState({
     hotel_name: "",
     period_month: "",
-    status: "",
+    status: "all",
   });
   const [currentTab, setCurrentTab] = useState("");
 
@@ -113,7 +116,7 @@ export default function ReconciliationView({
   };
 
   const handleReset = () => {
-    setLocalFilters({ hotel_name: "", period_month: "", status: "draft" });
+    setLocalFilters({ hotel_name: "", period_month: "", status: "all" });
     onResetFilter();
   };
 
@@ -125,6 +128,7 @@ export default function ReconciliationView({
   };
 
   const tabs = [
+    { label: "Tất cả", value: "all" },
     { label: "Chưa đối soát", value: "draft" },
     { label: "Chờ xác nhận", value: "pending" }, // ← THÊM DÒNG NÀY
     { label: "Chờ thanh toán", value: "confirmed" }, // ← GIỮ NGUYÊN
@@ -135,24 +139,105 @@ export default function ReconciliationView({
     try {
       let result = await sendPubllish(id || settlement?.id);
       console.log("AA result ", result);
-      fetchSettlements();
-      setSettlement(null);
+      if(result?.confirm_deadline_days){
+        fetchSettlements();
+        setSettlement(null);
+        setApproveDialogOpen(false)
+        toast.success(result?.message)
+      }else{
+        toast.error(result?.message)
+      }
     } catch (error) {
       console.log(error);
     }
   };
   return (
     <>
-      {settlement && (
+    <Dialog
+        open={approveDialogOpen}
+        onClose={() => setApproveDialogOpen(false)}
+        maxWidth='xs'
+        fullWidth
+        PaperProps={{ sx: { borderRadius: "16px" } }}>
+        <DialogTitle sx={{ textAlign: "center", pt: 4, pb: 1 }}>
+          <Box sx={{ position: "relative" }}>
+            <Box
+              sx={{
+                width: 64,
+                height: 64,
+                bgcolor: "#ffebee",
+                borderRadius: "50%",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                mx: "auto",
+                mb: 2,
+              }}>
+              <img src={success} alt='' />
+            </Box>
+            <IconButton
+              onClick={() => setApproveDialogOpen(false)}
+              sx={{ position: "absolute", top: -40, left: -30 }}>
+              <Close />
+            </IconButton>
+          </Box>
+        </DialogTitle>
+        <DialogContent sx={{ textAlign: "center", px: 4, pb: 3 }}>
+          <Typography fontWeight={600} fontSize='20px' mb={1}>
+            Xác nhận gửi
+          </Typography>
+          <Typography fontSize='14px' color='#666'>
+            Hãy đảm bảo đầy đủ thông tin, trước khi
+           gửi đối soát để tránh sai sót.
+          </Typography>
+        </DialogContent>
+        <DialogActions
+          sx={{
+            justifyContent: "center",
+            pb: 4,
+            gap: 2,
+            flexDirection: "column",
+          }}>
+          <Button
+            onClick={async () => {
+              handlePublish()
+            }}
+            variant='contained'
+            sx={{
+              borderRadius: "24px",
+              textTransform: "none",
+              bgcolor: "#98b720",
+              "&:hover": { bgcolor: "#8ab020" },
+              width: "100%",
+            }}>
+            Gửi 
+          </Button>
+          <Button
+            onClick={() => setApproveDialogOpen(false)}
+            variant='outlined'
+            sx={{
+              borderRadius: "24px",
+              textTransform: "none",
+              borderColor: "#ddd",
+              color: "#666",
+              width: "100%",
+            }}>
+            Hủy bỏ
+          </Button>
+        </DialogActions>
+      </Dialog>
+      {action == "detail" && (
         <HotelDetailFinal
           settlement={settlement}
           setSettlement={setSettlement}
           isMobile={isMobile}
           fetchSettlements={fetchSettlements}
           handlePublish={handlePublish}
+          setApproveDialogOpen={setApproveDialogOpen}
+          setAction={setAction}
         />
       )}
-      {!settlement && (
+      {action=="manager" && (
         <Box
           sx={{
             p: { xs: 2, sm: 3, md: 4 },
@@ -386,7 +471,9 @@ export default function ReconciliationView({
                         <TableRow
                           key={row.id}
                           hover
-                          onClick={() => setSettlement(dataSettlement[i])}>
+                          onClick={() => {
+                            setAction("detail")
+                            setSettlement(dataSettlement[i])}}>
                           <TableCell>{row.id}</TableCell>
                           <TableCell>
                             <Typography
@@ -439,7 +526,11 @@ export default function ReconciliationView({
                             {row.status_key == "draft" ? (
                               <Button
                                 variant={"contained"}
-                                onClick={() => handlePublish(row._id)}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setSettlement(dataSettlement[i])
+                                setApproveDialogOpen(true)
+                                }}
                                 size='small'
                                 sx={{
                                   borderRadius: 3,
@@ -538,6 +629,8 @@ function HotelDetailFinal({
   settlement,
   fetchSettlements,
   handlePublish,
+  setApproveDialogOpen,
+  setAction
 }) {
   const [dataSettlementBooking, setDataSettlementBooking] = useState([]);
   const [openModalPay, setOpenModalPay] = useState(false);
@@ -648,6 +741,7 @@ function HotelDetailFinal({
             gap={0.5}>
             <KeyboardArrowLeft
               onClick={() => {
+                setAction("manager")
                 setSettlement(null);
               }}
               sx={{ fontSize: 32, mr: 1, cursor: "pointer" }}
@@ -768,7 +862,7 @@ function HotelDetailFinal({
                   <Button
                     variant='contained'
                     onClick={() => {
-                      handlePublish();
+                      setApproveDialogOpen(true)
                     }}
                     sx={{
                       bgcolor: "#98B720",

@@ -46,6 +46,7 @@ import RoomDetail from "./RoomDetail";
 import { getHotel, toggleHotels, updateHotelStatus } from "../../service/hotel";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { toast } from "react-toastify";
+import { parseRoomName } from "../../utils/utils";
 
 // Component menu thao tác
 function ActionMenu({
@@ -220,6 +221,12 @@ export default function ManagerHotelView({
       });
     }
   }, [filters]);
+  const displayedHotels = hotels.filter((hotel) =>
+  parseRoomName(hotel.name).toLowerCase().includes(localFilters.name.toLowerCase())
+);
+
+
+
   useEffect(() => {
     if (searchParams.get("id")) {
       getHotelDetail();
@@ -748,7 +755,7 @@ export default function ManagerHotelView({
                     </TableRow>
                   ) : (
                     <>
-                      {hotels?.map((hotel, index) => (
+                      {displayedHotels?.map((hotel, index) => (
                         <TableRow hover key={hotel.id}>
                           <TableCell>{index + 1}</TableCell>
 

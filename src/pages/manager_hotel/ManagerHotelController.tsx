@@ -6,8 +6,8 @@ import { useSearchParams } from "react-router-dom";
 type Props = {};
 
 const ManagerHotelController = (props: Props) => {
-  const [hotels,setHotels] = useState([])
-  const [locations,setLocations] = useState([])
+  const [hotels, setHotels] = useState([])
+  const [locations, setLocations] = useState([])
   const [pagination, setPagination] = useState({
     page: 1,
     limit: 10,
@@ -19,38 +19,38 @@ const ManagerHotelController = (props: Props) => {
   const [filters, setFilters] = useState({
     name: "",
     cooperation_type: "",
-    city:""
+    city: ""
   });
-  useEffect(()=>{
+  useEffect(() => {
     const defaultFilters = {
       name: "",
       cooperation_type: "",
-      city:""
+      city: ""
     };
     console.log("Initial filters:", defaultFilters);
     setFilters(defaultFilters);
-    getDataHotels(1,defaultFilters)
+    getDataHotels(1, defaultFilters)
     getLocations()
-  },[])
+  }, [])
 
-  const getLocations = async()=>{
+  const getLocations = async () => {
     try {
       let result = await getLocation()
-      console.log("AAA getLocations",result)
-      if(result?.locations){
+      console.log("AAA getLocations", result)
+      if (result?.locations) {
         setLocations(result?.locations)
       }
     } catch (error) {
       console.log(error)
     }
   }
-  const getDataHotels =async (page, filterParams = filters) => {
+  const getDataHotels = async (page, filterParams = filters) => {
     setLoading(true)
     try {
       let query: any = {
         page: page || pagination.page,
         limit: pagination.limit,
-        partner_email: searchParams.get("email") 
+        partner_email: searchParams.get("email")
       };
 
 
@@ -61,7 +61,7 @@ const ManagerHotelController = (props: Props) => {
         query.city = filterParams.city;
       }
 
-      if (filterParams.cooperation_type ) {
+      if (filterParams.cooperation_type) {
         query.cooperation_type = filterParams.cooperation_type;
       }
       const params1 = new URLSearchParams();
@@ -74,7 +74,7 @@ const ManagerHotelController = (props: Props) => {
       let result = await getHotels(queryString1);
 
 
-      if(result?.hotels){
+      if (result?.hotels) {
         setHotels(result?.hotels)
         setPagination({
           page: result.page || 1,
@@ -92,40 +92,40 @@ const ManagerHotelController = (props: Props) => {
   const handleFilterChange = (newFilters: any) => {
     console.log("Filter changed to:", newFilters);
     setFilters(newFilters);
-   
-      getDataHotels( 1, newFilters);
-    
+
+    getDataHotels(1, newFilters);
+
   };
 
   // Reset filter
   const handleResetFilter = () => {
-  
+
     const resetFilters = {
       name: "",
       cooperation_type: "",
-      city:""
+      city: ""
     };
     setFilters(resetFilters);
-      getDataHotels(1, resetFilters);
-    
+    getDataHotels(1, resetFilters);
+
   };
 
   const handlePageChange = (
     event: React.ChangeEvent<unknown>,
     newPage: number
   ) => {
-   
-    getDataHotels( newPage);
-    
+
+    getDataHotels(newPage);
+
   };
-  return <ManagerHotelView hotels={hotels}  pagination={pagination}
-  locations={locations}
-  filters={filters}
-      onFilterChange={handleFilterChange}
-      onResetFilter={handleResetFilter}
-  onPageChange={handlePageChange}
-  loading={loading}
-  getDataHotels={getDataHotels} />;
+  return <ManagerHotelView hotels={hotels} pagination={pagination}
+    locations={locations}
+    filters={filters}
+    onFilterChange={handleFilterChange}
+    onResetFilter={handleResetFilter}
+    onPageChange={handlePageChange}
+    loading={loading}
+    getDataHotels={getDataHotels} />;
 };
 
 export default ManagerHotelController;
