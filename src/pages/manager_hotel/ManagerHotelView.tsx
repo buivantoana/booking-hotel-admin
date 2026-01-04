@@ -618,11 +618,12 @@ export default function ManagerHotelView({
                     Chọn địa điểm
                   </MenuItem>
 
-                  {locations?.map((item)=>{
-                    return <MenuItem value={item.id}>{item?.name?.vi}</MenuItem>
+                  {locations?.map((item) => {
+                    return (
+                      <MenuItem value={item.id}>{item?.name?.vi}</MenuItem>
+                    );
                   })}
-                  
-                  
+
                   {/* Nếu cần thêm */}
                 </Select>
               </Box>
@@ -671,7 +672,7 @@ export default function ManagerHotelView({
                   </MenuItem>
                   <MenuItem value='listing'>Listing</MenuItem>
                   <MenuItem value='contract'>Contract</MenuItem>
-                 
+
                   {/* Nếu cần thêm */}
                 </Select>
               </Box>
@@ -727,7 +728,7 @@ export default function ManagerHotelView({
                       "Hình thức",
                       "Tình trạng",
                       "Địa chỉ",
-                     
+
                       "Số điện thoại",
                       "",
                     ].map((head) => (
@@ -740,72 +741,71 @@ export default function ManagerHotelView({
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                {loading ? (
-                  <TableRow>
-                    <TableCell colSpan={8} align='center'>
-                      <Typography>Đang tải...</Typography>
-                    </TableCell>
-                  </TableRow>
-                ) :<>
-                  {hotels.length === 0 ? (
+                  {loading ? (
                     <TableRow>
                       <TableCell colSpan={8} align='center'>
-                        <Typography>Không có dữ liệu</Typography>
+                        <Typography>Đang tải...</Typography>
                       </TableCell>
                     </TableRow>
                   ) : (
                     <>
-                      {displayedHotels?.map((hotel, index) => (
-                        <TableRow hover key={hotel.id}>
-                          <TableCell>{index + 1}</TableCell>
-
-                          <TableCell
-                            onClick={() => {
-                              navigate(`/manager-hotel?id=${hotel.id}`);
-                              setAction("edit_detail");
-                            }}
-                            sx={{ fontWeight: 500, cursor: "pointer" }}>
-                            {parseLang(hotel.name)}
-                          </TableCell>
-
-                          <TableCell>
-                            {renderCooperationChip(hotel.cooperation_type)}
-                          </TableCell>
-
-                          <TableCell>
-                            {renderStatusChip(hotel.status)}
-                          </TableCell>
-
-                          <TableCell sx={{ maxWidth: 280 }}>
-                            {parseLang(hotel.address)}
-                          </TableCell>
-
-                          {/* <TableCell>{hotel?.email}</TableCell> */}
-
-                          <TableCell>
-                            {hotel.phone }
-                          </TableCell>
-
-                          <TableCell>
-                            {["pending", "active", "terminated"].includes(
-                              hotel.status
-                            ) && (
-                              <ActionMenu
-                                hotel={hotel}
-                                setAction={setAction}
-                                setIdHotel={setIdHotel}
-                                setDeleteDialogOpen={setDeleteDialogOpen}
-                                setApproveDialogOpen={setApproveDialogOpen}
-                                setCancelDialogOpen={setCancelDialogOpen}
-                              />
-                            )}
+                      {hotels.length === 0 ? (
+                        <TableRow>
+                          <TableCell colSpan={8} align='center'>
+                            <Typography>Không có dữ liệu</Typography>
                           </TableCell>
                         </TableRow>
-                      ))}
+                      ) : (
+                        <>
+                          {hotels?.map((hotel, index) => (
+                            <TableRow hover key={hotel.id}>
+                              <TableCell>{index + 1}</TableCell>
+
+                              <TableCell
+                                onClick={() => {
+                                  navigate(`/manager-hotel?id=${hotel.id}`);
+                                  setAction("edit_detail");
+                                }}
+                                sx={{ fontWeight: 500, cursor: "pointer" }}>
+                                {parseLang(hotel.name)}
+                              </TableCell>
+
+                              <TableCell>
+                                {renderCooperationChip(hotel.cooperation_type)}
+                              </TableCell>
+
+                              <TableCell>
+                                {renderStatusChip(hotel.status)}
+                              </TableCell>
+
+                              <TableCell sx={{ maxWidth: 280 }}>
+                                {parseLang(hotel.address)}
+                              </TableCell>
+
+                              {/* <TableCell>{hotel?.email}</TableCell> */}
+
+                              <TableCell>{hotel.phone}</TableCell>
+
+                              <TableCell>
+                                {["pending", "active", "terminated"].includes(
+                                  hotel.status
+                                ) && (
+                                  <ActionMenu
+                                    hotel={hotel}
+                                    setAction={setAction}
+                                    setIdHotel={setIdHotel}
+                                    setDeleteDialogOpen={setDeleteDialogOpen}
+                                    setApproveDialogOpen={setApproveDialogOpen}
+                                    setCancelDialogOpen={setCancelDialogOpen}
+                                  />
+                                )}
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </>
+                      )}
                     </>
                   )}
-                  
-                  </>}
                 </TableBody>
               </Table>
             </TableContainer>

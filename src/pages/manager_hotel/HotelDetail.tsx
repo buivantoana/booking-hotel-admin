@@ -184,7 +184,10 @@ function HotelInfoDetail({
 
   const images = detailHotel.images ? JSON.parse(detailHotel.images) : [];
   const mainImage = images[0] || null;
-  const thumbImages = images.slice(0, 3);
+  const images_detail = detailHotel.verify_images
+    ? JSON.parse(detailHotel.verify_images)
+    : [];
+  const thumbImages = images_detail.slice(0, 3);
 
   return (
     <Paper
@@ -291,13 +294,12 @@ function HotelInfoDetail({
 
             {/* Cột 2: Thông tin chính */}
             <Grid item xs={12} md={4}>
-              <Typography fontSize={16} fontWeight={600} color='#333' >
+              <Typography fontSize={16} fontWeight={600} color='#333'>
                 Tên khách sạn
               </Typography>
               <Typography fontSize={15} color='#333' mb={2}>
-              {hotelName} ({detailHotel.id || "ABC_123456"})
-                  </Typography>
-           
+                {hotelName}
+              </Typography>
 
               <Stack spacing={2.5}>
                 <Box>
@@ -332,16 +334,7 @@ function HotelInfoDetail({
                     Nhận thông báo đặt phòng
                   </Typography>
                   <Typography fontSize={15} color='#333'>
-                    Tin nhắn/ Email/ Ứng dụng Hotel Booking
-                  </Typography>
-                </Box>
-
-                <Box>
-                  <Typography fontSize={14} color='black' fontWeight={600}>
-                    Phương thức thanh toán
-                  </Typography>
-                  <Typography fontSize={15} color='#333'>
-                    Trả trước/ Trả tại khách sạn
+                    Qua số điện thoại
                   </Typography>
                 </Box>
 
@@ -350,7 +343,7 @@ function HotelInfoDetail({
                     Tỉnh thành/ Quận
                   </Typography>
                   <Typography fontSize={15} color='#333'>
-                    Bắc Từ Liêm/ TP.Hà Nội
+                    {detailHotel.city}
                   </Typography>
                 </Box>
 
@@ -373,7 +366,7 @@ function HotelInfoDetail({
                     Mô tả
                   </Typography>
                   <Typography fontSize={15} color='#333'>
-                    {hotelDescription }
+                    {hotelDescription}
                   </Typography>
                 </Box>
 
@@ -390,15 +383,9 @@ function HotelInfoDetail({
                   <Typography fontSize={14} color='black' fontWeight={600}>
                     Tình trạng hợp tác
                   </Typography>
-                  <Chip
-                    label='Listing'
-                    size='small'
-                    sx={{
-                      bgcolor: "#f3e5f5",
-                      color: "#7b1fa2",
-                      fontWeight: 600,
-                    }}
-                  />
+                  <Typography fontSize={15} color='#333'>
+                    Listing
+                  </Typography>
                 </Box>
 
                 <Box>

@@ -1,6 +1,10 @@
 "use client";
 
-import { Close, KeyboardArrowLeft, Search as SearchIcon } from "@mui/icons-material";
+import {
+  Close,
+  KeyboardArrowLeft,
+  Search as SearchIcon,
+} from "@mui/icons-material";
 import {
   Box,
   Button,
@@ -128,7 +132,7 @@ export default function ReconciliationView({
   };
 
   const tabs = [
-    { label: "Tất cả", value: "all" },
+    { label: "Toàn bộ", value: "all" },
     { label: "Chưa đối soát", value: "draft" },
     { label: "Chờ xác nhận", value: "pending" }, // ← THÊM DÒNG NÀY
     { label: "Chờ thanh toán", value: "confirmed" }, // ← GIỮ NGUYÊN
@@ -139,13 +143,13 @@ export default function ReconciliationView({
     try {
       let result = await sendPubllish(id || settlement?.id);
       console.log("AA result ", result);
-      if(result?.confirm_deadline_days){
+      if (result?.confirm_deadline_days) {
         fetchSettlements();
         setSettlement(null);
-        setApproveDialogOpen(false)
-        toast.success(result?.message)
-      }else{
-        toast.error(result?.message)
+        setApproveDialogOpen(false);
+        toast.success(result?.message);
+      } else {
+        toast.error(result?.message);
       }
     } catch (error) {
       console.log(error);
@@ -153,7 +157,7 @@ export default function ReconciliationView({
   };
   return (
     <>
-    <Dialog
+      <Dialog
         open={approveDialogOpen}
         onClose={() => setApproveDialogOpen(false)}
         maxWidth='xs'
@@ -187,8 +191,8 @@ export default function ReconciliationView({
             Xác nhận gửi
           </Typography>
           <Typography fontSize='14px' color='#666'>
-            Hãy đảm bảo đầy đủ thông tin, trước khi
-           gửi đối soát để tránh sai sót.
+            Hãy đảm bảo đầy đủ thông tin, trước khi gửi đối soát để tránh sai
+            sót.
           </Typography>
         </DialogContent>
         <DialogActions
@@ -200,7 +204,7 @@ export default function ReconciliationView({
           }}>
           <Button
             onClick={async () => {
-              handlePublish()
+              handlePublish();
             }}
             variant='contained'
             sx={{
@@ -210,7 +214,7 @@ export default function ReconciliationView({
               "&:hover": { bgcolor: "#8ab020" },
               width: "100%",
             }}>
-            Gửi 
+            Gửi
           </Button>
           <Button
             onClick={() => setApproveDialogOpen(false)}
@@ -237,7 +241,7 @@ export default function ReconciliationView({
           setAction={setAction}
         />
       )}
-      {action=="manager" && (
+      {action == "manager" && (
         <Box
           sx={{
             p: { xs: 2, sm: 3, md: 4 },
@@ -394,18 +398,34 @@ export default function ReconciliationView({
               {tabs.map((tab) => (
                 <Button
                   key={tab.value}
-                  variant={currentTab === tab.value ? "contained" : "outlined"}
+                  variant={
+                    currentTab === tab.value ||
+                    (tab.value === "all" && currentTab === "")
+                      ? "contained"
+                      : "outlined"
+                  }
                   size='small'
                   onClick={() => handleTabChange(tab.value)}
                   sx={{
                     borderRadius: 3,
                     textTransform: "none",
-                    color: currentTab === tab.value ? "white" : "#98b720",
+                    color:
+                      currentTab === tab.value ||
+                      (tab.value === "all" && currentTab === "")
+                        ? "white"
+                        : "#98b720",
                     borderColor: "#98b720",
                     bgcolor:
-                      currentTab === tab.value ? "#98b720" : "transparent",
+                      currentTab === tab.value ||
+                      (tab.value === "all" && currentTab === "")
+                        ? "#98b720"
+                        : "transparent",
                     "&:hover": {
-                      bgcolor: currentTab === tab.value ? "#1565c0" : "#f5f5f5",
+                      bgcolor:
+                        currentTab === tab.value ||
+                        (tab.value === "all" && currentTab === "")
+                          ? "#1565c0"
+                          : "#f5f5f5",
                     },
                   }}>
                   {tab.label}
@@ -472,8 +492,9 @@ export default function ReconciliationView({
                           key={row.id}
                           hover
                           onClick={() => {
-                            setAction("detail")
-                            setSettlement(dataSettlement[i])}}>
+                            setAction("detail");
+                            setSettlement(dataSettlement[i]);
+                          }}>
                           <TableCell>{row.id}</TableCell>
                           <TableCell>
                             <Typography
@@ -528,8 +549,8 @@ export default function ReconciliationView({
                                 variant={"contained"}
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  setSettlement(dataSettlement[i])
-                                setApproveDialogOpen(true)
+                                  setSettlement(dataSettlement[i]);
+                                  setApproveDialogOpen(true);
                                 }}
                                 size='small'
                                 sx={{
@@ -630,7 +651,7 @@ function HotelDetailFinal({
   fetchSettlements,
   handlePublish,
   setApproveDialogOpen,
-  setAction
+  setAction,
 }) {
   const [dataSettlementBooking, setDataSettlementBooking] = useState([]);
   const [openModalPay, setOpenModalPay] = useState(false);
@@ -741,7 +762,7 @@ function HotelDetailFinal({
             gap={0.5}>
             <KeyboardArrowLeft
               onClick={() => {
-                setAction("manager")
+                setAction("manager");
                 setSettlement(null);
               }}
               sx={{ fontSize: 32, mr: 1, cursor: "pointer" }}
@@ -862,7 +883,7 @@ function HotelDetailFinal({
                   <Button
                     variant='contained'
                     onClick={() => {
-                      setApproveDialogOpen(true)
+                      setApproveDialogOpen(true);
                     }}
                     sx={{
                       bgcolor: "#98B720",

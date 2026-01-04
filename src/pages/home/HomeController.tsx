@@ -131,42 +131,42 @@ const HomeController = (props: Props) => {
         start: [],
         end: [],
       };
-      const startOfLastWeek = dayjs().subtract(1, "week").startOf("isoWeek"); // Thứ 2 tuần trước
-      const endOfLastWeek = dayjs().subtract(1, "week").endOf("isoWeek"); // Chủ nhật tuần trước
+      const endOfThisWeek = dayjs().hour(23).minute(59).second(59);
 
-      let params_start = {
-        start_time: startOfLastWeek
-          .hour(0)
-          .minute(0)
-          .second(0)
-          .format("YYYY-MM-DDTHH:mm:ssZ"),
-        end_time: endOfLastWeek
-          .hour(23)
-          .minute(59)
-          .second(59)
-          .format("YYYY-MM-DDTHH:mm:ssZ"),
-        rent_type: roomTypeGeneral,
-      };
+      const startOfThisWeek = dayjs()
+        .subtract(6, "day")
+        .hour(0)
+        .minute(0)
+        .second(0);
 
-      // === TUẦN NÀY ===
-      const startOfThisWeek = dayjs().startOf("isoWeek"); // Thứ 2 tuần này
-      const endOfThisWeek = dayjs().endOf("isoWeek"); // Chủ nhật tuần này
-      // Nếu muốn chỉ lấy đến ngày hiện tại (thay vì cả chủ nhật tương lai), dùng dòng dưới:
-      // const endOfThisWeek = dayjs().hour(23).minute(59).second(59);
+      // =========================
+      // TUẦN TRƯỚC: trừ tiếp 7 ngày
+      // =========================
+      const endOfLastWeek = startOfThisWeek
+        .subtract(1, "day")
+        .hour(23)
+        .minute(59)
+        .second(59);
 
-      let params_end = {
-        start_time: startOfThisWeek
-          .hour(0)
-          .minute(0)
-          .second(0)
-          .format("YYYY-MM-DDTHH:mm:ssZ"),
-        end_time: endOfThisWeek
-          .hour(23)
-          .minute(59)
-          .second(59)
-          .format("YYYY-MM-DDTHH:mm:ssZ"),
-        rent_type: roomTypeGeneral,
-      };
+      const startOfLastWeek = endOfLastWeek
+        .subtract(6, "day")
+        .hour(0)
+        .minute(0)
+        .second(0);
+
+      // ===== params TUẦN TRƯỚC =====
+      let params_start = new URLSearchParams({
+        start_time: startOfLastWeek.format("YYYY-MM-DDTHH:mm:ssZ"),
+        end_time: endOfLastWeek.format("YYYY-MM-DDTHH:mm:ssZ"),
+        rent_type: roomTypeCheckin,
+      });
+
+      // ===== params TUẦN NÀY =====
+      let params_end = new URLSearchParams({
+        start_time: startOfThisWeek.format("YYYY-MM-DDTHH:mm:ssZ"),
+        end_time: endOfThisWeek.format("YYYY-MM-DDTHH:mm:ssZ"),
+        rent_type: roomTypeCheckin,
+      });
 
       let result_start = await getGeneralWeekRoomType(params_start);
       if (result_start?.revenue_by_day) {
@@ -188,44 +188,44 @@ const HomeController = (props: Props) => {
         start: [],
         end: [],
       };
-      const startOfLastWeek = dayjs().subtract(1, "week").startOf("isoWeek"); // Thứ 2 tuần trước
-      const endOfLastWeek = dayjs().subtract(1, "week").endOf("isoWeek"); // Chủ nhật tuần trước
+      const endOfThisWeek = dayjs().hour(23).minute(59).second(59);
 
-      let params_start = {
-        start_time: startOfLastWeek
-          .hour(0)
-          .minute(0)
-          .second(0)
-          .format("YYYY-MM-DDTHH:mm:ssZ"),
-        end_time: endOfLastWeek
-          .hour(23)
-          .minute(59)
-          .second(59)
-          .format("YYYY-MM-DDTHH:mm:ssZ"),
-        rent_type: roomTypeBooking,
+      const startOfThisWeek = dayjs()
+        .subtract(6, "day")
+        .hour(0)
+        .minute(0)
+        .second(0);
+
+      // =========================
+      // TUẦN TRƯỚC: trừ tiếp 7 ngày
+      // =========================
+      const endOfLastWeek = startOfThisWeek
+        .subtract(1, "day")
+        .hour(23)
+        .minute(59)
+        .second(59);
+
+      const startOfLastWeek = endOfLastWeek
+        .subtract(6, "day")
+        .hour(0)
+        .minute(0)
+        .second(0);
+
+      // ===== params TUẦN TRƯỚC =====
+      let params_start = new URLSearchParams({
+        start_time: startOfLastWeek.format("YYYY-MM-DDTHH:mm:ssZ"),
+        end_time: endOfLastWeek.format("YYYY-MM-DDTHH:mm:ssZ"),
+        rent_type: roomTypeCheckin,
         event_type: "booked",
-      };
+      });
 
-      // === TUẦN NÀY ===
-      const startOfThisWeek = dayjs().startOf("isoWeek"); // Thứ 2 tuần này
-      const endOfThisWeek = dayjs().endOf("isoWeek"); // Chủ nhật tuần này
-      // Nếu muốn chỉ lấy đến ngày hiện tại (thay vì cả chủ nhật tương lai), dùng dòng dưới:
-      // const endOfThisWeek = dayjs().hour(23).minute(59).second(59);
-
-      let params_end = {
-        start_time: startOfThisWeek
-          .hour(0)
-          .minute(0)
-          .second(0)
-          .format("YYYY-MM-DDTHH:mm:ssZ"),
-        end_time: endOfThisWeek
-          .hour(23)
-          .minute(59)
-          .second(59)
-          .format("YYYY-MM-DDTHH:mm:ssZ"),
-        rent_type: roomTypeBooking,
+      // ===== params TUẦN NÀY =====
+      let params_end = new URLSearchParams({
+        start_time: startOfThisWeek.format("YYYY-MM-DDTHH:mm:ssZ"),
+        end_time: endOfThisWeek.format("YYYY-MM-DDTHH:mm:ssZ"),
+        rent_type: roomTypeCheckin,
         event_type: "booked",
-      };
+      });
 
       let result_start = await getEventMonth(params_start);
       if (result_start?.daily) {
@@ -246,44 +246,44 @@ const HomeController = (props: Props) => {
         start: [],
         end: [],
       };
-      const startOfLastWeek = dayjs().subtract(1, "week").startOf("isoWeek"); // Thứ 2 tuần trước
-      const endOfLastWeek = dayjs().subtract(1, "week").endOf("isoWeek"); // Chủ nhật tuần trước
+      const endOfThisWeek = dayjs().hour(23).minute(59).second(59);
 
-      let params_start = {
-        start_time: startOfLastWeek
-          .hour(0)
-          .minute(0)
-          .second(0)
-          .format("YYYY-MM-DDTHH:mm:ssZ"),
-        end_time: endOfLastWeek
-          .hour(23)
-          .minute(59)
-          .second(59)
-          .format("YYYY-MM-DDTHH:mm:ssZ"),
+      const startOfThisWeek = dayjs()
+        .subtract(6, "day")
+        .hour(0)
+        .minute(0)
+        .second(0);
+
+      // =========================
+      // TUẦN TRƯỚC: trừ tiếp 7 ngày
+      // =========================
+      const endOfLastWeek = startOfThisWeek
+        .subtract(1, "day")
+        .hour(23)
+        .minute(59)
+        .second(59);
+
+      const startOfLastWeek = endOfLastWeek
+        .subtract(6, "day")
+        .hour(0)
+        .minute(0)
+        .second(0);
+
+      // ===== params TUẦN TRƯỚC =====
+      let params_start = new URLSearchParams({
+        start_time: startOfLastWeek.format("YYYY-MM-DDTHH:mm:ssZ"),
+        end_time: endOfLastWeek.format("YYYY-MM-DDTHH:mm:ssZ"),
         rent_type: roomTypeCheckin,
         event_type: "checked_in",
-      };
+      });
 
-      // === TUẦN NÀY ===
-      const startOfThisWeek = dayjs().startOf("isoWeek"); // Thứ 2 tuần này
-      const endOfThisWeek = dayjs().endOf("isoWeek"); // Chủ nhật tuần này
-      // Nếu muốn chỉ lấy đến ngày hiện tại (thay vì cả chủ nhật tương lai), dùng dòng dưới:
-      // const endOfThisWeek = dayjs().hour(23).minute(59).second(59);
-
-      let params_end = {
-        start_time: startOfThisWeek
-          .hour(0)
-          .minute(0)
-          .second(0)
-          .format("YYYY-MM-DDTHH:mm:ssZ"),
-        end_time: endOfThisWeek
-          .hour(23)
-          .minute(59)
-          .second(59)
-          .format("YYYY-MM-DDTHH:mm:ssZ"),
+      // ===== params TUẦN NÀY =====
+      let params_end = new URLSearchParams({
+        start_time: startOfThisWeek.format("YYYY-MM-DDTHH:mm:ssZ"),
+        end_time: endOfThisWeek.format("YYYY-MM-DDTHH:mm:ssZ"),
         rent_type: roomTypeCheckin,
         event_type: "checked_in",
-      };
+      });
 
       let result_start = await getEventMonth(params_start);
       if (result_start?.daily) {
