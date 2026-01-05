@@ -160,6 +160,7 @@ export default function ApprovalView({
   paginationRooms,
   onPageChangeRooms,
   rooms,
+  locations
 }) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
@@ -284,6 +285,7 @@ export default function ApprovalView({
           setDeleteDialogOpen={setDeleteDialogOpen}
           setCancelDialogOpen={setCancelDialogOpen}
           room={room}
+          locations={locations}
         />
       )}
       {action == "manager" && (

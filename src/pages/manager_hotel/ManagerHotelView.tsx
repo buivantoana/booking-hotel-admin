@@ -43,7 +43,7 @@ import remove from "../../images/delete.png";
 import success from "../../images/Frame.png";
 import HotelDetail from "./HotelDetail";
 import RoomDetail from "./RoomDetail";
-import { getHotel, toggleHotels, updateHotelStatus } from "../../service/hotel";
+import { getHotel, toggleHotels, updateHotelStatus, updateRoomStatus } from "../../service/hotel";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import { parseRoomName } from "../../utils/utils";
@@ -190,8 +190,11 @@ export default function ManagerHotelView({
   onFilterChange,
   onResetFilter,
   loading
+
 }) {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [cancelDialogOpenRoom, setCancelDialogOpenRoom] = useState(false);
+  const [approveDialogOpenRoom, setApproveDialogOpenRoom] = useState(false);
   const [action, setAction] = useState("manager");
   const [idHotel, setIdHotel] = useState(null);
   const [room, setRoom] = useState(null);
@@ -208,9 +211,9 @@ export default function ManagerHotelView({
   const [approveDialogOpen, setApproveDialogOpen] = useState(false);
   const [localFilters, setLocalFilters] = useState({
     name: "",
-    cooperation_type:"",
+    cooperation_type: "",
     city: "",
-   
+
   });
   useEffect(() => {
     if (filters) {
@@ -222,8 +225,8 @@ export default function ManagerHotelView({
     }
   }, [filters]);
   const displayedHotels = hotels.filter((hotel) =>
-  parseRoomName(hotel.name).toLowerCase().includes(localFilters.name.toLowerCase())
-);
+    parseRoomName(hotel.name).toLowerCase().includes(localFilters.name.toLowerCase())
+  );
 
 
 
@@ -244,8 +247,8 @@ export default function ManagerHotelView({
   const handleReset = () => {
     setLocalFilters({
       name: "",
-    cooperation_type:"",
-    city: "",
+      cooperation_type: "",
+      city: "",
     });
     onResetFilter();
   };
@@ -267,7 +270,7 @@ export default function ManagerHotelView({
       let result;
       if (status == "reject") {
         result = await updateHotelStatus(detailHotel?.id || idHotel.id, {
-          action: "terminate",
+          action: detailHotel?.status == "pending" ? "reject" : "terminate",
           reason,
         });
         setCancelDialogOpen(false);
@@ -305,8 +308,204 @@ export default function ManagerHotelView({
       console.log(error);
     }
   };
+  const handleStatusHotelRoom = async (status) => {
+    try {
+      let result;
+      if (status == "reject") {
+        result = await updateRoomStatus(room.id, {
+          action:room?.status=="pending"?"reject": "terminate",
+          reason,
+        });
+        setCancelDialogOpenRoom(false);
+      }
+      if (status == "approve") {
+        result = await updateRoomStatus(room.id, {
+          action: "approve",
+        });
+        setApproveDialogOpenRoom(false);
+      }
+
+      if (result?.message && !result?.code) {
+        setReason("");
+        toast.success(result?.message);
+        getHotelDetail();
+      } else {
+        toast.error(result?.message);
+      }
+      console.log("AAA result", result);
+    } catch (error) {
+      console.log(error);
+    }
+  };
   return (
     <Box sx={{ p: { xs: 2, sm: 3, md: 4 }, minHeight: "100vh" }}>
+        <Dialog
+        open={approveDialogOpenRoom}
+        onClose={() => setApproveDialogOpenRoom(false)}
+        maxWidth='xs'
+        fullWidth
+        PaperProps={{ sx: { borderRadius: "16px" } }}>
+        <DialogTitle sx={{ textAlign: "center", pt: 4, pb: 1 }}>
+          <Box sx={{ position: "relative" }}>
+            <Box
+              sx={{
+                width: 64,
+                height: 64,
+                bgcolor: "#ffebee",
+                borderRadius: "50%",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                mx: "auto",
+                mb: 2,
+              }}>
+              <img src={success} alt='' />
+            </Box>
+            <IconButton
+              onClick={() => setApproveDialogOpenRoom(false)}
+              sx={{ position: "absolute", top: -40, left: -30 }}>
+              <Close />
+            </IconButton>
+          </Box>
+        </DialogTitle>
+        <DialogContent sx={{ textAlign: "center", px: 4, pb: 3 }}>
+          <Typography fontWeight={600} fontSize='20px' mb={1}>
+            Xác nhận mở lại phòng
+          </Typography>
+          <Typography fontSize='14px' color='#666'>
+            Hãy đảm bảo đầy đủ thông tin, giá và tình trạng sãn sàng trước khi
+            duyệt khách sạn để tránh sai sót trong quá trình đặt phòng.
+          </Typography>
+        </DialogContent>
+        <DialogActions
+          sx={{
+            justifyContent: "center",
+            pb: 4,
+            gap: 2,
+            flexDirection: "column",
+          }}>
+          <Button
+            onClick={async () => {
+              handleStatusHotelRoom("approve");
+            }}
+            variant='contained'
+            sx={{
+              borderRadius: "24px",
+              textTransform: "none",
+              bgcolor: "#98b720",
+              "&:hover": { bgcolor: "#8ab020" },
+              width: "100%",
+            }}>
+            Gửi duyệt
+          </Button>
+          <Button
+            onClick={() => setApproveDialogOpenRoom(false)}
+            variant='outlined'
+            sx={{
+              borderRadius: "24px",
+              textTransform: "none",
+              borderColor: "#ddd",
+              color: "#666",
+              width: "100%",
+            }}>
+            Hủy bỏ
+          </Button>
+        </DialogActions>
+      </Dialog>
+      <Dialog
+        open={cancelDialogOpenRoom}
+        onClose={() => setCancelDialogOpenRoom(false)}
+        maxWidth='xs'
+        fullWidth
+        PaperProps={{ sx: { borderRadius: "16px" } }}>
+        <DialogTitle sx={{ textAlign: "left", p: 1 }}>
+          <Box sx={{ position: "relative" }}>
+            <Typography fontWeight={600} fontSize='20px' mb={1}>
+              Từ chối phòng
+            </Typography>
+            <IconButton
+              onClick={() => setCancelDialogOpenRoom(false)}
+              sx={{ position: "absolute", top: -5, right: 0 }}>
+              <Close />
+            </IconButton>
+          </Box>
+        </DialogTitle>
+        <DialogContent sx={{ pb: 3, padding: 1 }}>
+          <Typography fontSize='14px' color='#666'>
+            Từ chối kinh doanh khách sạn. Bạn có thể mở kinh doanh lại trong
+            tương lai.
+          </Typography>
+          <TextField
+            multiline
+            rows={4}
+            placeholder='Nhập nội dung từ chối loại phòng...'
+            value={reason}
+            onChange={(e) => setReason(e.target.value)}
+            variant='outlined'
+            fullWidth
+            sx={{
+              mt: 2,
+              "& .MuiOutlinedInput-root": {
+                borderRadius: 1,
+
+                backgroundColor: "#fff",
+                "& fieldset": {
+                  borderColor: "#cddc39", // Border mặc định
+                  borderWidth: "1px", // Tăng độ dày nếu muốn nổi bật hơn
+                },
+                "&:hover fieldset": {
+                  borderColor: "#c0ca33", // Hover: đậm hơn một chút (tùy chọn)
+                  borderWidth: "1px",
+                },
+                "&.Mui-focused fieldset": {
+                  borderColor: "#cddc39 !important", // QUAN TRỌNG: Khi focus vẫn giữ màu này
+                  borderWidth: "1px",
+                  boxShadow: "0 0 0 3px rgba(205, 220, 57, 0.2)", // Hiệu ứng glow nhẹ (tùy chọn)
+                },
+                // Tắt màu legend primary khi focus (nếu có label)
+                "&.Mui-focused .MuiInputLabel-root": {
+                  color: "#666",
+                },
+              },
+            }}
+          />
+        </DialogContent>
+        <DialogActions
+          sx={{
+            justifyContent: "center",
+            pb: 4,
+            gap: 2,
+            flexDirection: "column",
+          }}>
+          <Button
+            disabled={!reason}
+            onClick={async () => {
+              handleStatusHotelRoom("reject");
+            }}
+            variant='contained'
+            sx={{
+              borderRadius: "24px",
+              textTransform: "none",
+              bgcolor: "#98b720",
+              "&:hover": { bgcolor: "#8ab020" },
+              width: "100%",
+            }}>
+            Xác nhận từ chối kinh doanh
+          </Button>
+          <Button
+            onClick={() => setCancelDialogOpenRoom(false)}
+            variant='outlined'
+            sx={{
+              borderRadius: "24px",
+              textTransform: "none",
+              borderColor: "#ddd",
+              color: "#666",
+              width: "100%",
+            }}>
+            Hủy bỏ
+          </Button>
+        </DialogActions>
+      </Dialog>
       <Dialog
         open={approveDialogOpen}
         onClose={() => setApproveDialogOpen(false)}
@@ -480,6 +679,11 @@ export default function ManagerHotelView({
           detailHotel={detailHotel}
           room={room}
           onNext={setAction}
+          setDeleteDialogOpen={setDeleteDialogOpen}
+          deleteDialogOpen={deleteDialogOpen}
+         
+          setCancelDialogOpenRoom={setCancelDialogOpenRoom}
+          setApproveDialogOpenRoom={setApproveDialogOpenRoom}
         />
       )}
 
@@ -492,6 +696,9 @@ export default function ManagerHotelView({
           setAction={setAction}
           setCancelDialogOpen={setCancelDialogOpen}
           setApproveDialogOpen={setApproveDialogOpen}
+          locations={locations}
+          setCancelDialogOpenRoom={setCancelDialogOpenRoom}
+          setApproveDialogOpenRoom={setApproveDialogOpenRoom}
         />
       )}
       {action == "manager" && (
@@ -790,15 +997,15 @@ export default function ManagerHotelView({
                                 {["pending", "active", "terminated"].includes(
                                   hotel.status
                                 ) && (
-                                  <ActionMenu
-                                    hotel={hotel}
-                                    setAction={setAction}
-                                    setIdHotel={setIdHotel}
-                                    setDeleteDialogOpen={setDeleteDialogOpen}
-                                    setApproveDialogOpen={setApproveDialogOpen}
-                                    setCancelDialogOpen={setCancelDialogOpen}
-                                  />
-                                )}
+                                    <ActionMenu
+                                      hotel={hotel}
+                                      setAction={setAction}
+                                      setIdHotel={setIdHotel}
+                                      setDeleteDialogOpen={setDeleteDialogOpen}
+                                      setApproveDialogOpen={setApproveDialogOpen}
+                                      setCancelDialogOpen={setCancelDialogOpen}
+                                    />
+                                  )}
                               </TableCell>
                             </TableRow>
                           ))}

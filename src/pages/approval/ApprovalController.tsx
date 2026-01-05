@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from "react";
 import ApprovalView from "./ApprovalView";
-import { getHotels, getRooms } from "../../service/hotel";
+import { getHotels, getLocations, getRooms } from "../../service/hotel";
 
 type Props = {};
 
 const ApprovalController = (props: Props) => {
   const [hotels,setHotels] = useState([])
+  const [locations, setLocations] = useState<Location[]>([]);
   const [pagination, setPagination] = useState({
     page: 1,
     limit: 10,
@@ -99,12 +100,31 @@ const ApprovalController = (props: Props) => {
     getDataRooms( newPage);
     
   };
+  useEffect(() => {
+    const fetchLocations = async () => {
+      try {
+     
+        const result = await getLocations();
+        // Giả sử API trả về { locations: [...] }
+        if (result?.locations && Array.isArray(result.locations)) {
+          setLocations(result.locations);
+        }
+      } catch (error) {
+        console.error("Error fetching locations:", error);
+      } finally {
+        
+      }
+    };
+
+    fetchLocations();
+  }, []);
   return <ApprovalView hotels={hotels}
   pagination={pagination}
   onPageChange={handlePageChange}
   paginationRooms={paginationRooms}
   onPageChangeRooms={handlePageChangeRooms}
   rooms={rooms}
+  locations={locations}
   getDataRooms={getDataRooms}
   getDataHotels={getDataHotels} />;
 };

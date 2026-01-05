@@ -206,7 +206,23 @@ input[type="number"] {
 .more-select div {
   padding: 10px;
 }
+.MuiCheckbox-root {
+  padding: 8px !important;
+  border-radius: 8px !important;
+}
 
+.MuiCheckbox-root.Mui-checked {
+  color: #7CB518 !important;
+  background-color: rgba(124, 181, 24, 0.16) !important;
+}
+
+.MuiCheckbox-root.Mui-checked:hover {
+  background-color: rgba(124, 181, 24, 0.24) !important;
+}
+
+.MuiCheckbox-root:hover {
+  background-color: rgba(124, 181, 24, 0.08) !important;
+}
 /* --- CUSTOM THUMB DOTS STYLE --- */
 /* .slick-thumb {
   display: flex !important;

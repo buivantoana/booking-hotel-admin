@@ -1,10 +1,12 @@
-import { Box, Typography, Button, Chip } from "@mui/material";
-import { ArrowBackIos, Edit as EditIcon, Star } from "@mui/icons-material";
+import { Box, Typography, Button, Chip, IconButton } from "@mui/material";
+import { ArrowBackIos, ArrowBackIosNew, ArrowForwardIos, Edit as EditIcon, Star } from "@mui/icons-material";
 import { Grid, Paper, Stack, Divider } from "@mui/material";
 import ManagerRooms from "./ManagerRooms";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { getHotel } from "../../service/hotel";
+import Slider from "react-slick";
+import { facilities } from "../../utils/utils";
 
 export default function HotelDetail({
   setAction,
@@ -14,6 +16,7 @@ export default function HotelDetail({
   setDeleteDialogOpen,
   setCancelDialogOpen,
   room,
+  locations
 }) {
   return (
     <Box sx={{ minHeight: "100vh" }}>
@@ -31,6 +34,7 @@ export default function HotelDetail({
         setCancelDialogOpen={setCancelDialogOpen}
         getHotelDetail={getHotelDetail}
         setRoom={setRoom}
+        locations={locations}
       />
     </Box>
   );
@@ -111,6 +115,7 @@ function HotelInfoDetail({
   getHotelDetail,
   setDeleteDialogOpen,
   setCancelDialogOpen,
+  locations
 }) {
   const [action, setAction] = useState("manager");
   const parseVi = (str) => {
@@ -137,13 +142,31 @@ function HotelInfoDetail({
   const rentTypes = detailHotel.rent_types
     ? JSON.parse(detailHotel.rent_types)
     : {};
-  const rentStr = `08:00 ~ 22:00 / ${rentTypes.overnight?.from || "22:00"} ~ ${
-    rentTypes.overnight?.to || "08:00"
-  } / ${rentTypes.daily?.from || "14:00"} ~ ${rentTypes.daily?.to || "12:00"}`;
+  const rentStr = `08:00 ~ 22:00 / ${rentTypes.overnight?.from || "22:00"} ~ ${rentTypes.overnight?.to || "08:00"
+    } / ${rentTypes.daily?.from || "14:00"} ~ ${rentTypes.daily?.to || "12:00"}`;
 
   const images = detailHotel.images ? JSON.parse(detailHotel.images) : [];
-  const mainImage = images[0] || null;
-  const thumbImages = images.slice(0, 3);
+  const imagesVerify = detailHotel.verify_images ? JSON.parse(detailHotel.verify_images) : [];
+  const thumbImages = Array.from(new Set([...images, ...imagesVerify]));
+  const [navMain, setNavMain] = useState(null);
+  const [navThumb, setNavThumb] = useState(null);
+
+  const sliderMain = useRef();
+  const sliderThumb = useRef();
+
+  const settingsMain = {
+    asNavFor: navThumb,
+    arrows: false,
+    infinite: true,
+  };
+
+  const settingsThumb = {
+    asNavFor: navMain,
+    slidesToShow: 3,
+    swipeToSlide: true,
+    focusOnSelect: true,
+    centerMode: false,
+  };
 
   return (
     <Paper
@@ -245,44 +268,135 @@ function HotelInfoDetail({
                 Hình ảnh khách sạn
               </Typography>
 
-              {mainImage ? (
-                <Box
-                  sx={{
-                    borderRadius: "16px",
-                    overflow: "hidden",
-                    mb: 2,
-                    boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+              <Box mb={1} position={"relative"}>
+                <Slider
+                  {...settingsMain}
+                  ref={(slider) => {
+                    sliderMain.current = slider;
+                    setNavMain(slider);
                   }}>
-                  <img
-                    src={mainImage}
-                    alt='Khách sạn chính'
-                    style={{ width: "100%", display: "block" }}
-                  />
-                </Box>
-              ) : null}
+                  {thumbImages.map((img, i) => (
+                    <Box height={"360px !important"}>
+                      <img
+                        key={i}
+                        src={img}
+                        style={{
+                          width: "100%",
+                          height: "100%",
+                          objectFit: "cover",
+                          borderRadius: 12,
+                        }}
+                      />
+                    </Box>
+                  ))}
+                </Slider>
 
-              <Stack direction='row' spacing={1}>
-                {thumbImages.map((img, i) => (
-                  <Box
-                    key={i}
-                    sx={{
-                      borderRadius: "12px",
-                      overflow: "hidden",
-                      flex: 1,
-                      boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-                    }}>
-                    <img
-                      src={img}
-                      alt={`Ảnh ${i + 1}`}
-                      style={{
-                        width: "100%",
-                        height: "auto",
-                        display: "block",
-                      }}
-                    />
-                  </Box>
-                ))}
-              </Stack>
+                {/* CUSTOM ARROWS */}
+                <IconButton
+                  onClick={() => sliderMain.current?.slickPrev()}
+                  sx={{
+                    position: "absolute",
+                    top: "50%",
+                    left: 10,
+                    bgcolor: "white",
+                    width: 36,
+                    height: 36,
+                    borderRadius: "50%",
+                    transform: "translateY(-50%)",
+                    boxShadow: 2,
+                    transition: "all 0.3s ease", // mượt khi hover
+
+                    // Hover effect
+                    "&:hover": {
+                      bgcolor: "#98b720", // nền chuyển xanh
+                      boxShadow: 6, // bóng đậm hơn tí
+
+                      "& .MuiSvgIcon-root": {
+                        // đổi màu icon khi hover
+                        color: "white !important",
+                      },
+                    },
+
+                    // Icon mặc định
+                    "& .MuiSvgIcon-root": {
+                      fontSize: 16,
+                      color: "#333",
+                      transition: "color 0.3s ease",
+                    },
+                  }}>
+                  <ArrowBackIosNew sx={{ fontSize: 16 }} />
+                </IconButton>
+
+                <IconButton
+                  onClick={() => sliderMain.current?.slickNext()}
+                  sx={{
+                    position: "absolute",
+                    top: "50%",
+                    right: 10,
+                    width: 36,
+                    height: 36,
+                    borderRadius: "50%",
+                    bgcolor: "white",
+                    boxShadow: 2,
+                    transform: "translateY(-50%)",
+                    transition: "all 0.3s ease", // mượt khi hover
+
+                    // Hover effect
+                    "&:hover": {
+                      bgcolor: "#98b720", // nền chuyển xanh
+                      boxShadow: 6, // bóng đậm hơn tí
+
+                      "& .MuiSvgIcon-root": {
+                        // đổi màu icon khi hover
+                        color: "white !important",
+                      },
+                    },
+
+                    // Icon mặc định
+                    "& .MuiSvgIcon-root": {
+                      fontSize: 16,
+                      color: "#333",
+                      transition: "color 0.3s ease",
+                    },
+                  }}>
+                  <ArrowForwardIos />
+                </IconButton>
+              </Box>
+
+              {/* Thumbnail */}
+              <Box
+                sx={{
+                  ".slick-current img": {
+                    outline: "2px solid #98b720",
+                    outlineOffset: "-2px", // kéo viền vào trong đúng 2px → trông như border trong
+                    opacity: 1,
+                    // optional: thêm viền ngoài nếu muốn đậm hơn
+                  },
+                  // Đảm bảo tất cả ảnh đều có kích thước cố định và không bị co giãn do border/outline
+                  img: {
+                    display: "block",
+                    width: "100%",
+                    height: "100px",
+                    objectFit: "cover",
+                    borderRadius: 1,
+                    opacity: 0.6,
+                    transition: "all 0.3s ease",
+                    boxSizing: "border-box",
+                  },
+                }}>
+                <Slider
+                  {...settingsThumb}
+                  ref={(slider) => {
+                    sliderThumb.current = slider;
+                    setNavThumb(slider);
+                  }}>
+                  {thumbImages.map((img, i) => (
+                    <Box width={"95% !important"} height={"100px"}>
+                      <img key={i} src={img} />
+                    </Box>
+                  ))}
+                </Slider>
+              </Box>
             </Grid>
 
             {/* Cột 2: Thông tin chính */}
@@ -345,7 +459,7 @@ function HotelInfoDetail({
                     Tỉnh thành/ Quận
                   </Typography>
                   <Typography fontSize={15} color='#333'>
-                    Bắc Từ Liêm/ TP.Hà Nội
+                  {locations?.find(item=> item?.id == detailHotel?.city)?.name?.vi }
                   </Typography>
                 </Box>
 
@@ -368,7 +482,7 @@ function HotelInfoDetail({
                     Mô tả
                   </Typography>
                   <Typography fontSize={15} color='#333'>
-                    {hotelDescription ? "Có" : "Không"}
+                    {hotelDescription}
                   </Typography>
                 </Box>
 
@@ -395,24 +509,90 @@ function HotelInfoDetail({
                     }}
                   />
                 </Box>
-
                 <Box>
+                  <Typography fontSize={14} color='black' fontWeight={600}>
+                    Tiện ích khách sạn
+                  </Typography>
+                  {(() => {
+                    // Parse facilities từ DB (là JSON string dạng array id)
+                    const facilityIds = () => {
+                      if (!detailHotel?.amenities) return [];
+                      try {
+                        const parsed =
+                          typeof detailHotel.amenities === "string"
+                            ? JSON.parse(detailHotel.amenities)
+                            : Array.isArray(detailHotel.amenities)
+                              ? detailHotel.amenities
+                              : [];
+                        return Array.isArray(parsed) ? parsed : [];
+                      } catch (e) {
+                        console.warn("Parse facilities error:", e);
+                        return [];
+                      }
+                    };
+
+                    // Map id → object đầy đủ (label + icon)
+                    const selectedFacilities = facilities.filter((fac) =>
+                      facilityIds().includes(fac.id)
+                    );
+
+                    if (selectedFacilities.length === 0) {
+                      return (
+                        <Typography color='#999' fontStyle='italic'>
+                          Chưa có tiện ích nào được thiết lập
+                        </Typography>
+                      );
+                    }
+
+                    return (
+                      <Box
+                        sx={{ display: "flex", flexWrap: "wrap", gap: 2, mt: 1 }}>
+                        {selectedFacilities.map((fac) => (
+                          <Box
+                            key={fac.id}
+                            sx={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: 1.5,
+                              bgcolor: "#f8f9fa",
+                              border: "1px solid #e9ecef",
+                              borderRadius: 3,
+                              px: 1,
+                              py: .5,
+                              minWidth: 140,
+                            }}>
+                            <Box
+                              component='img'
+                              src={fac.icon}
+                              alt={fac.name.vi}
+                              sx={{ width: 20, height: 20, objectFit: "contain" }}
+                            />
+                            <Typography fontWeight={500} fontSize='0.85rem'>
+                              {fac.name.vi}
+                            </Typography>
+                          </Box>
+                        ))}
+                      </Box>
+                    );
+                  })()}
+                </Box>
+                {/* <Box>
                   <Typography fontSize={14} color='black' fontWeight={600}>
                     Loại khách sạn
                   </Typography>
                   <Typography fontSize={15} color='#333'>
                     Du lịch
                   </Typography>
-                </Box>
+                </Box> */}
 
-                <Box>
+                {/* <Box>
                   <Typography fontSize={14} color='black' fontWeight={600}>
                     Có phòng
                   </Typography>
                   <Typography fontSize={15} color='#333'>
                     Có
                   </Typography>
-                </Box>
+                </Box> */}
               </Stack>
             </Grid>
           </Grid>

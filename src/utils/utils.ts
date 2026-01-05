@@ -379,3 +379,159 @@ export  const parseRoomName = (name?: string) => {
     return name;
   }
 };
+export const facilities = [
+  {
+    id: "luggage_storage",
+    name: { en: "Luggage Storage", vi: "Bảo quản hành lý" },
+    icon: "https://cdn-icons-png.flaticon.com/512/3176/3176366.png"
+  },
+  {
+    id: "elevator",
+    name: { en: "Elevator", vi: "Thang máy" },
+    icon: "https://cdn-icons-png.flaticon.com/512/854/854929.png"
+  },
+  {
+    id: "safe_box",
+    name: { en: "Safe Box", vi: "Két sắt" },
+    icon: "https://cdn-icons-png.flaticon.com/512/639/639365.png"
+  },
+  // Thêm các tiện ích khác ở đây...
+  {
+    id: "parking",
+    name: { en: "Parking", vi: "Bãi đỗ xe" },
+    icon: "https://cdn-icons-png.flaticon.com/512/3063/3063826.png"
+  },
+  {
+    id: "pool",
+    name: { en: "Swimming Pool", vi: "Bể bơi" },
+    icon: "https://cdn-icons-png.flaticon.com/512/2933/2933028.png"
+  },
+  {
+    id: "gym",
+    name: { en: "Gym", vi: "Phòng gym" },
+    icon: "https://cdn-icons-png.flaticon.com/512/2930/2930888.png"
+  },
+  {
+    id: "spa",
+    name: { en: "Spa", vi: "Điều hòa" },
+    icon: "https://cdn-icons-png.flaticon.com/512/2901/2901399.png"
+  },
+  {
+    id: "tv",
+    name: { en: "Smart TV", vi: "Smart TV" },
+    icon: "https://cdn-icons-png.flaticon.com/512/565/565674.png"
+  },
+]
+
+export const type_bed = [
+  {
+    "id": "single_bed_1",
+    "name": "1 giường đơn"
+  },
+  {
+    "id": "double_bed_1",
+    "label": "1 giường đôi"
+  },
+  {
+    "id": "single_bed_2",
+    "label": "2 giường đơn"
+  },
+  {
+    "id": "double_bed_2",
+    "label": "2 giường đôi"
+  },
+  {
+    "id": "round_bed_1",
+    "label": "1 giường tròn"
+  },
+  {
+    "id": "double_small_1m5x2",
+    "label": "Giường đôi cỡ nhỏ (1m5 x 2m)"
+  },
+  {
+    "id": "queen_1m6x2",
+    "label": "Giường Queen-size (1m6 x 2m)"
+  },
+  {
+    "id": "king_1m8x2",
+    "label": "Giường King-size (1m8 x 2m)"
+  },
+  {
+    "id": "extra_bed",
+    "label": "Giường phụ"
+  },
+  {
+    "id": "sofa_bed",
+    "label": "Giường sofa"
+  },
+  {
+    "id": "bunk_bed_double",
+    "label": "Giường tầng đôi"
+  },
+  {
+    "id": "bunk_bed_single",
+    "label": "Giường tầng đơn"
+  },
+  {
+    "id": "mattress",
+    "label": "Nệm ngủ"
+  },
+  {
+    "id": "baby_cot",
+    "label": "Giường con nhộng / cũi em bé"
+  }]
+
+export const direction = [
+  {
+    "id": "window_no_view",
+    "label": "Cửa sổ (không hướng)"
+  },
+  {
+    "id": "city_view",
+    "label": "Hướng thành phố"
+  },
+  {
+    "id": "garden_view",
+    "label": "Hướng vườn"
+  },
+  {
+    "id": "pool_view",
+    "label": "Hướng hồ bơi"
+  },
+  {
+    "id": "no_window",
+    "label": "Không cửa sổ"
+  },
+  {
+    "id": "landmark_view",
+    "label": "Hướng ra địa danh nổi tiếng"
+  },
+  {
+    "id": "sea_view",
+    "label": "Hướng biển"
+  },
+  {
+    "id": "airport_view",
+    "label": "Hướng sân bay"
+  },
+  {
+    "id": "park_view",
+    "label": "Hướng công viên"
+  },
+  {
+    "id": "mountain_view",
+    "label": "Hướng núi"
+  },
+  {
+    "id": "river_view",
+    "label": "Hướng sông"
+  },
+  {
+    "id": "valley_view",
+    "label": "Hướng thung lũng"
+  },
+  {
+    "id": "balcony",
+    "label": "Ban công"
+  }
+]

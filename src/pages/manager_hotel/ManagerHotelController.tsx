@@ -118,6 +118,7 @@ const ManagerHotelController = (props: Props) => {
     getDataHotels(newPage);
 
   };
+ 
   return <ManagerHotelView hotels={hotels} pagination={pagination}
     locations={locations}
     filters={filters}
