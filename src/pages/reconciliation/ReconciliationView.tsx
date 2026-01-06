@@ -34,6 +34,7 @@ import React, { useEffect, useState } from "react";
 import { getbankPartner, listBookingSettlement } from "../../service/booking";
 import { sendPay, sendPubllish } from "../../service/hotel";
 import success from "../../images/Frame.png";
+import dayjs from "dayjs";
 const parseLang = (value: string, lang = "vi") => {
   try {
     const obj = JSON.parse(value);
@@ -112,7 +113,7 @@ export default function ReconciliationView({
     total: item.closing_balance,
     hotel_id: item.hotel_id,
     _id: item.id,
-    dueDate: new Date(item.confirm_deadline).toLocaleDateString("vi-VN"),
+    dueDate:item.confirm_deadline? new Date(item.confirm_deadline).toLocaleDateString("vi-VN"):"",
   }));
 
   const handleSearch = () => {
@@ -155,6 +156,15 @@ export default function ReconciliationView({
       console.log(error);
     }
   };
+
+
+const months = Array.from({ length: 12 }).map((_, index) => {
+  const date = dayjs().subtract(index, "month");
+  return {
+    value: date.format("MM-YYYY"),     // dữ liệu trả về (giữ nguyên như hiện tại)
+    label: `Tháng ${date.format("MM.YYYY")}`, // label hiển thị
+  };
+});
   return (
     <>
       <Dialog
@@ -359,7 +369,11 @@ export default function ReconciliationView({
                     <MenuItem value='' disabled>
                       Chọn kỳ đối soát
                     </MenuItem>
-                    <MenuItem value='11-2025'>Tháng 11.2025</MenuItem>
+                    {months.map((item) => (
+      <MenuItem key={item.value} value={item.value}>
+        {item.label}
+      </MenuItem>
+    ))}
                   </Select>
                 </FormControl>
               </Box>

@@ -24,13 +24,13 @@ const HomeController = (props: Props) => {
   });
   const [dateRangeRevenueEvent, setDateRangeRevenueEvent] = useState({
     mode: "week",
-    checkIn: dayjs().startOf("isoWeek"),
-    checkOut: dayjs().endOf("isoWeek"),
+    checkIn: dayjs().subtract(6, "day").startOf("day"),  // Sửa: 7 ngày gần nhất, start từ ngày trừ 6
+    checkOut: dayjs().endOf("day"),                      // Sửa: end là ngày hiện tại
   });
   const [dateRangeRevenueEventView, setDateRangeRevenueEventView] = useState({
     mode: "week",
-    checkIn: dayjs().startOf("isoWeek"),
-    checkOut: dayjs().endOf("isoWeek"),
+    checkIn: dayjs().subtract(6, "day").startOf("day"),  // Sửa tương tự
+    checkOut: dayjs().endOf("day"),
   });
   const [roomTypeGeneral, setRoomTypeGeneral] = useState("all");
   const [roomTypeBooking, setRoomTypeBooking] = useState("all");
@@ -158,14 +158,14 @@ const HomeController = (props: Props) => {
       let params_start = new URLSearchParams({
         start_time: startOfLastWeek.format("YYYY-MM-DDTHH:mm:ssZ"),
         end_time: endOfLastWeek.format("YYYY-MM-DDTHH:mm:ssZ"),
-        rent_type: roomTypeCheckin,
+        rent_type: roomTypeGeneral,
       });
 
       // ===== params TUẦN NÀY =====
       let params_end = new URLSearchParams({
         start_time: startOfThisWeek.format("YYYY-MM-DDTHH:mm:ssZ"),
         end_time: endOfThisWeek.format("YYYY-MM-DDTHH:mm:ssZ"),
-        rent_type: roomTypeCheckin,
+        rent_type: roomTypeGeneral,
       });
 
       let result_start = await getGeneralWeekRoomType(params_start);
@@ -215,7 +215,7 @@ const HomeController = (props: Props) => {
       let params_start = new URLSearchParams({
         start_time: startOfLastWeek.format("YYYY-MM-DDTHH:mm:ssZ"),
         end_time: endOfLastWeek.format("YYYY-MM-DDTHH:mm:ssZ"),
-        rent_type: roomTypeCheckin,
+        rent_type: roomTypeBooking,
         event_type: "booked",
       });
 
@@ -223,7 +223,7 @@ const HomeController = (props: Props) => {
       let params_end = new URLSearchParams({
         start_time: startOfThisWeek.format("YYYY-MM-DDTHH:mm:ssZ"),
         end_time: endOfThisWeek.format("YYYY-MM-DDTHH:mm:ssZ"),
-        rent_type: roomTypeCheckin,
+        rent_type: roomTypeBooking,
         event_type: "booked",
       });
 
@@ -304,36 +304,37 @@ const HomeController = (props: Props) => {
 
       const { mode, checkIn, checkOut } = dateRangeRevenueEvent;
 
-      let startPrev, endPrev, startCurrent, endCurrent;
+    let startPrev, endPrev, startCurrent, endCurrent;
 
-      if (mode === "week") {
-        startCurrent = checkIn.startOf("isoWeek");
-        endCurrent = checkOut.endOf("isoWeek");
+    if (mode === "week") {
+      // Sửa: Dùng subtract thay vì isoWeek để lấy đúng 7 ngày gần nhất
+      startCurrent = checkOut.subtract(6, "day").startOf("day");
+      endCurrent = checkOut.endOf("day");
 
-        startPrev = startCurrent.subtract(1, "week");
-        endPrev = endCurrent.subtract(1, "week");
-      }
+      // Tuần trước: trừ thêm 7 ngày từ endCurrent
+      endPrev = startCurrent.subtract(1, "day").endOf("day");  // Ngày cuối tuần trước = startCurrent - 1 ngày
+      startPrev = endPrev.subtract(6, "day").startOf("day");   // Start tuần trước = endPrev - 6 ngày
+    }
 
-      if (mode === "month") {
-        startCurrent = checkIn.startOf("month");
-        endCurrent = checkOut.endOf("month");
+    if (mode === "month") {
+      startCurrent = checkIn.startOf("month");
+      endCurrent = checkOut.endOf("month");
 
-        startPrev = startCurrent.subtract(1, "month");
-        endPrev = endCurrent.subtract(1, "month");
-      }
+      startPrev = startCurrent.subtract(1, "month");
+      endPrev = endCurrent.subtract(1, "month");
+    }
 
-      const params_start = {
-        start_time: startPrev.startOf("day").format("YYYY-MM-DDTHH:mm:ssZ"),
-        end_time: endPrev.endOf("day").format("YYYY-MM-DDTHH:mm:ssZ"),
-        event_type: "visit",
-      };
+    const params_start = {
+      start_time: startPrev.format("YYYY-MM-DDTHH:mm:ssZ"),
+      end_time: endPrev.format("YYYY-MM-DDTHH:mm:ssZ"),
+      event_type: "visit",
+    };
 
-      const params_end = {
-        start_time: startCurrent.startOf("day").format("YYYY-MM-DDTHH:mm:ssZ"),
-        end_time: endCurrent.endOf("day").format("YYYY-MM-DDTHH:mm:ssZ"),
-        event_type: "visit",
-      };
-
+    const params_end = {
+      start_time: startCurrent.format("YYYY-MM-DDTHH:mm:ssZ"),
+      end_time: endCurrent.format("YYYY-MM-DDTHH:mm:ssZ"),
+      event_type: "visit",
+    };
       const result_start = await getEventMonth(params_start);
       if (result_start?.daily) result.start = result_start.daily;
 
@@ -353,32 +354,34 @@ const HomeController = (props: Props) => {
       const { mode, checkIn, checkOut } = dateRangeRevenueEventView;
 
       let startPrev, endPrev, startCurrent, endCurrent;
-
+  
       if (mode === "week") {
-        startCurrent = checkIn.startOf("isoWeek");
-        endCurrent = checkOut.endOf("isoWeek");
-
-        startPrev = startCurrent.subtract(1, "week");
-        endPrev = endCurrent.subtract(1, "week");
+        // Sửa: Dùng subtract thay vì isoWeek để lấy đúng 7 ngày gần nhất
+        startCurrent = checkOut.subtract(6, "day").startOf("day");
+        endCurrent = checkOut.endOf("day");
+  
+        // Tuần trước: trừ thêm 7 ngày từ endCurrent
+        endPrev = startCurrent.subtract(1, "day").endOf("day");  // Ngày cuối tuần trước = startCurrent - 1 ngày
+        startPrev = endPrev.subtract(6, "day").startOf("day");   // Start tuần trước = endPrev - 6 ngày
       }
-
+  
       if (mode === "month") {
         startCurrent = checkIn.startOf("month");
         endCurrent = checkOut.endOf("month");
-
+  
         startPrev = startCurrent.subtract(1, "month");
         endPrev = endCurrent.subtract(1, "month");
       }
-
+  
       const params_start = {
-        start_time: startPrev.startOf("day").format("YYYY-MM-DDTHH:mm:ssZ"),
-        end_time: endPrev.endOf("day").format("YYYY-MM-DDTHH:mm:ssZ"),
+        start_time: startPrev.format("YYYY-MM-DDTHH:mm:ssZ"),
+        end_time: endPrev.format("YYYY-MM-DDTHH:mm:ssZ"),
         event_type: "view",
       };
-
+  
       const params_end = {
-        start_time: startCurrent.startOf("day").format("YYYY-MM-DDTHH:mm:ssZ"),
-        end_time: endCurrent.endOf("day").format("YYYY-MM-DDTHH:mm:ssZ"),
+        start_time: startCurrent.format("YYYY-MM-DDTHH:mm:ssZ"),
+        end_time: endCurrent.format("YYYY-MM-DDTHH:mm:ssZ"),
         event_type: "view",
       };
 

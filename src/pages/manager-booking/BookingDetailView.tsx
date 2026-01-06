@@ -638,7 +638,7 @@ export default function BookingDetailView({
                           <br />
                           <span
                             style={{ color: "#98B720", fontSize: "0.875rem" }}>
-                            {roomName}
+                            {parseRoomName(roomName)}
                           </span>
                         </TableCell>
                         <TableCell>

@@ -372,7 +372,11 @@ export  const parseRoomName = (name?: string) => {
   if (!name) return "Không có tên";
 
   try {
+    if(typeof name == "object"){
+      return name?.vi || name?.en || "Không có tên";
+    }
     const parsed = JSON.parse(name);
+    console.log("aAAAA parsed",parsed)
     return parsed?.vi || parsed?.en || "Không có tên";
   } catch {
     // name là plain text (ví dụ: "Suite")

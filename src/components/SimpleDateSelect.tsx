@@ -21,23 +21,30 @@ import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import dayjs, { Dayjs } from "dayjs";
 import isoWeek from "dayjs/plugin/isoWeek";
-
-dayjs.extend(isoWeek);
+import isBetween from "dayjs/plugin/isBetween";
+dayjs.extend(isBetween);
 
 /* ================= TYPES ================= */
 
 type Mode = "week" | "month";
 
-export interface DateRangeValue {
+interface DateValue {
   mode: Mode;
   checkIn: Dayjs;
   checkOut: Dayjs;
 }
 
 interface Props {
-  value: DateRangeValue;
-  onChange: (val: DateRangeValue) => void;
+  value: DateValue;
+  onChange: (value: DateValue) => void;
 }
+
+/* ================= UTILS ================= */
+
+const getLast7DaysRange = (base: Dayjs) => ({
+  start: base.subtract(6, "day").startOf("day"),
+  end: base.endOf("day"),
+});
 
 /* ================= COMPONENT ================= */
 
@@ -47,42 +54,48 @@ export default function SimpleDatePopup({ value, onChange }: Props) {
 
   // local draft state
   const [mode, setMode] = useState<Mode>(value.mode);
-  const [checkIn, setCheckIn] = useState(value.checkIn);
-  const [checkOut, setCheckOut] = useState(value.checkOut);
+  const [checkIn, setCheckIn] = useState<Dayjs>(value.checkIn);
+  const [checkOut, setCheckOut] = useState<Dayjs>(value.checkOut);
 
+  /* ===== SYNC FROM PARENT ===== */
   useEffect(() => {
     setMode(value.mode);
     setCheckIn(value.checkIn);
     setCheckOut(value.checkOut);
   }, [value]);
 
-  /* ===== CLICK DATE ===== */
+  /* ===== DATE CLICK ===== */
   const handleDateClick = (date: Dayjs) => {
     if (mode === "month") {
       setCheckIn(date.startOf("month"));
       setCheckOut(date.endOf("month"));
     } else {
-      setCheckIn(date.startOf("isoWeek"));
-      setCheckOut(date.endOf("isoWeek"));
+      // Sửa: Dùng date làm end, start = date - 6 days
+      setCheckIn(date.subtract(6, "day").startOf("day"));
+      setCheckOut(date.endOf("day"));
     }
   };
 
   /* ===== APPLY ===== */
   const handleApply = () => {
-    onChange({ mode, checkIn, checkOut });
+    onChange({
+      mode,
+      checkIn,
+      checkOut,
+    });
     setOpen(false);
   };
 
-  /* ===== RENDER DAY (WEEK) ===== */
-  const renderDay = (start: Dayjs, end: Dayjs) => (props: any) => {
+  /* ===== RENDER DAY (WEEK MODE) ===== */
+  const renderWeekDay =
+  (start: Dayjs, end: Dayjs) =>
+  (props: any) => {
     const day = props.day as Dayjs;
-    const inRange =
-      day.isAfter(start.subtract(1, "day")) && day.isBefore(end.add(1, "day"));
+    const inRange = day.isBetween(start, end, "day", "[]");
 
     return (
       <Button
         {...props}
-        onClick={() => handleDateClick(day)}
         sx={{
           minWidth: 36,
           height: 36,
@@ -90,19 +103,21 @@ export default function SimpleDatePopup({ value, onChange }: Props) {
           bgcolor: inRange ? "#9DBD00" : "transparent",
           color: inRange ? "#fff" : "inherit",
           "&:hover": { bgcolor: "#8AA900" },
-        }}>
+        }}
+        onClick={() => handleDateClick(day)}  // Bây giờ handleDateClick dùng day làm end
+        // ... (giữ nguyên style)
+      >
         {day.date()}
       </Button>
     );
   };
-
   /* ================= UI ================= */
 
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
       <ClickAwayListener onClickAway={() => setOpen(false)}>
         <Box>
-          {/* ===== BUTTON OPEN ===== */}
+          {/* ===== TRIGGER ===== */}
           <Box
             ref={anchorRef}
             onClick={() => {
@@ -112,7 +127,6 @@ export default function SimpleDatePopup({ value, onChange }: Props) {
               setOpen(true);
             }}
             sx={{
-           
               border: "1px solid #d0d5dd",
               borderRadius: 2,
               px: 2,
@@ -122,9 +136,10 @@ export default function SimpleDatePopup({ value, onChange }: Props) {
               justifyContent: "space-between",
               alignItems: "center",
               bgcolor: "#fff",
-            }}>
+            }}
+          >
             <Typography fontWeight={500}>
-              {value.mode === "week" ? "Tuần này" : "Tháng này"}
+              {mode === "week" ? "7 ngày gần nhất" : "Tháng này"}
             </Typography>
             <KeyboardArrowDownIcon />
           </Box>
@@ -133,24 +148,26 @@ export default function SimpleDatePopup({ value, onChange }: Props) {
           <Popper
             open={open}
             anchorEl={anchorRef.current}
-            placement='bottom-start'>
+            placement="bottom-start"
+          >
             <Paper sx={{ mt: 1, borderRadius: 4 }}>
-              <Stack direction='row'>
+              <Stack direction="row">
                 {/* ===== LEFT MENU ===== */}
                 <Stack width={160} p={2} spacing={1}>
                   <Typography
-                    onClick={() => {
-                      const now = dayjs();
-                      setMode("week");
-                      setCheckIn(now.startOf("isoWeek"));
-                      setCheckOut(now.endOf("isoWeek"));
-                    }}
+                   onClick={() => {
+                    const now = dayjs();
+                    setMode("week");
+                    setCheckIn(now.subtract(6, "day").startOf("day"));  // Sửa: 7 ngày gần nhất
+                    setCheckOut(now.endOf("day"));
+                  }}
                     sx={{
                       cursor: "pointer",
                       fontWeight: mode === "week" ? 600 : 400,
                       color: mode === "week" ? "#9DBD00" : "inherit",
-                    }}>
-                    Tuần này
+                    }}
+                  >
+                    7 ngày gần nhất
                   </Typography>
 
                   <Typography
@@ -164,12 +181,13 @@ export default function SimpleDatePopup({ value, onChange }: Props) {
                       cursor: "pointer",
                       fontWeight: mode === "month" ? 600 : 400,
                       color: mode === "month" ? "#9DBD00" : "inherit",
-                    }}>
+                    }}
+                  >
                     Tháng này
                   </Typography>
                 </Stack>
 
-                <Divider orientation='vertical' flexItem />
+                <Divider orientation="vertical" flexItem />
 
                 {/* ===== RIGHT CONTENT ===== */}
                 <Stack flex={1} p={3} spacing={2}>
@@ -183,8 +201,9 @@ export default function SimpleDatePopup({ value, onChange }: Props) {
                       display: "flex",
                       alignItems: "center",
                       gap: 1,
-                    }}>
-                    <CalendarTodayIcon fontSize='small' />
+                    }}
+                  >
+                    <CalendarTodayIcon fontSize="small" />
                     <Typography fontSize={14}>
                       {checkIn.format("DD/MM/YYYY")} –{" "}
                       {checkOut.format("DD/MM/YYYY")}
@@ -195,7 +214,7 @@ export default function SimpleDatePopup({ value, onChange }: Props) {
                   {mode === "month" ? (
                     <DateCalendar
                       views={["year", "month"]}
-                      openTo='month'
+                      openTo="month"
                       value={checkIn}
                       onChange={(date) => {
                         if (!date) return;
@@ -203,52 +222,38 @@ export default function SimpleDatePopup({ value, onChange }: Props) {
                         setCheckOut(date.endOf("month"));
                       }}
                       sx={{
-                        // Tháng được chọn
                         "& .MuiMonthCalendar-button.Mui-selected": {
                           backgroundColor: "#9DBD00 !important",
                           color: "#fff",
-                          "&:hover": {
-                            backgroundColor: "#8AA900",
-                          },
                         },
-
-                        // Năm được chọn (nếu có)
                         "& .MuiYearCalendar-button.Mui-selected": {
                           backgroundColor: "#9DBD00 !important",
                           color: "#fff",
-                          "&:hover": {
-                            backgroundColor: "#8AA900",
-                          },
                         },
                       }}
                     />
                   ) : (
                     <DateCalendar
-                      sx={{ width: "100%" }}
-                      value={checkIn}
-                      slots={{ day: renderDay(checkIn, checkOut) }}
+                    value={checkOut}
+                      slots={{
+                        day: renderWeekDay(checkIn, checkOut),
+                      }}
                     />
                   )}
 
                   {/* ACTIONS */}
-                  <Stack direction='row' justifyContent='flex-end' spacing={2}>
+                  <Stack direction="row" justifyContent="flex-end" spacing={2}>
                     <Button
-                      sx={{
-                        bgcolor: "#eee",
-                        px: 4,
-                        borderRadius: 5,
-                      }}
-                      onClick={() => setOpen(false)}>
+                      sx={{ bgcolor: "#eee", px: 4, borderRadius: 5 }}
+                      onClick={() => setOpen(false)}
+                    >
                       Hủy
                     </Button>
                     <Button
-                      variant='contained'
-                      sx={{
-                        bgcolor: "#9DBD00",
-                        px: 4,
-                        borderRadius: 5,
-                      }}
-                      onClick={handleApply}>
+                      variant="contained"
+                      sx={{ bgcolor: "#9DBD00", px: 4, borderRadius: 5 }}
+                      onClick={handleApply}
+                    >
                       Đồng ý
                     </Button>
                   </Stack>
