@@ -113,7 +113,9 @@ export default function ReconciliationView({
     total: item.closing_balance,
     hotel_id: item.hotel_id,
     _id: item.id,
-    dueDate:item.confirm_deadline? new Date(item.confirm_deadline).toLocaleDateString("vi-VN"):"",
+    dueDate: item.confirm_deadline
+      ? new Date(item.confirm_deadline).toLocaleDateString("vi-VN")
+      : "",
   }));
 
   const handleSearch = () => {
@@ -157,14 +159,13 @@ export default function ReconciliationView({
     }
   };
 
-
-const months = Array.from({ length: 12 }).map((_, index) => {
-  const date = dayjs().subtract(index, "month");
-  return {
-    value: date.format("MM-YYYY"),     // dữ liệu trả về (giữ nguyên như hiện tại)
-    label: `Tháng ${date.format("MM.YYYY")}`, // label hiển thị
-  };
-});
+  const months = Array.from({ length: 12 }).map((_, index) => {
+    const date = dayjs().subtract(index, "month");
+    return {
+      value: date.format("YYYY-MM"), // dữ liệu trả về (giữ nguyên như hiện tại)
+      label: `Tháng ${date.format("MM.YYYY")}`, // label hiển thị
+    };
+  });
   return (
     <>
       <Dialog
@@ -370,10 +371,10 @@ const months = Array.from({ length: 12 }).map((_, index) => {
                       Chọn kỳ đối soát
                     </MenuItem>
                     {months.map((item) => (
-      <MenuItem key={item.value} value={item.value}>
-        {item.label}
-      </MenuItem>
-    ))}
+                      <MenuItem key={item.value} value={item.value}>
+                        {item.label}
+                      </MenuItem>
+                    ))}
                   </Select>
                 </FormControl>
               </Box>
