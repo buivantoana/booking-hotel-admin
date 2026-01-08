@@ -51,7 +51,7 @@ function ActionMenu({
   attribute,
   setSelectedAttribute,
   setConfirmOpen,
-  setModalOpen
+  setModalOpen,
 }) {
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
@@ -99,7 +99,7 @@ function ActionMenu({
         <MenuItem
           onClick={(e) => {
             handleClose(e);
-            setModalOpen(true)
+            setModalOpen(true);
             setSelectedAttribute(attribute);
           }}>
           <Edit fontSize='small' sx={{ mr: 1.5 }} />
@@ -107,14 +107,14 @@ function ActionMenu({
         </MenuItem>
 
         <MenuItem
-            sx={{ color: "red" }}
-            onClick={(e) => {
-              setSelectedAttribute(attribute)
-              setConfirmOpen(true)
-            }}>
-            <Delete fontSize='small' sx={{ mr: 1.5 }} />
-          Xóa tiện ích
-          </MenuItem>
+          sx={{ color: "red" }}
+          onClick={(e) => {
+            setSelectedAttribute(attribute);
+            setConfirmOpen(true);
+          }}>
+          <Delete fontSize='small' sx={{ mr: 1.5 }} />
+          Xóa cơ sở
+        </MenuItem>
       </Menu>
     </>
   );
@@ -125,67 +125,61 @@ export default function ManagerAttributeView({
   loading = false,
   fetchAttribute,
 }) {
-
   const [selectedAttribute, setSelectedAttribute] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [detailOpen, setDetailOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("bed_type");
   const theme = useTheme();
-  const [data,setData] = useState([])
+  const [data, setData] = useState([]);
   const navigate = useNavigate();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
-
-
-  useEffect(()=>{
-    if(activeTab == "bed_type"){
-      setData(attribute?.bed_type)
+  useEffect(() => {
+    if (activeTab == "bed_type") {
+      setData(attribute?.bed_type);
     }
-    if(activeTab == "direction"){
-      setData(attribute?.direction)
+    if (activeTab == "direction") {
+      setData(attribute?.direction);
     }
-    if(activeTab == "amenities"){
-      setData(attribute?.amenities)
+    if (activeTab == "amenities") {
+      setData(attribute?.amenities);
     }
-  },[activeTab,attribute])
+  }, [activeTab, attribute]);
 
-  const handleDeleteAttribute =async () => {
+  const handleDeleteAttribute = async () => {
     try {
-      let result = await deleteAttribute(selectedAttribute?.id,activeTab)
-      if (result?.message && !result?.code){
-        setConfirmOpen(false)
-        toast.success(result?.message)
-        setSelectedAttribute(null)
-        fetchAttribute()
-      }else{
-        toast.error(result?.message)
+      let result = await deleteAttribute(selectedAttribute?.id, activeTab);
+      if (result?.message && !result?.code) {
+        setConfirmOpen(false);
+        toast.success(result?.message);
+        setSelectedAttribute(null);
+        fetchAttribute();
+      } else {
+        toast.error(result?.message);
       }
-      console.log("AAAA result handleDeleteAttribute",result)
-      
+      console.log("AAAA result handleDeleteAttribute", result);
     } catch (error) {
-      console.log(error)
+      console.log(error);
     }
-    
-  }
-  console.log("AAAA data",data)
-  console.log("AAAA selectedAttribute",selectedAttribute)
+  };
+  console.log("AAAA data", data);
+  console.log("AAAA selectedAttribute", selectedAttribute);
   return (
     <Box sx={{ p: { xs: 2, sm: 3, md: 4 } }}>
-      
       <AddEntryModal
         open={modalOpen}
         onClose={() => {
-          setSelectedAttribute(null)
-          setModalOpen(false)}}
+          setSelectedAttribute(null);
+          setModalOpen(false);
+        }}
         attribute={selectedAttribute}
         onSuccess={() => {
           setSelectedAttribute(null);
-          fetchAttribute()
+          fetchAttribute();
         }}
         setSelectedAttribute={setSelectedAttribute}
         activeTab={activeTab}
-        
       />
       <Box
         mb={4}
@@ -218,7 +212,7 @@ export default function ManagerAttributeView({
               fontSize: "28px", // icon lớn hơn một chút
             },
           }}>
-          Thêm tiện ích
+          Thêm cơ sở
         </Button>
       </Box>
 
@@ -239,7 +233,7 @@ export default function ManagerAttributeView({
               pb: 0.5,
               cursor: "pointer",
             }}>
-            Loại Giường
+            Loại giường
           </Typography>
           <Typography
             fontSize={16}
@@ -267,7 +261,6 @@ export default function ManagerAttributeView({
           </Typography>
         </Box>
 
-
         {/* Bảng */}
         <TableContainer>
           <Table>
@@ -282,7 +275,7 @@ export default function ManagerAttributeView({
                 <TableCell>
                   <strong>Name</strong>
                 </TableCell>
-                
+
                 <TableCell align='center'>
                   <strong></strong>
                 </TableCell>
@@ -303,23 +296,14 @@ export default function ManagerAttributeView({
                 </TableRow>
               ) : (
                 data?.map((item, index) => (
-                  <TableRow
-                    key={item.id}
-                    hover
-                    
-                    sx={{ cursor: "pointer" }}>
-                    <TableCell>
-                      {index + 1}
-                    </TableCell>
-                    <TableCell sx={{ fontWeight: 500 }}>
-                      {item.id}
-                    </TableCell>
-                    
+                  <TableRow key={item.id} hover sx={{ cursor: "pointer" }}>
+                    <TableCell>{index + 1}</TableCell>
+                    <TableCell sx={{ fontWeight: 500 }}>{item.id}</TableCell>
+
                     <TableCell sx={{ fontWeight: 500 }}>
                       {parseRoomName(item.name)}
                     </TableCell>
-                    
-                   
+
                     <TableCell
                       align='center'
                       onClick={(e) => e.stopPropagation()}>
@@ -338,11 +322,10 @@ export default function ManagerAttributeView({
         </TableContainer>
 
         {/* Pagination */}
-
       </Paper>
 
       {/* Modal chi tiết (có thể mở rộng sau) */}
-     
+
       {/* Confirmation dialog ngừng/kích hoạt */}
       <Dialog
         open={confirmOpen}
@@ -352,9 +335,9 @@ export default function ManagerAttributeView({
         PaperProps={{ sx: { borderRadius: "16px" } }}>
         <DialogTitle sx={{ textAlign: "center", p: 1 }}>
           <Box sx={{ position: "relative" }}>
-            <img src={ remove} alt='' />
+            <img src={remove} alt='' />
             <Typography fontWeight={600} fontSize='20px' mb={1}>
-            Bạn muốn xóa tiện ích này?
+              Bạn muốn xóa cơ sở này?
             </Typography>
             <IconButton
               onClick={() => setConfirmOpen(false)}
@@ -365,8 +348,8 @@ export default function ManagerAttributeView({
         </DialogTitle>
         <DialogContent sx={{ pb: 3, padding: 1 }}>
           <Typography fontSize='14px' textAlign={"center"} color='#666'>
-          Bạn có muốn xóa tiện ích này ngay bây giờ không?
-Bạn không thể hoàn tác hành động này.
+            Bạn có muốn xóa cơ sở này ngay bây giờ không? Bạn không thể hoàn tác
+            hành động này.
           </Typography>
         </DialogContent>
         <DialogActions
@@ -378,7 +361,7 @@ Bạn không thể hoàn tác hành động này.
           }}>
           <Button
             onClick={async () => {
-              handleDeleteAttribute()
+              handleDeleteAttribute();
             }}
             variant='contained'
             sx={{
@@ -389,7 +372,6 @@ Bạn không thể hoàn tác hành động này.
               width: "100%",
             }}>
             Xác nhận tiếp tục
-
           </Button>
           <Button
             onClick={() => setConfirmOpen(false)}
@@ -414,28 +396,62 @@ import { FormControl, InputLabel } from "@mui/material";
 import axios from "axios"; // hoặc dùng fetch
 import { parseRoomName } from "../../utils/utils";
 
-
-
+import { Grid } from "@mui/material";
 import {
+  addAttribute,
+  deleteAttribute,
+  updateAttribute,
+} from "../../service/hotel";
 
-  Grid,
- 
-} from '@mui/material';
-import { addAttribute, deleteAttribute, updateAttribute } from "../../service/hotel";
-
-
-function AddEntryModal({ open, onClose, attribute, activeTab, onSuccess,setSelectedAttribute }) {
+function AddEntryModal({
+  open,
+  onClose,
+  attribute,
+  activeTab,
+  onSuccess,
+  setSelectedAttribute,
+}) {
   const [formData, setFormData] = useState({
-    key: '',
-    vietnamese: '',
-    korean: '',
-    english: '',
-    japanese: '',
+    key: "",
+    vietnamese: "",
+    korean: "",
+    english: "",
+    japanese: "",
     icon: null as File | null,
-    iconPreview: '',
+    iconPreview: "",
   });
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const validateForm = () => {
+    const newErrors: Record<string, string> = {};
+
+    if (!formData.key.trim()) {
+      newErrors.key = "Key không được để trống";
+    } else if (!/^[a-zA-Z0-9_]+$/.test(formData.key)) {
+      newErrors.key = "Key chỉ được chứa chữ, số và dấu _";
+    }
+
+    if (!formData.vietnamese.trim()) {
+      newErrors.vietnamese = "Vui lòng nhập tên tiếng Việt";
+    }
+
+    if (!formData.english.trim()) {
+      newErrors.english = "Vui lòng nhập tên tiếng Anh";
+    }
+
+    if (!formData.korean.trim()) {
+      newErrors.korean = "Vui lòng nhập tên tiếng Hàn";
+    }
+
+    if (!formData.japanese.trim()) {
+      newErrors.japanese = "Vui lòng nhập tên tiếng Nhật";
+    }
+
+    setErrors(newErrors);
+
+    return Object.keys(newErrors).length === 0;
+  };
 
   useEffect(() => {
     if (attribute) {
@@ -447,40 +463,46 @@ function AddEntryModal({ open, onClose, attribute, activeTab, onSuccess,setSelec
         japanese: name.ja || "",
         english: name.en || "",
         icon: null,
-        iconPreview: attribute.icon || '',
+        iconPreview: attribute.icon || "",
       });
     } else {
       setFormData({
-        key: '',
-        vietnamese: '',
-        korean: '',
-        english: '',
-        japanese: '',
+        key: "",
+        vietnamese: "",
+        korean: "",
+        english: "",
+        japanese: "",
         icon: null,
-        iconPreview: '',
+        iconPreview: "",
       });
     }
+    setErrors({});
   }, [attribute]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value,
+      [e.target.name]: value,
     });
+    setErrors((prev) => ({
+      ...prev,
+      [name]: "",
+    }));
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       // Kiểm tra loại file
-      if (!file.type.startsWith('image/')) {
-        toast.error('Vui lòng chọn file ảnh');
+      if (!file.type.startsWith("image/")) {
+        toast.error("Vui lòng chọn file ảnh");
         return;
       }
 
       // Kiểm tra kích thước file (ví dụ: max 5MB)
       if (file.size > 5 * 1024 * 1024) {
-        toast.error('Kích thước file không được vượt quá 5MB');
+        toast.error("Kích thước file không được vượt quá 5MB");
         return;
       }
 
@@ -496,44 +518,46 @@ function AddEntryModal({ open, onClose, attribute, activeTab, onSuccess,setSelec
     setFormData({
       ...formData,
       icon: null,
-      iconPreview: '',
+      iconPreview: "",
     });
-    
+
     // Reset file input
     if (fileInputRef.current) {
-      fileInputRef.current.value = '';
+      fileInputRef.current.value = "";
     }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!validateForm()) return;
+
     try {
       // Tạo FormData để gửi file
       const formDataToSend = new FormData();
-      
+
       // Thêm dữ liệu text
-      formDataToSend.append('id', formData.key);
-      formDataToSend.append('type', activeTab);
-      formDataToSend.append('name', JSON.stringify({
-        vi: formData.vietnamese,
-        ko: formData.korean,
-        ja: formData.japanese,
-        en: formData.english,
-      }));
+      formDataToSend.append("id", formData.key);
+      formDataToSend.append("type", activeTab);
+      formDataToSend.append(
+        "name",
+        JSON.stringify({
+          vi: formData.vietnamese,
+          ko: formData.korean,
+          ja: formData.japanese,
+          en: formData.english,
+        })
+      );
 
       // Thêm file icon nếu có
       if (formData.icon) {
-        formDataToSend.append('icon', formData.icon);
+        formDataToSend.append("icon", formData.icon);
       }
-
-      
-    
 
       let result;
       if (attribute?.id) {
         // Nếu có icon mới thì thêm vào, nếu không thì không gửi
         if (formData.icon) {
-          formDataToSend.append('id', formData.key);
+          formDataToSend.append("id", formData.key);
         }
         result = await updateAttribute(formData.key, activeTab, formDataToSend);
       } else {
@@ -541,15 +565,15 @@ function AddEntryModal({ open, onClose, attribute, activeTab, onSuccess,setSelec
       }
 
       if (result?.message && !result?.code) {
-        setSelectedAttribute(null)
+        setSelectedAttribute(null);
         setFormData({
-          key: '',
-          vietnamese: '',
-          korean: '',
-          english: '',
-          japanese: '',
+          key: "",
+          vietnamese: "",
+          korean: "",
+          english: "",
+          japanese: "",
           icon: null,
-          iconPreview: '',
+          iconPreview: "",
         });
         onSuccess();
         onClose();
@@ -559,18 +583,18 @@ function AddEntryModal({ open, onClose, attribute, activeTab, onSuccess,setSelec
       }
     } catch (error) {
       console.log(error);
-      toast.error('Có lỗi xảy ra khi lưu thông tin');
+      toast.error("Có lỗi xảy ra khi lưu thông tin");
     }
   };
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
+    <Dialog open={open} onClose={onClose} maxWidth='md' fullWidth>
       <DialogTitle>
-        <Box display="flex" alignItems="center" justifyContent="space-between">
-          <Typography variant="h6" fontWeight="medium">
-            {attribute?.id ? "Chỉnh sửa tiện ích" : "Thêm tiện ích"}
+        <Box display='flex' alignItems='center' justifyContent='space-between'>
+          <Typography variant='h6' fontWeight='medium'>
+            {attribute?.id ? "Chỉnh sửa cơ sở" : "Thêm cơ sở"}
           </Typography>
-          <IconButton onClick={onClose} size="small">
+          <IconButton onClick={onClose} size='small'>
             <CloseIcon />
           </IconButton>
         </Box>
@@ -581,20 +605,26 @@ function AddEntryModal({ open, onClose, attribute, activeTab, onSuccess,setSelec
           <Grid container spacing={3}>
             {/* Key */}
             <Grid item xs={12}>
-              <Typography variant="body2" color="text.secondary" gutterBottom>
+              <Typography variant='body2' color='text.secondary' gutterBottom>
                 Key
               </Typography>
-              <Typography variant="caption" color="text.secondary" display="block" mb={1}>
-                Nhập key tiện ích
+              <Typography
+                variant='caption'
+                color='text.secondary'
+                display='block'
+                mb={1}>
+                Nhập key cơ sở
               </Typography>
               <TextField
                 fullWidth
-                name="key"
+                name='key'
                 disabled={attribute?.id}
                 value={formData.key}
                 onChange={handleChange}
-                placeholder="Nhập key tiện ích"
-                variant="outlined"
+                error={!!errors.key}
+                helperText={errors.key}
+                placeholder='Nhập key cơ sở'
+                variant='outlined'
                 sx={{
                   "& .MuiOutlinedInput-root": {
                     borderRadius: "16px",
@@ -611,16 +641,18 @@ function AddEntryModal({ open, onClose, attribute, activeTab, onSuccess,setSelec
 
             {/* Các ngôn ngữ - 2 cột */}
             <Grid item xs={12} sm={6}>
-              <Typography variant="body2" color="text.secondary" gutterBottom>
+              <Typography variant='body2' color='text.secondary' gutterBottom>
                 Tên Tiếng Việt
               </Typography>
               <TextField
                 fullWidth
-                name="vietnamese"
+                name='vietnamese'
                 value={formData.vietnamese}
                 onChange={handleChange}
-                placeholder="Nhập tên tiện ích"
-                variant="outlined"
+                error={!!errors.vietnamese}
+                helperText={errors.vietnamese}
+                placeholder='Nhập tên cơ sở'
+                variant='outlined'
                 sx={{
                   "& .MuiOutlinedInput-root": {
                     borderRadius: "16px",
@@ -636,16 +668,18 @@ function AddEntryModal({ open, onClose, attribute, activeTab, onSuccess,setSelec
             </Grid>
 
             <Grid item xs={12} sm={6}>
-              <Typography variant="body2" color="text.secondary" gutterBottom>
+              <Typography variant='body2' color='text.secondary' gutterBottom>
                 Tên Tiếng Hàn
               </Typography>
               <TextField
                 fullWidth
-                name="korean"
+                name='korean'
                 value={formData.korean}
                 onChange={handleChange}
-                placeholder="Nhập tên tiện ích"
-                variant="outlined"
+                error={!!errors.korean}
+                helperText={errors.korean}
+                placeholder='Nhập tên cơ sở'
+                variant='outlined'
                 sx={{
                   "& .MuiOutlinedInput-root": {
                     borderRadius: "16px",
@@ -661,16 +695,18 @@ function AddEntryModal({ open, onClose, attribute, activeTab, onSuccess,setSelec
             </Grid>
 
             <Grid item xs={12} sm={6}>
-              <Typography variant="body2" color="text.secondary" gutterBottom>
+              <Typography variant='body2' color='text.secondary' gutterBottom>
                 Tên Tiếng Anh
               </Typography>
               <TextField
                 fullWidth
-                name="english"
+                name='english'
                 value={formData.english}
                 onChange={handleChange}
-                placeholder="Nhập tên tiện ích"
-                variant="outlined"
+                error={!!errors.english}
+                helperText={errors.english}
+                placeholder='Nhập tên cơ sở'
+                variant='outlined'
                 sx={{
                   "& .MuiOutlinedInput-root": {
                     borderRadius: "16px",
@@ -686,16 +722,18 @@ function AddEntryModal({ open, onClose, attribute, activeTab, onSuccess,setSelec
             </Grid>
 
             <Grid item xs={12} sm={6}>
-              <Typography variant="body2" color="text.secondary" gutterBottom>
+              <Typography variant='body2' color='text.secondary' gutterBottom>
                 Tên Tiếng Nhật
               </Typography>
               <TextField
                 fullWidth
-                name="japanese"
+                name='japanese'
                 value={formData.japanese}
                 onChange={handleChange}
-                placeholder="Nhập tên tiện ích"
-                variant="outlined"
+                error={!!errors.japanese}
+                helperText={errors.japanese}
+                placeholder='Nhập tên cơ sở'
+                variant='outlined'
                 sx={{
                   "& .MuiOutlinedInput-root": {
                     borderRadius: "16px",
@@ -712,88 +750,89 @@ function AddEntryModal({ open, onClose, attribute, activeTab, onSuccess,setSelec
 
             {/* Upload icon */}
             <Grid item xs={12}>
-              <Typography variant="body2" color="text.secondary" gutterBottom>
-                Upload icon tiện ích
+              <Typography variant='body2' color='text.secondary' gutterBottom>
+                Upload icon cơ sở
               </Typography>
-              
+
               <Box
                 sx={{
-                  width:"80px",
-                  height:"80px",
-                  border: '2px dashed #ccc',
-                  borderRadius: '16px',
+                  width: "80px",
+                  height: "80px",
+                  border: "2px dashed #ccc",
+                  borderRadius: "16px",
                   padding: 3,
-                  textAlign: 'center',
-                  backgroundColor: '#fafafa',
-                  cursor: 'pointer',
-                  '&:hover': {
-                    borderColor: '#98b720',
-                    backgroundColor: '#f5f5f5',
+                  textAlign: "center",
+                  backgroundColor: "#fafafa",
+                  cursor: "pointer",
+                  "&:hover": {
+                    borderColor: "#98b720",
+                    backgroundColor: "#f5f5f5",
                   },
                 }}
-                onClick={() => fileInputRef.current?.click()}
-              >
+                onClick={() => fileInputRef.current?.click()}>
                 <input
-                  type="file"
+                  type='file'
                   ref={fileInputRef}
                   onChange={handleFileChange}
-                  accept="image/*"
-                  style={{ display: 'none' }}
+                  accept='image/*'
+                  style={{ display: "none" }}
                 />
-                
+
                 {formData.iconPreview ? (
                   <Box>
                     <Box
-                      component="img"
+                      component='img'
                       src={formData.iconPreview}
-                      alt="Icon preview"
+                      alt='Icon preview'
                       sx={{
                         width: 50,
                         height: 50,
-                        objectFit: 'contain',
-                        
+                        objectFit: "contain",
                       }}
                     />
-                    <Box display="flex" justifyContent="center" >
+                    <Box display='flex' justifyContent='center'>
                       <Button
-                        variant="outlined"
-                        color="primary"
+                        variant='outlined'
+                        color='primary'
                         sx={{
-                          border:"none"
+                          border: "none",
                         }}
                         onClick={(e) => {
                           e.stopPropagation();
                           fileInputRef.current?.click();
-                        }}
-                      >
-                       <Edit/>
+                        }}>
+                        <Edit />
                       </Button>
                       <Button
-                       sx={{
-                        border:"none"
-                      }}
-                        variant="outlined"
-                        color="error"
+                        sx={{
+                          border: "none",
+                        }}
+                        variant='outlined'
+                        color='error'
                         onClick={(e) => {
                           e.stopPropagation();
                           handleRemoveIcon();
-                        }}
-                      >
-                       <Delete/>
+                        }}>
+                        <Delete />
                       </Button>
                     </Box>
                   </Box>
                 ) : (
                   <>
-                    <CloudUpload sx={{ fontSize: 48, color: '#98b720', mb: 1 }} />
-                   
+                    <CloudUpload
+                      sx={{ fontSize: 48, color: "#98b720", mb: 1 }}
+                    />
                   </>
                 )}
               </Box>
 
               {/* Hiển thị tên file nếu có */}
               {formData.icon && (
-                <Typography variant="caption" color="text.secondary" display="block" mt={1}>
+                <Typography
+                  variant='caption'
+                  color='text.secondary'
+                  display='block'
+                  mt={1}>
                   File đã chọn: {formData.icon.name}
                 </Typography>
               )}
@@ -803,17 +842,16 @@ function AddEntryModal({ open, onClose, attribute, activeTab, onSuccess,setSelec
 
         <DialogActions sx={{ px: 3, pb: 3 }}>
           <Button
-            type="submit"
+            type='submit'
             fullWidth
-            variant="contained"
+            variant='contained'
             sx={{
               backgroundColor: "#98b720",
               "&:hover": { backgroundColor: "#98b720" },
               py: 1.5,
               borderRadius: "16px",
-            }}
-          >
-            {attribute?.id ? "Cập nhật tiện ích" : "Thêm tiện ích"}
+            }}>
+            {attribute?.id ? "Cập nhật cơ sở" : "Thêm cơ sở"}
           </Button>
         </DialogActions>
       </form>

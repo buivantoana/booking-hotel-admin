@@ -96,7 +96,7 @@ const menuItems = [
   },
   {
     id: "attribute",
-    label: "Thiết lập tiện ích",
+    label: "Thiết lập cơ sở",
     icon: <Add />,
     path: "/manager-attribute",
     roles: ["accountant", "admin", "super_admin"],
