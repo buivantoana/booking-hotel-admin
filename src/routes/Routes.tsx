@@ -23,6 +23,7 @@ import ManagerReviewController from "../pages/manager-review/ManagerReviewContro
 import ManagerAccountController from "../pages/manager-account/ManagerAccountController";
 import ProfileController from "../pages/profile/ProfileController";
 import ManagerStaffController from "../pages/manager-staff/ManagerStaffController";
+import ManagerAttributeController from "../pages/manager-attribute/ManagerAttributeController";
 
 const Router = () => {
   const context: any = useBookingContext();
@@ -125,6 +126,14 @@ const Router = () => {
             element={
               <PrivateRouter>
                 <ProfileController />
+              </PrivateRouter>
+            }
+          />
+           <Route
+            path='/manager-attribute'
+            element={
+              <PrivateRouter>
+                <ManagerAttributeController />
               </PrivateRouter>
             }
           />

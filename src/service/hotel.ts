@@ -300,6 +300,93 @@ export async function getLocations() {
     }
   }
 }
+export async function getAttribute() {
+  try {
+    let token = localStorage.getItem("access_token");
+    const response = await api.get(`/admin/hotel/room-attributes?type=all`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data;
+  } catch (error: any) {
+    if (error.response) {
+      console.error("Error response data:", error.response.data);
+      console.error("Error response status:", error.response.status);
+      return error.response.data;
+    } else if (error.request) {
+      console.error("No response received:", error.request);
+    } else {
+      console.error("Error setting up request:", error.message);
+    }
+  }
+}
+export async function addAttribute(body) {
+  try {
+    let token = localStorage.getItem("access_token");
+    const response = await api.post(`/admin/hotel/room-attributes`,body, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data;
+  } catch (error: any) {
+    if (error.response) {
+      console.error("Error response data:", error.response.data);
+      console.error("Error response status:", error.response.status);
+      return error.response.data;
+    } else if (error.request) {
+      console.error("No response received:", error.request);
+    } else {
+      console.error("Error setting up request:", error.message);
+    }
+  }
+}
+export async function updateAttribute(id,type,body) {
+  try {
+    let token = localStorage.getItem("access_token");
+    const response = await api.put(`/admin/hotel/room-attributes/${type}/${id}`,body, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data;
+  } catch (error: any) {
+    if (error.response) {
+      console.error("Error response data:", error.response.data);
+      console.error("Error response status:", error.response.status);
+      return error.response.data;
+    } else if (error.request) {
+      console.error("No response received:", error.request);
+    } else {
+      console.error("Error setting up request:", error.message);
+    }
+  }
+}
+export async function deleteAttribute(id,type) {
+  try {
+    let token = localStorage.getItem("access_token");
+    const response = await api.delete(`/admin/hotel/room-attributes/${type}/${id}`, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data;
+  } catch (error: any) {
+    if (error.response) {
+      console.error("Error response data:", error.response.data);
+      console.error("Error response status:", error.response.status);
+      return error.response.data;
+    } else if (error.request) {
+      console.error("No response received:", error.request);
+    } else {
+      console.error("Error setting up request:", error.message);
+    }
+  }
+}
 export async function getHotel(id) {
   try {
     let token = localStorage.getItem("access_token");

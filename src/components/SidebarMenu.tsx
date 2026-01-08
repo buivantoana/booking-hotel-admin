@@ -94,6 +94,13 @@ const menuItems = [
     path: "/reconciliation",
     roles: ["accountant", "admin", "super_admin"],
   },
+  {
+    id: "attribute",
+    label: "Thiết lập tiện ích",
+    icon: <Add />,
+    path: "/manager-attribute",
+    roles: ["accountant", "admin", "super_admin"],
+  },
 ];
 const filteredMenu = menuItems.filter(item =>
   item.roles.includes(role)
@@ -179,6 +186,7 @@ import { Avatar, Button, Popover, Divider, ListItem } from "@mui/material";
 import ArrowDropUpIcon from "@mui/icons-material/ArrowDropUp";
 import PersonIcon from "@mui/icons-material/Person";
 import { useBookingContext } from "../App";
+import { Add } from "@mui/icons-material";
 const UserProfileButton = () => {
   const context = useBookingContext();
   const [anchorEl, setAnchorEl] = React.useState<HTMLButtonElement | null>(
