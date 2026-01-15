@@ -301,6 +301,180 @@ export default function ManagerReviewView({
       console.log(error)
     }
   }
+
+
+  // Desktop: Bảng gốc (giữ nguyên 100%)
+  const renderDesktop = () => (
+    <TableContainer sx={{ mt: 5, width: "100%", overflowX: "auto" }}>
+      <Table>
+        <TableHead>
+          <TableRow sx={{ backgroundColor: "#f5f5f5" }}>
+            <TableCell><strong>#</strong></TableCell>
+            <TableCell><strong>Tên khách sạn</strong></TableCell>
+            <TableCell><strong>Người đánh giá</strong></TableCell>
+            <TableCell><strong>Số điểm đánh giá</strong></TableCell>
+            <TableCell><strong>Nội dung</strong></TableCell>
+            <TableCell><strong>Thời gian</strong></TableCell>
+            <TableCell align="center"><strong></strong></TableCell>
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {loading ? (
+            <TableRow>
+              <TableCell colSpan={7} align="center">
+                <Typography>Đang tải...</Typography>
+              </TableCell>
+            </TableRow>
+          ) : Reviews.length === 0 ? (
+            <TableRow>
+              <TableCell colSpan={7} align="center">
+                <Typography>Không có dữ liệu đánh giá</Typography>
+              </TableCell>
+            </TableRow>
+          ) : (
+            Reviews.map((row, index) => (
+              <TableRow
+                key={row.id}
+                hover
+                sx={{ cursor: "pointer" }}
+                onClick={() => handleRowClick(row)}
+              >
+                <TableCell>{index + 1}</TableCell>
+                <TableCell sx={{ color: "#98B720" }}>
+                  {getHotelName(row.hotel_name)}
+                </TableCell>
+                <TableCell>{row.user_name || "Khách"}</TableCell>
+                <TableCell>{renderStars(row.rate)}</TableCell>
+                <TableCell>
+                  {row.comment || "Không có nội dung"}
+                </TableCell>
+                <TableCell>{formatDate(row.created_at)}</TableCell>
+                <TableCell align="center">
+                  <ActionMenu
+                    setReview={setReview}
+                    review={row}
+                    setDetailDialogOpen={setDetailDialogOpen}
+                    setHiddenDialogOpen={setHiddenDialogOpen}
+                    setVisibleDialogOpen={setVisibleDialogOpen}
+                  />
+                </TableCell>
+              </TableRow>
+            ))
+          )}
+        </TableBody>
+      </Table>
+    </TableContainer>
+  );
+
+  // Mobile: Card dọc (thiết kế đẹp, chuyên nghiệp)
+  const renderMobile = () => (
+    <Box sx={{ mt: 5, display: "flex", flexDirection: "column", gap: 3 }}>
+      {loading ? (
+        <Typography align="center">Đang tải...</Typography>
+      ) : Reviews.length === 0 ? (
+        <Typography align="center" color="#999" py={6}>
+          Không có dữ liệu đánh giá
+        </Typography>
+      ) : (
+        Reviews.map((row, index) => (
+          <Paper
+            key={row.id}
+            elevation={0}
+            sx={{
+              borderRadius: "12px",
+              border: "1px solid #eee",
+              overflow: "hidden",
+              boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
+              cursor: "pointer",
+              transition: "all 0.2s",
+              "&:hover": {
+                boxShadow: "0 4px 16px rgba(0,0,0,0.12)",
+                transform: "translateY(-2px)",
+              },
+            }}
+          
+          >
+            {/* Header card */}
+            <Box
+              onClick={() => handleRowClick(row)}
+              sx={{
+                p: 2,
+                bgcolor: "#f8f9fa",
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                flexWrap: "wrap",
+                gap: 1,
+              }}
+            >
+              <Stack direction="row" spacing={1.5} alignItems="center">
+                <Typography variant="subtitle2" color="text.secondary">
+                  #{index + 1}
+                </Typography>
+                <Typography variant="subtitle1" fontWeight="600" color="#98B720">
+                  {getHotelName(row.hotel_name)}
+                </Typography>
+              </Stack>
+
+              {renderStars(row.rate)}
+            </Box>
+
+            <Divider />
+
+            {/* Nội dung chính */}
+            <Box sx={{ p: 2 }}>
+              <Stack spacing={1.5}>
+                <Box>
+                  <Typography variant="body2" color="text.secondary">
+                    Người đánh giá
+                  </Typography>
+                  <Typography fontWeight="500">
+                    {row.user_name || "Khách"}
+                  </Typography>
+                </Box>
+
+                <Box>
+                  <Typography variant="body2" color="text.secondary">
+                    Thời gian
+                  </Typography>
+                  <Typography color="#616161">
+                    {formatDate(row.created_at)}
+                  </Typography>
+                </Box>
+
+                <Box>
+                  <Typography variant="body2" color="text.secondary">
+                    Nội dung
+                  </Typography>
+                  <Typography variant="body1" sx={{ mt: 0.5 }}>
+                    {row.comment || "Không có nội dung"}
+                  </Typography>
+                </Box>
+              </Stack>
+            </Box>
+
+            {/* Thao tác */}
+            <Box
+              sx={{
+                p: 2,
+                bgcolor: "#fafafa",
+                display: "flex",
+                justifyContent: "flex-end",
+              }}
+            >
+              <ActionMenu
+                setReview={setReview}
+                review={row}
+                setDetailDialogOpen={setDetailDialogOpen}
+                setHiddenDialogOpen={setHiddenDialogOpen}
+                setVisibleDialogOpen={setVisibleDialogOpen}
+              />
+            </Box>
+          </Paper>
+        ))
+      )}
+    </Box>
+  );
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
       <Box sx={{ p: { xs: 2, sm: 3, md: 4 }, minHeight: "100vh" }}>
@@ -323,10 +497,10 @@ export default function ManagerReviewView({
               direction={{ xs: "column", sm: "row" }}
               gap={2}
               flexWrap="wrap"
-              alignItems="end"
+              alignItems={{xs:"start",md:"end"}}
             >
               {/* Tên khách sạn */}
-              <Box>
+              <Box width={{xs:"100%",md:"unset"}}>
                 <Typography sx={{ mb: 1.5 }}>Tên khách sạn</Typography>
                 <TextField
                   placeholder="Tìm kiếm"
@@ -342,7 +516,7 @@ export default function ManagerReviewView({
                     ),
                   }}
                   sx={{
-                    width: 200,
+                    width: {xs:"100%",md:200},
                     "& .MuiOutlinedInput-root": {
                       height: 40,
                       borderRadius: "24px",
@@ -359,7 +533,7 @@ export default function ManagerReviewView({
               </Box>
 
               {/* Tên người dùng */}
-              <Box>
+              <Box width={{xs:"100%",md:"unset"}}>
                 <Typography sx={{ mb: 1.5 }}>Tên người dùng</Typography>
                 <TextField
                   placeholder="Tìm kiếm"
@@ -375,7 +549,7 @@ export default function ManagerReviewView({
                     ),
                   }}
                   sx={{
-                    width: 200,
+                    width: {xs:"100%",md:200},
                     "& .MuiOutlinedInput-root": {
                       height: 40,
                       borderRadius: "24px",
@@ -392,7 +566,7 @@ export default function ManagerReviewView({
               </Box>
 
               {/* Nội dung */}
-              <Box>
+              <Box width={{xs:"100%",md:"unset"}}>
                 <Typography sx={{ mb: 1.5 }}>Nội dung</Typography>
                 <TextField
                   placeholder="Tìm kiếm"
@@ -408,7 +582,7 @@ export default function ManagerReviewView({
                     ),
                   }}
                   sx={{
-                    width: 200,
+                    width: {xs:"100%",md:200},
                     "& .MuiOutlinedInput-root": {
                       height: 40,
                       borderRadius: "24px",
@@ -425,7 +599,7 @@ export default function ManagerReviewView({
               </Box>
 
               {/* Điểm đánh giá */}
-              <Box>
+              <Box width={{xs:"100%",md:"unset"}}>
                 <Typography sx={{ mb: 1.5 }}>Điểm đánh giá</Typography>
                 <Button
                   variant="outlined"
@@ -433,6 +607,7 @@ export default function ManagerReviewView({
                   endIcon={<KeyboardArrowDown />}
                   onClick={handleToggle}
                   sx={{
+                    width: {xs:"100%",md:"max-content"},
                     borderRadius: 20,
                     textTransform: "none",
                     borderColor: "#ddd",
@@ -544,52 +719,7 @@ export default function ManagerReviewView({
           </Stack>
 
           {/* Bảng dữ liệu */}
-          <TableContainer sx={{ mt: 5 }}>
-            <Table>
-              <TableHead>
-                <TableRow sx={{ backgroundColor: "#f5f5f5" }}>
-                  <TableCell><strong>#</strong></TableCell>
-                  <TableCell><strong>Tên khách sạn</strong></TableCell>
-                  <TableCell><strong>Người đánh giá</strong></TableCell>
-                  <TableCell><strong>Số điểm đánh giá</strong></TableCell>
-                  <TableCell><strong>Nội dung</strong></TableCell>
-                  <TableCell><strong>Thời gian</strong></TableCell>
-                  <TableCell align="center"><strong></strong></TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {loading ? (
-                  <TableRow>
-                    <TableCell colSpan={7} align="center">
-                      <Typography>Đang tải...</Typography>
-                    </TableCell>
-                  </TableRow>
-                ) : Reviews.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={7} align="center">
-                      <Typography>Không có dữ liệu đánh giá</Typography>
-                    </TableCell>
-                  </TableRow>
-                ) : (
-                  Reviews.map((row, index) => (
-                    <TableRow    onClick={() => handleRowClick(row)} key={row.id} hover sx={{ cursor: "pointer" }}>
-                      <TableCell>{index + 1}</TableCell>
-                      <TableCell sx={{ color: "#98B720" }}>{getHotelName(row.hotel_name)}</TableCell>
-                      <TableCell>{row.user_name || "Khách"}</TableCell>
-                      <TableCell>{renderStars(row.rate)}</TableCell>
-                      <TableCell>
-                        {row.comment || "Không có nội dung"}
-                      </TableCell>
-                      <TableCell>{formatDate(row.created_at)}</TableCell>
-                      <TableCell align="center">
-                        <ActionMenu setReview={setReview} review={row} setDetailDialogOpen={setDetailDialogOpen} setHiddenDialogOpen={setHiddenDialogOpen} setVisibleDialogOpen={setVisibleDialogOpen} />
-                      </TableCell>
-                    </TableRow>
-                  ))
-                )}
-              </TableBody>
-            </Table>
-          </TableContainer>
+          {isMobile ? renderMobile() : renderDesktop()}
 
           {/* Pagination */}
           <Stack spacing={2} sx={{ mt: 3, alignItems: "center" }}>

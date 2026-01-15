@@ -1,4 +1,4 @@
-import { Box, Typography, Button, Chip, IconButton } from "@mui/material";
+import { Box, Typography, Button, Chip, IconButton, useTheme, useMediaQuery } from "@mui/material";
 import { ArrowBackIos, ArrowBackIosNew, ArrowForwardIos, Edit as EditIcon, Star } from "@mui/icons-material";
 import { Grid, Paper, Stack, Divider } from "@mui/material";
 import ManagerRooms from "./ManagerRooms";
@@ -57,9 +57,11 @@ function HotelHeader({
       return str;
     }
   };
-
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const hotelName = parseVi(detailHotel.name) || "Khách sạn";
   const { status } = detailHotel;
+
   const renderStatusChip = (status) => {
     const map = {
       active: {
@@ -117,7 +119,7 @@ function HotelHeader({
 
         <Box>
           <Typography
-            fontSize={22}
+            fontSize={isMobile?18:22}
             fontWeight={700}
             color='#222'
             sx={{ lineHeight: 1.2 }}>
@@ -125,7 +127,7 @@ function HotelHeader({
           </Typography>
         </Box>
 
-        {renderStatusChip(status)}
+        {!isMobile && <>{renderStatusChip(status)}</>}
       </Box>
       {status != "rejected"&&
       <Box>

@@ -184,6 +184,9 @@ function HotelInfoDetail({
           justifyContent: "space-between",
           alignItems: "center",
           mb: 3,
+          flexWrap:"wrap",
+          gap:2
+
         }}>
         <Box sx={{ display: "flex", gap: 4 }}>
           <Typography

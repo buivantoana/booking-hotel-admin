@@ -119,7 +119,7 @@ const DateRangePicker = ({
       anchorEl={anchorEl}
       placement='bottom'
       sx={{ zIndex: 50 }}>
-      <Paper sx={{ mt: 1, borderRadius: 3, width: 680, overflow: "hidden" }}>
+      <Paper sx={{ mt: 1, borderRadius: 3, width: {xs:"85%",md:680}, overflow: "hidden" }}>
         <LocalizationProvider dateAdapter={AdapterDayjs}>
           <Stack>
             <Box p={2} bgcolor='#f9f9f9'>
@@ -128,7 +128,7 @@ const DateRangePicker = ({
               </Typography>
             </Box>
 
-            <Stack direction='row'>
+            <Stack direction={{xs:"column",md:'row'}}>
               {[0, 1].map((i) => (
                 <Box
                   key={i}

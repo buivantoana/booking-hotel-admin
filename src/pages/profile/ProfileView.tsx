@@ -459,7 +459,7 @@ const ProfileView = () => {
                 bgcolor: "#98b720",
                 mt: 2,
                 py: 1,
-                width: "15%",
+                width: {xs:"45%",md:"15%"},
                 borderRadius: "40px",
                 textTransform: "none",
 

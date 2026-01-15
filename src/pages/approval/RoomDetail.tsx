@@ -14,6 +14,8 @@ import {
   DialogActions,
   Menu,
   MenuItem,
+  useTheme,
+  useMediaQuery,
 } from "@mui/material";
 import KeyboardArrowLeftIcon from "@mui/icons-material/KeyboardArrowLeft";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
@@ -45,6 +47,8 @@ export default function RoomDetail({
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
   const [action, setAction] = useState("detail");
   const [searchParams, setSearchParams] = useSearchParams();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   // Parse dữ liệu từ room props
   const parsedName = room ? parseRoomName(room.name) || "Không có tên" : "";
   const parsedNameHotel = room
@@ -270,13 +274,12 @@ export default function RoomDetail({
               }}
               sx={{ fontSize: 30, mr: 1, cursor: "pointer" }}
             />
-            <Box>
+           <Box>
               <Typography variant='h5' fontWeight={600}>
                 {parsedName}
               </Typography>
-              <Typography color='gray'>{parsedNameHotel}</Typography>
+              {!isMobile&&<Typography color='gray'>{parsedNameHotel}</Typography>}
             </Box>
-
             <Box sx={{ flexGrow: 1 }} />
 
             <Box display={"flex"} gap={"10px"}>
@@ -288,8 +291,8 @@ export default function RoomDetail({
                   color: "black",
                   fontWeight: 600,
                   fontSize: 15,
-                  px: 4,
-                  py: 1.4,
+                  px: isMobile?2:4,
+                  py: isMobile?1:1.4,
                   borderRadius: "50px",
                   textTransform: "none",
                   boxShadow: "none",
@@ -304,8 +307,8 @@ export default function RoomDetail({
                   color: "white",
                   fontWeight: 600,
                   fontSize: 15,
-                  px: 4,
-                  py: 1.4,
+                  px: isMobile?2:4,
+                  py: isMobile?1:1.4,
                   borderRadius: "50px",
                   textTransform: "none",
                   boxShadow: "none",
@@ -328,7 +331,7 @@ export default function RoomDetail({
               Thông tin phòng
             </Typography>
 
-            <Grid container spacing={2} mb={4}>
+            <Grid container spacing={2} gap={{xs:5,md:0}} mb={4}>
               {[
                 { label: "Số lượng phòng bán", value: room?.number },
                 { label: "Diện tích", value: area },

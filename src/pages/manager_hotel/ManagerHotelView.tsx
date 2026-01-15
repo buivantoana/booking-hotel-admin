@@ -24,6 +24,7 @@ import {
   Pagination,
   useTheme,
   useMediaQuery,
+  Divider,
 } from "@mui/material";
 import {
   Add as AddIcon,
@@ -337,6 +338,207 @@ export default function ManagerHotelView({
       console.log(error);
     }
   };
+ 
+
+  // Desktop: Bảng gốc (giữ nguyên 100%)
+  const renderDesktop = () => (
+    <TableContainer sx={{ overflowX: "auto", mt: 4 }}>
+      <Table sx={{ minWidth: 1000 }}>
+        <TableHead>
+          <TableRow sx={{ bgcolor: "#f8f9fa" }}>
+            {[
+              "#",
+              "Tên khách sạn",
+              "Hình thức",
+              "Tình trạng",
+              "Địa chỉ",
+              "Số điện thoại",
+              "",
+            ].map((head) => (
+              <TableCell
+                key={head}
+                sx={{
+                  fontWeight: 600,
+                  color: "#555",
+                  fontSize: 14,
+                }}
+              >
+                {head}
+              </TableCell>
+            ))}
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {loading ? (
+            <TableRow>
+              <TableCell colSpan={7} align="center">
+                <Typography>Đang tải...</Typography>
+              </TableCell>
+            </TableRow>
+          ) : hotels.length === 0 ? (
+            <TableRow>
+              <TableCell colSpan={7} align="center">
+                <Typography>Không có dữ liệu</Typography>
+              </TableCell>
+            </TableRow>
+          ) : (
+            hotels?.map((hotel, index) => (
+              <TableRow hover key={hotel.id}>
+                <TableCell>{index + 1}</TableCell>
+
+                <TableCell
+                  onClick={() => {
+                    navigate(`/manager-hotel?id=${hotel.id}`);
+                    setAction("edit_detail");
+                  }}
+                  sx={{ fontWeight: 500, cursor: "pointer" }}
+                >
+                  {parseLang(hotel.name)}
+                </TableCell>
+
+                <TableCell>{renderCooperationChip(hotel.cooperation_type)}</TableCell>
+
+                <TableCell>{renderStatusChip(hotel.status)}</TableCell>
+
+                <TableCell sx={{ maxWidth: 280 }}>
+                  {parseLang(hotel.address)}
+                </TableCell>
+
+                <TableCell>{hotel.phone}</TableCell>
+
+                <TableCell>
+                  {["pending", "active", "terminated"].includes(hotel.status) && (
+                    <ActionMenu
+                      hotel={hotel}
+                      setAction={setAction}
+                      setIdHotel={setIdHotel}
+                      setDeleteDialogOpen={setDeleteDialogOpen}
+                      setApproveDialogOpen={setApproveDialogOpen}
+                      setCancelDialogOpen={setCancelDialogOpen}
+                    />
+                  )}
+                </TableCell>
+              </TableRow>
+            ))
+          )}
+        </TableBody>
+      </Table>
+    </TableContainer>
+  );
+
+  // Mobile: Card dọc
+  const renderMobile = () => (
+    <Box sx={{ mt: 4, display: "flex", flexDirection: "column", gap: 3 }}>
+      {loading ? (
+        <Typography align="center">Đang tải...</Typography>
+      ) : hotels.length === 0 ? (
+        <Typography align="center" color="#999" py={6}>
+          Không có dữ liệu
+        </Typography>
+      ) : (
+        hotels?.map((hotel, index) => (
+          <Paper
+            key={hotel.id}
+            elevation={0}
+            sx={{
+              borderRadius: "12px",
+              border: "1px solid #eee",
+              overflow: "hidden",
+              boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
+              cursor: "pointer",
+              transition: "all 0.2s",
+              "&:hover": {
+                boxShadow: "0 4px 16px rgba(0,0,0,0.12)",
+                transform: "translateY(-2px)",
+              },
+            }}
+          
+          >
+            {/* Header card */}
+            <Box
+              onClick={() => {
+                navigate(`/manager-hotel?id=${hotel.id}`);
+                setAction("edit_detail");
+              }}
+              sx={{
+                p: 2,
+                bgcolor: "#f8f9fa",
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                flexWrap: "wrap",
+                gap: 1,
+              }}
+            >
+              <Stack direction="row" spacing={1.5} alignItems="center">
+                <Typography variant="subtitle2" color="text.secondary">
+                  #{index + 1}
+                </Typography>
+                <Typography variant="subtitle1" fontWeight="600">
+                  {parseLang(hotel.name)}
+                </Typography>
+              </Stack>
+
+              {renderStatusChip(hotel.status)}
+            </Box>
+
+            <Divider />
+
+            {/* Nội dung chính */}
+            <Box sx={{ p: 2 }}>
+              <Stack spacing={1.5}>
+                <Box>
+                  <Typography variant="body2" color="text.secondary">
+                    Hình thức
+                  </Typography>
+                  <Box sx={{ mt: 0.5 }}>
+                    {renderCooperationChip(hotel.cooperation_type)}
+                  </Box>
+                </Box>
+
+                <Box>
+                  <Typography variant="body2" color="text.secondary">
+                    Địa chỉ
+                  </Typography>
+                  <Typography variant="body1" sx={{ mt: 0.5 }}>
+                    {parseLang(hotel.address)}
+                  </Typography>
+                </Box>
+
+                <Box>
+                  <Typography variant="body2" color="text.secondary">
+                    Số điện thoại
+                  </Typography>
+                  <Typography fontWeight="500">{hotel.phone || "N/A"}</Typography>
+                </Box>
+              </Stack>
+            </Box>
+
+            {/* Thao tác */}
+            <Box
+              sx={{
+                p: 2,
+                bgcolor: "#fafafa",
+                display: "flex",
+                justifyContent: "flex-end",
+              }}
+            >
+              {["pending", "active", "terminated"].includes(hotel.status) && (
+                <ActionMenu
+                  hotel={hotel}
+                  setAction={setAction}
+                  setIdHotel={setIdHotel}
+                  setDeleteDialogOpen={setDeleteDialogOpen}
+                  setApproveDialogOpen={setApproveDialogOpen}
+                  setCancelDialogOpen={setCancelDialogOpen}
+                />
+              )}
+            </Box>
+          </Paper>
+        ))
+      )}
+    </Box>
+  );
   return (
     <Box sx={{ p: { xs: 2, sm: 3, md: 4 }, minHeight: "100vh" }}>
         <Dialog
@@ -734,9 +936,9 @@ export default function ManagerHotelView({
               direction={{ xs: "column", sm: "row" }}
               mb={4}
               spacing={2}
-              alignItems='end'>
+              alignItems={{xs:"start",md:'end'}}>
               {/* Tìm kiếm */}
-              <Box>
+              <Box width={{xs:"100%",md:"unset"}}>
                 <Typography sx={{ mb: 1.5 }}>Tìm kiếm</Typography>
                 <TextField
                   placeholder='Tên khách sạn'
@@ -755,7 +957,7 @@ export default function ManagerHotelView({
                     ),
                   }}
                   sx={{
-                    width: 280,
+                    width:{xs:"100%",md:280},
                     "& .MuiOutlinedInput-root": {
                       height: 40,
                       borderRadius: "24px",
@@ -782,7 +984,7 @@ export default function ManagerHotelView({
                   }}
                 />
               </Box>
-              <Box>
+              <Box width={{xs:"100%",md:"unset"}}>
                 <Typography sx={{ mb: 1.5 }}>Địa điểm</Typography>
                 <Select
                   displayEmpty
@@ -795,7 +997,7 @@ export default function ManagerHotelView({
                     })
                   }
                   sx={{
-                    width: 200,
+                    width:{xs:"100%",md:200},
                     height: 40,
 
                     borderRadius: "24px",
@@ -836,7 +1038,7 @@ export default function ManagerHotelView({
               </Box>
 
               {/* 2 ô DatePicker – ĐÃ FIX LỖI 100% */}
-              <Box>
+              <Box width={{xs:"100%",md:"unset"}}>
                 <Typography sx={{ mb: 1.5 }}>Hình thức hợp tác</Typography>
                 <Select
                   displayEmpty
@@ -849,7 +1051,7 @@ export default function ManagerHotelView({
                     })
                   }
                   sx={{
-                    width: 200,
+                    width:{xs:"100%",md:200},
                     height: 40,
                     borderRadius: "24px",
                     bgcolor: "#fff",
@@ -925,97 +1127,7 @@ export default function ManagerHotelView({
                 </Box>
               </Stack>
             </Box>
-            <TableContainer>
-              <Table sx={{ minWidth: 1000 }}>
-                <TableHead>
-                  <TableRow sx={{ bgcolor: "#f8f9fa" }}>
-                    {[
-                      "#",
-                      "Tên khách sạn",
-                      "Hình thức",
-                      "Tình trạng",
-                      "Địa chỉ",
-
-                      "Số điện thoại",
-                      "",
-                    ].map((head) => (
-                      <TableCell
-                        key={head}
-                        sx={{ fontWeight: 600, color: "#555", fontSize: 14 }}>
-                        {head}
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {loading ? (
-                    <TableRow>
-                      <TableCell colSpan={8} align='center'>
-                        <Typography>Đang tải...</Typography>
-                      </TableCell>
-                    </TableRow>
-                  ) : (
-                    <>
-                      {hotels.length === 0 ? (
-                        <TableRow>
-                          <TableCell colSpan={8} align='center'>
-                            <Typography>Không có dữ liệu</Typography>
-                          </TableCell>
-                        </TableRow>
-                      ) : (
-                        <>
-                          {hotels?.map((hotel, index) => (
-                            <TableRow hover key={hotel.id}>
-                              <TableCell>{index + 1}</TableCell>
-
-                              <TableCell
-                                onClick={() => {
-                                  navigate(`/manager-hotel?id=${hotel.id}`);
-                                  setAction("edit_detail");
-                                }}
-                                sx={{ fontWeight: 500, cursor: "pointer" }}>
-                                {parseLang(hotel.name)}
-                              </TableCell>
-
-                              <TableCell>
-                                {renderCooperationChip(hotel.cooperation_type)}
-                              </TableCell>
-
-                              <TableCell>
-                                {renderStatusChip(hotel.status)}
-                              </TableCell>
-
-                              <TableCell sx={{ maxWidth: 280 }}>
-                                {parseLang(hotel.address)}
-                              </TableCell>
-
-                              {/* <TableCell>{hotel?.email}</TableCell> */}
-
-                              <TableCell>{hotel.phone}</TableCell>
-
-                              <TableCell>
-                                {["pending", "active", "terminated"].includes(
-                                  hotel.status
-                                ) && (
-                                    <ActionMenu
-                                      hotel={hotel}
-                                      setAction={setAction}
-                                      setIdHotel={setIdHotel}
-                                      setDeleteDialogOpen={setDeleteDialogOpen}
-                                      setApproveDialogOpen={setApproveDialogOpen}
-                                      setCancelDialogOpen={setCancelDialogOpen}
-                                    />
-                                  )}
-                              </TableCell>
-                            </TableRow>
-                          ))}
-                        </>
-                      )}
-                    </>
-                  )}
-                </TableBody>
-              </Table>
-            </TableContainer>
+            {isMobile ? renderMobile() : renderDesktop()}
             {hotels.length !== 0 && (
               <Stack spacing={2} sx={{ mt: 3, alignItems: "center" }}>
                 <Pagination

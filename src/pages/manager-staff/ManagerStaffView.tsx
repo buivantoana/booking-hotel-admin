@@ -25,6 +25,7 @@ import {
   useTheme,
   useMediaQuery,
   Select,
+  Divider,
 } from "@mui/material";
 import {
   Search as SearchIcon,
@@ -234,6 +235,193 @@ export default function ManagerStaffView({
       console.log(error);
     }
   };
+ 
+
+  // Desktop: Bảng gốc (giữ nguyên 100%)
+  const renderDesktop = () => (
+    <TableContainer sx={{ mt: 5, width: "100%", overflowX: "auto" }}>
+      <Table>
+        <TableHead>
+          <TableRow sx={{ bgcolor: "#f5f5f5" }}>
+            <TableCell><strong>#</strong></TableCell>
+            <TableCell><strong>Email</strong></TableCell>
+            <TableCell><strong>Trạng thái</strong></TableCell>
+            <TableCell><strong>Số lượng khách sạn</strong></TableCell>
+            <TableCell><strong>Số điện thoại</strong></TableCell>
+            <TableCell align="center"><strong></strong></TableCell>
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {loading ? (
+            <TableRow>
+              <TableCell colSpan={6} align="center">
+                Đang tải...
+              </TableCell>
+            </TableRow>
+          ) : displayedAccounts.length === 0 ? (
+            <TableRow>
+              <TableCell colSpan={6} align="center">
+                Không có dữ liệu
+              </TableCell>
+            </TableRow>
+          ) : (
+            displayedAccounts.map((account, index) => (
+              <TableRow
+                key={account.id}
+                hover
+                onClick={() => handleViewDetail(account)}
+                sx={{ cursor: "pointer" }}
+              >
+                <TableCell>
+                  {(pagination.page - 1) * pagination.limit + index + 1}
+                </TableCell>
+                <TableCell sx={{ fontWeight: 500 }}>
+                  {account.email}
+                </TableCell>
+                <TableCell>
+                  <Chip
+                    label={account.active ? "Đang hoạt động" : "Ngừng hợp tác"}
+                    sx={{
+                      bgcolor: account.active ? "#e8f5e9" : "#ffebee",
+                      color: account.active ? "#4caf50" : "#f44336",
+                      fontWeight: "medium",
+                    }}
+                  />
+                </TableCell>
+                <TableCell>{account.hotel_count || 0}</TableCell>
+                <TableCell>{account.phone || "-"}</TableCell>
+                <TableCell
+                  align="center"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <ActionMenu
+                    account={account}
+                    setSelectedAccount={setSelectedAccount}
+                    onViewDetail={() => {
+                      setSelectedAccount(account);
+                      setModalOpen(true);
+                    }}
+                    onToggleStatus={handleToggleStatus}
+                  />
+                </TableCell>
+              </TableRow>
+            ))
+          )}
+        </TableBody>
+      </Table>
+    </TableContainer>
+  );
+
+  // Mobile: Card dọc (UI đẹp, gọn gàng)
+  const renderMobile = () => (
+    <Box sx={{ mt: 5, display: "flex", flexDirection: "column", gap: 3 }}>
+      {loading ? (
+        <Typography align="center">Đang tải...</Typography>
+      ) : displayedAccounts.length === 0 ? (
+        <Typography align="center" color="#999" py={6}>
+          Không có dữ liệu
+        </Typography>
+      ) : (
+        displayedAccounts.map((account, index) => (
+          <Paper
+            key={account.id}
+            elevation={0}
+            sx={{
+              borderRadius: "12px",
+              border: "1px solid #eee",
+              overflow: "hidden",
+              boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
+              cursor: "pointer",
+              transition: "all 0.2s",
+              "&:hover": {
+                boxShadow: "0 4px 16px rgba(0,0,0,0.12)",
+                transform: "translateY(-2px)",
+              },
+            }}
+           
+          >
+            {/* Header card */}
+            <Box
+             onClick={() => handleViewDetail(account)}
+              sx={{
+                p: 2,
+                bgcolor: "#f8f9fa",
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                flexWrap: "wrap",
+                gap: 1,
+              }}
+            >
+              <Stack direction="row" spacing={1.5} alignItems="center">
+                <Typography variant="subtitle2" color="text.secondary">
+                  #{(pagination.page - 1) * pagination.limit + index + 1}
+                </Typography>
+                <Typography variant="subtitle1" fontWeight="600">
+                  {account.email}
+                </Typography>
+              </Stack>
+
+              <Chip
+                label={account.active ? "Đang hoạt động" : "Ngừng hợp tác"}
+                sx={{
+                  bgcolor: account.active ? "#e8f5e9" : "#ffebee",
+                  color: account.active ? "#4caf50" : "#f44336",
+                  fontWeight: "medium",
+                }}
+              />
+            </Box>
+
+            <Divider />
+
+            {/* Nội dung chính */}
+            <Box sx={{ p: 2 }}>
+              <Stack spacing={1.5}>
+                <Box>
+                  <Typography variant="body2" color="text.secondary">
+                    Số lượng khách sạn
+                  </Typography>
+                  <Typography fontWeight="600">
+                    {account.hotel_count || 0}
+                  </Typography>
+                </Box>
+
+                <Box>
+                  <Typography variant="body2" color="text.secondary">
+                    Số điện thoại
+                  </Typography>
+                  <Typography fontWeight="500">
+                    {account.phone || "-"}
+                  </Typography>
+                </Box>
+              </Stack>
+            </Box>
+
+            {/* Thao tác */}
+            <Box
+              sx={{
+                p: 2,
+                bgcolor: "#fafafa",
+                display: "flex",
+                justifyContent: "flex-end",
+              }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <ActionMenu
+                account={account}
+                setSelectedAccount={setSelectedAccount}
+                onViewDetail={() => {
+                  setSelectedAccount(account);
+                  setModalOpen(true);
+                }}
+                onToggleStatus={handleToggleStatus}
+              />
+            </Box>
+          </Paper>
+        ))
+      )}
+    </Box>
+  );
   return (
     <Box sx={{ p: { xs: 2, sm: 3, md: 4 } }}>
       <AccountModal
@@ -267,8 +455,8 @@ export default function ManagerStaffView({
             },
             color: "white",
             fontWeight: "bold",
-            fontSize: "16px",
-            padding: "12px 24px",
+            fontSize:isMobile?"12px":"16px",
+            padding:isMobile?1: "12px 24px",
             borderRadius: "12px", // bo tròn mạnh
             textTransform: "none", // không in hoa tự động
             boxShadow: "none",
@@ -289,9 +477,9 @@ export default function ManagerStaffView({
         <Stack
           direction={{ xs: "column", md: "row" }}
           spacing={2}
-          alignItems='end'
+          alignItems={{xs:"start",md:'end'}}
           mb={4}>
-          <Box>
+          <Box >
             <Typography sx={{ mb: 1 }}>Tìm kiếm</Typography>
             <TextField
               placeholder='Nhập email'
@@ -307,7 +495,7 @@ export default function ManagerStaffView({
                 ),
               }}
               sx={{
-                width: 300,
+                width: {xs:"100%",md:300},
                 "& .MuiOutlinedInput-root": {
                   height: 40,
                   borderRadius: "24px",
@@ -369,89 +557,7 @@ export default function ManagerStaffView({
         </Stack>
 
         {/* Bảng */}
-        <TableContainer>
-          <Table>
-            <TableHead>
-              <TableRow sx={{ bgcolor: "#f5f5f5" }}>
-                <TableCell>
-                  <strong>#</strong>
-                </TableCell>
-                <TableCell>
-                  <strong>Email</strong>
-                </TableCell>
-                <TableCell>
-                  <strong>Trạng thái</strong>
-                </TableCell>
-                <TableCell>
-                  <strong>Số lượng khách sạn</strong>
-                </TableCell>
-                <TableCell>
-                  <strong>Số điện thoại</strong>
-                </TableCell>
-                <TableCell align='center'>
-                  <strong></strong>
-                </TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {loading ? (
-                <TableRow>
-                  <TableCell colSpan={6} align='center'>
-                    Đang tải...
-                  </TableCell>
-                </TableRow>
-              ) : displayedAccounts.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={6} align='center'>
-                    Không có dữ liệu
-                  </TableCell>
-                </TableRow>
-              ) : (
-                displayedAccounts.map((account, index) => (
-                  <TableRow
-                    key={account.id}
-                    hover
-                    onClick={() => handleViewDetail(account)}
-                    sx={{ cursor: "pointer" }}>
-                    <TableCell>
-                      {(pagination.page - 1) * pagination.limit + index + 1}
-                    </TableCell>
-                    <TableCell sx={{ fontWeight: 500 }}>
-                      {account.email}
-                    </TableCell>
-                    <TableCell>
-                      <Chip
-                        label={
-                          account.active ? "Đang hoạt động" : "Ngừng hợp tác"
-                        }
-                        sx={{
-                          bgcolor: account.active ? "#e8f5e9" : "#ffebee",
-                          color: account.active ? "#4caf50" : "#f44336",
-                          fontWeight: "medium",
-                        }}
-                      />
-                    </TableCell>
-                    <TableCell>{account.hotel_count || 0}</TableCell>
-                    <TableCell>{account.phone || "-"}</TableCell>
-                    <TableCell
-                      align='center'
-                      onClick={(e) => e.stopPropagation()}>
-                      <ActionMenu
-                        account={account}
-                        setSelectedAccount={setSelectedAccount}
-                        onViewDetail={() => {
-                          setSelectedAccount(account);
-                          setModalOpen(true);
-                        }}
-                        onToggleStatus={handleToggleStatus}
-                      />
-                    </TableCell>
-                  </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
-        </TableContainer>
+        {isMobile ? renderMobile() : renderDesktop()}
 
         {/* Pagination */}
         <Stack sx={{ mt: 4, alignItems: "center" }}>
@@ -695,7 +801,7 @@ const AccountModal: React.FC<AccountModalProps> = ({
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth='sm' fullWidth>
-      <DialogTitle>
+      <DialogTitle sx={{p:{xs:1,md:3}}}>
         <Box display='flex' justifyContent='space-between' alignItems='center'>
           <Typography variant='h6' fontWeight='bold'>
             {isEdit ? "Chỉnh sửa thông tin" : "Thêm mới tài khoản"}
@@ -706,7 +812,7 @@ const AccountModal: React.FC<AccountModalProps> = ({
         </Box>
       </DialogTitle>
 
-      <DialogContent dividers>
+      <DialogContent sx={{p:{xs:1,md:3}}} dividers>
         <Box display='grid' gridTemplateColumns='1fr 1fr' gap={2} mt={1}>
           <Box>
             <Typography variant='subtitle2' color='text.secondary' mb={0.5}>

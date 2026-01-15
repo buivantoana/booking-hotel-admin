@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   Box,
   Typography,
@@ -6,6 +6,13 @@ import {
   ListItemButton,
   ListItemIcon,
   ListItemText,
+  useMediaQuery,
+  useTheme,
+  AppBar,
+  Toolbar,
+  IconButton,
+ 
+  Drawer,
 } from "@mui/material";
 import HomeOutlinedIcon from "@mui/icons-material/HomeOutlined";
 
@@ -29,7 +36,12 @@ export default function SidebarMenu() {
   const navigate = useNavigate();
   const user = JSON.parse(localStorage.getItem("user") || "{}");
 const role = user?.role;
-
+const theme = useTheme();
+const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+const [mobileOpen, setMobileOpen] = useState(false);
+const handleDrawerToggle = () => {
+  setMobileOpen(!mobileOpen);
+};
 const menuItems = [
   {
     id: "home",
@@ -96,7 +108,7 @@ const menuItems = [
   },
   {
     id: "attribute",
-    label: "Thiết lập cơ sở",
+    label: "Thiết lập cở sở",
     icon: <Add />,
     path: "/manager-attribute",
     roles: ["accountant", "admin", "super_admin"],
@@ -105,80 +117,136 @@ const menuItems = [
 const filteredMenu = menuItems.filter(item =>
   item.roles.includes(role)
 );
-  return (
-    <Box sx={{ position: "relative", height: "100vh" }}>
-      <Box
-        sx={{
-          width: { xs: "220px", sm: "260px" },
-          height: "calc(100vh - 32px)",
-          borderRight: "1px solid #eee",
-          p: 2,
-          bgcolor: "#fff",
-          flex: 0.7,
-        }}>
-        <Box my={3} display={"flex"} justifyContent={"center"}>
-          <img src={logo} width={200} alt='' />
-        </Box>
+const drawerContent = (
+  <Box
+    sx={{
+      width: isMobile?"100%":260,
+      height: "100vh",
+      bgcolor: "#fff",
+      borderRight: isMobile?"none":"1px solid #eee",
+      p: isMobile?0:2,
+      display: "flex",
+      flexDirection: "column",
+     
+    }}
+  >
+    {!isMobile&&<Box my={3} display="flex" justifyContent="center">
+      <img src={logo} width={200} alt="" />
+    </Box>}
 
-        <List sx={{ height: "70vh", overflowY: "auto" }}>
-          {filteredMenu.map((item) => {
-            const isActive = location.pathname === item.path;
+    <List sx={{ flexGrow: 1 }}>
+      {filteredMenu.map((item) => {
+        const isActive = location.pathname === item.path;
 
-            return (
-              <ListItemButton
-                key={item.id}
-                onClick={() => navigate(item.path)}
-                sx={{
-                  mb: 1,
-                  borderRadius: "20px",
-                  bgcolor: isActive ? "#F4FBE7" : "transparent",
-                  color: isActive ? "#7CB518" : "#8B93A1",
-                  "&:hover": {
-                    bgcolor: isActive ? "#EAF7D3" : "#f5f5f5",
-                  },
-                  fontWeight: isActive ? 700 : 500,
-                }}>
-                <ListItemIcon
-                  sx={{
-                    color: isActive ? "#7CB518" : "#8B93A1",
-                    minWidth: 40,
-                  }}>
-                  {item.icon}
-                </ListItemIcon>
+        return (
+          <ListItemButton
+            key={item.id}
+            onClick={() => {
+              navigate(item.path);
+              if (isMobile) setMobileOpen(false);
+            }}
+            sx={{
+              mb: 1,
+              borderRadius: "20px",
+              bgcolor: isActive ? "#F4FBE7" : "transparent",
+              color: isActive ? "#7CB518" : "#8B93A1",
+              "&:hover": {
+                bgcolor: isActive ? "#EAF7D3" : "#f5f5f5",
+              },
+              fontWeight: isActive ? 700 : 500,
+            }}
+          >
+            <ListItemIcon
+              sx={{ color: isActive ? "#7CB518" : "#8B93A1", minWidth: 40 }}
+            >
+              {item.icon}
+            </ListItemIcon>
 
-                <ListItemText
-                  primary={item.label}
-                  // Set fontSize ở đây là tốt nhất
-                  sx={{
-                    "& .MuiTypography-root": {
-                      fontSize: "18px", // hoặc "1rem"
-                      fontWeight: "inherit", // Kế thừa fontWeight từ ListItemButton
-                    },
-                  }}
-                  // Hoặc dùng primaryTypographyProps
-                  primaryTypographyProps={{
-                    sx: {
-                      fontSize: "16px",
-                      fontWeight: "inherit",
-                    },
-                  }}
-                />
-              </ListItemButton>
-            );
-          })}
-        </List>
-      </Box>
-      <Box
-        sx={{
-          position: "absolute",
-          bottom: 10,
-          width: "100%",
-          display: "flex",
-          justifyContent: "center",
-        }}>
-        <UserProfileButton />
-      </Box>
+            <ListItemText
+              primary={item.label}
+              primaryTypographyProps={{
+                sx: { fontSize: "16px", fontWeight: "inherit" },
+              }}
+            />
+          </ListItemButton>
+        );
+      })}
+    </List>
+
+    <Box
+      sx={{
+        width: "100%",
+        display: "flex",
+        justifyContent: "center",
+        mt: "auto",
+        pb: 4,
+        
+      }}
+    >
+      <UserProfileButton setMobileOpen={setMobileOpen} />
     </Box>
+  </Box>
+);
+  return (
+    <>
+    {isMobile && (
+        <AppBar
+          position="fixed"
+          sx={{
+            bgcolor: "white",
+           
+            color: "text.primary",
+            zIndex: (theme) => theme.zIndex.drawer + 2,
+            padding:0
+          }}
+        >
+          <Toolbar>
+            <IconButton
+              size="large"
+              edge="start"
+              color="inherit"
+              aria-label="menu"
+              onClick={handleDrawerToggle}
+              sx={{ mr: 2 }}
+            >
+              <Menu />
+            </IconButton>
+           <Box my={3} display="flex" justifyContent="center">
+         <img src={logo} width={150} alt="" />
+         </Box>
+          </Toolbar>
+        </AppBar>
+      )}
+
+      {/* Drawer mobile */}
+      <Drawer
+        variant="temporary"
+        open={mobileOpen}
+        onClose={handleDrawerToggle}
+        ModalProps={{ keepMounted: true }}
+        sx={{
+          display: { xs: "block", sm: "none" },
+          "& .MuiDrawer-paper": { boxSizing: "border-box", width: isMobile?"100%":260,pt:"120px" },
+        }}
+      >
+        {drawerContent}
+      </Drawer>
+
+      {/* Sidebar desktop */}
+      <Box
+        sx={{
+          width: isMobile?"100%":260,
+          flexShrink: 0,
+          display: { xs: "none", sm: "block" },
+          height: "100vh",
+          position: "sticky",
+          top: 0,
+        }}
+      >
+        {drawerContent}
+      </Box>
+    
+    </>
   );
 }
 
@@ -186,8 +254,10 @@ import { Avatar, Button, Popover, Divider, ListItem } from "@mui/material";
 import ArrowDropUpIcon from "@mui/icons-material/ArrowDropUp";
 import PersonIcon from "@mui/icons-material/Person";
 import { useBookingContext } from "../App";
-import { Add } from "@mui/icons-material";
-const UserProfileButton = () => {
+import { Add, Menu } from "@mui/icons-material";
+const UserProfileButton = ({setMobileOpen}) => {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const context = useBookingContext();
   const [anchorEl, setAnchorEl] = React.useState<HTMLButtonElement | null>(
     null
@@ -198,6 +268,7 @@ const UserProfileButton = () => {
   };
 
   const handleClose = () => {
+    if (isMobile) setMobileOpen(false)
     setAnchorEl(null);
   };
 

@@ -866,7 +866,7 @@ export default function HomeView({
         direction={{ xs: "column", sm: "row" }}
         justifyContent='space-between'
         alignItems='center'
-        mb={5}
+        mb={{xs:2,md:5}}
         gap={2}>
         <Box>
           <Typography variant='h5' fontWeight='bold'>
@@ -890,7 +890,7 @@ export default function HomeView({
       {/* Tổng quan đặt phòng */}
       <Box display={"flex"} justifyContent={"space-between"}>
         <Box>
-          <Typography variant='h6' fontWeight='bold' mb={1}>
+          <Typography variant='h6' fontSize={{xs:"17px",md:"20px"}} fontWeight='bold' mb={1}>
             Tổng quan đặt phòng
           </Typography>
           <Typography variant='body2' color='text.secondary' mb={4}>
@@ -965,7 +965,7 @@ export default function HomeView({
         Hiệu suất khách sạn
       </Typography>
 
-      <Grid container spacing={3} mb={8}>
+      <Grid container spacing={3} gap={{xs:4,md:0}} mb={8}>
         <Grid item xs={12} md={6}>
           <PerformanceChart
             title='Khách ghé thăm'
@@ -997,7 +997,7 @@ export default function HomeView({
           />
         </Grid>
       </Grid>
-      <Grid container spacing={3} mb={8}>
+      <Grid container spacing={3} gap={{xs:4,md:0}} mb={8}>
         <Grid item xs={12} md={6}>
           <PerformanceChart
             title='Lượt đặt phòng'
@@ -1038,7 +1038,7 @@ export default function HomeView({
       <Typography variant='h6' fontWeight='bold' mb={4}>
         Doanh thu
       </Typography>
-      <Grid container spacing={3}>
+      <Grid container gap={{xs:4,md:0}} spacing={3}>
         <Grid item xs={12} md={6}>
           <RevenueCompareChart
             setRoomTypeGeneral={setRoomTypeGeneral}

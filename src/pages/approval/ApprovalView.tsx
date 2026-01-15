@@ -22,6 +22,7 @@ import {
   useTheme,
   useMediaQuery,
   TextField,
+  Divider,
 } from "@mui/material";
 import {
   Add as AddIcon,
@@ -262,6 +263,413 @@ export default function ApprovalView({
     navigate(`/approval?tab=all`);
   };
 
+
+
+  // Desktop: Bảng gốc
+  const renderDesktop = () => (
+    <TableContainer sx={{ overflowX: "auto", mt: 4 }}>
+      <Table sx={{ minWidth: 1000 }}>
+        <TableHead>
+          <TableRow sx={{ bgcolor: "#f8f9fa" }}>
+            {[
+              "#",
+              "Tên khách sạn",
+              "Hình thức",
+              "Tình trạng",
+              "Địa chỉ",
+              "Mail",
+              "Số điện thoại",
+              "",
+            ].map((head) => (
+              <TableCell
+                key={head}
+                sx={{
+                  fontWeight: 600,
+                  color: "#555",
+                  fontSize: 14,
+                }}
+              >
+                {head}
+              </TableCell>
+            ))}
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {hotels.length === 0 ? (
+            <TableRow>
+              <TableCell colSpan={8} align="center">
+                <Typography>Không có dữ liệu</Typography>
+              </TableCell>
+            </TableRow>
+          ) : (
+            hotels?.map((hotel, index) => (
+              <TableRow hover key={hotel.id}>
+                <TableCell>{index + 1}</TableCell>
+
+                <TableCell
+                  onClick={() => {
+                    setIdHotel(hotel);
+                    navigate(`/approval?id=${hotel.id}`);
+                    setAction("edit_detail");
+                  }}
+                  sx={{ fontWeight: 500, cursor: "pointer" }}
+                >
+                  {parseLang(hotel.name)}
+                </TableCell>
+
+                <TableCell>{renderCooperationChip(hotel.cooperation_type)}</TableCell>
+
+                <TableCell>{renderStatusChip(hotel.status)}</TableCell>
+
+                <TableCell sx={{ maxWidth: 280 }}>
+                  {parseLang(hotel.address)}
+                </TableCell>
+
+                <TableCell>{hotel.email}</TableCell>
+
+                <TableCell>
+                  {hotel.cooperation_type === "listing" ? "Online" : "Cả hai"}
+                </TableCell>
+
+                <TableCell>
+                  <ActionMenu
+                    hotel={hotel}
+                    setIdHotel={setIdHotel}
+                    setAction={setAction}
+                    setDeleteDialogOpen={setDeleteDialogOpen}
+                    setCancelDialogOpen={setCancelDialogOpen}
+                  />
+                </TableCell>
+              </TableRow>
+            ))
+          )}
+        </TableBody>
+      </Table>
+    </TableContainer>
+  );
+
+  // Mobile: Card dọc
+  const renderMobile = () => (
+    <Box sx={{ mt: 4, display: "flex", flexDirection: "column", gap: 3 }}>
+      {hotels.length === 0 ? (
+        <Typography align="center" color="#999" py={6}>
+          Không có dữ liệu
+        </Typography>
+      ) : (
+        hotels?.map((hotel, index) => (
+          <Paper
+            key={hotel.id}
+            elevation={0}
+            sx={{
+              borderRadius: "12px",
+              border: "1px solid #eee",
+              overflow: "hidden",
+              boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
+              cursor: "pointer",
+              transition: "all 0.2s",
+              "&:hover": {
+                boxShadow: "0 4px 16px rgba(0,0,0,0.12)",
+                transform: "translateY(-2px)",
+              },
+            }}
+           
+          >
+            {/* Header card */}
+            <Box
+             onClick={() => {
+              setIdHotel(hotel);
+              navigate(`/approval?id=${hotel.id}`);
+              setAction("edit_detail");
+            }}
+              sx={{
+                p: 2,
+                bgcolor: "#f8f9fa",
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                flexWrap: "wrap",
+                gap: 1,
+              }}
+            >
+              <Stack direction="row" spacing={1.5} alignItems="center">
+                <Typography variant="subtitle2" color="text.secondary">
+                  #{index + 1}
+                </Typography>
+                <Typography variant="subtitle1" fontWeight="600">
+                  {parseLang(hotel.name)}
+                </Typography>
+              </Stack>
+
+              {renderStatusChip(hotel.status)}
+            </Box>
+
+            <Divider />
+
+            {/* Nội dung chính */}
+            <Box sx={{ p: 2 }}>
+              <Stack spacing={1.5}>
+                <Box>
+                  <Typography variant="body2" color="text.secondary">
+                    Hình thức
+                  </Typography>
+                  <Box sx={{ mt: 0.5 }}>
+                    {renderCooperationChip(hotel.cooperation_type)}
+                  </Box>
+                </Box>
+
+                <Box>
+                  <Typography variant="body2" color="text.secondary">
+                    Địa chỉ
+                  </Typography>
+                  <Typography variant="body1" sx={{ mt: 0.5 }}>
+                    {parseLang(hotel.address)}
+                  </Typography>
+                </Box>
+
+                <Stack direction="row" justifyContent="space-between">
+                  <Box>
+                    <Typography variant="body2" color="text.secondary">
+                      Mail
+                    </Typography>
+                    <Typography>{hotel.email || "N/A"}</Typography>
+                  </Box>
+
+                  <Box textAlign="right">
+                    <Typography variant="body2" color="text.secondary">
+                      SĐT
+                    </Typography>
+                    <Typography>{hotel.phone || "N/A"}</Typography>
+                  </Box>
+                </Stack>
+              </Stack>
+            </Box>
+
+            {/* Thao tác */}
+            <Box
+              sx={{
+                p: 2,
+                bgcolor: "#fafafa",
+                display: "flex",
+                justifyContent: "flex-end",
+              }}
+            >
+              <ActionMenu
+                hotel={hotel}
+                setIdHotel={setIdHotel}
+                setAction={setAction}
+                setDeleteDialogOpen={setDeleteDialogOpen}
+                setCancelDialogOpen={setCancelDialogOpen}
+              />
+            </Box>
+          </Paper>
+        ))
+      )}
+    </Box>
+  );
+
+
+
+  // Desktop: Bảng gốc (giữ nguyên)
+  const renderDesktopRooms = () => (
+    <TableContainer sx={{ overflowX: "auto", mt: 4 }}>
+      <Table sx={{ minWidth: 1000 }}>
+        <TableHead>
+          <TableRow sx={{ bgcolor: "#f8f9fa" }}>
+            {[
+              "Tên loại phòng",
+              "Tên khách sạn",
+              "Trạng thái",
+              "Giá theo giờ",
+              "Giá qua đêm",
+              "Giá qua ngày",
+              "",
+            ].map((head) => (
+              <TableCell
+                key={head}
+                sx={{
+                  fontWeight: 600,
+                  color: "#555",
+                  fontSize: 14,
+                }}
+              >
+                {head}
+              </TableCell>
+            ))}
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {rooms.length === 0 ? (
+            <TableRow>
+              <TableCell colSpan={7} align="center" sx={{ py: 6 }}>
+                <Typography color="#999">Chưa có loại phòng nào</Typography>
+              </TableCell>
+            </TableRow>
+          ) : (
+            rooms.map((room: any) => (
+              <TableRow key={room.id} hover>
+                {/* Tên loại phòng */}
+                <TableCell
+                  onClick={() => handleRoomClick(room)}
+                  sx={{
+                    fontWeight: 500,
+                    cursor: "pointer",
+                    "&:hover": {
+                      textDecoration: "underline",
+                      color: "#98B720",
+                    },
+                  }}
+                >
+                  {parseRoomName(room.name) || "Không có tên"}
+                </TableCell>
+
+                {/* Tên khách sạn */}
+                <TableCell
+                  sx={{
+                    fontWeight: 500,
+                    cursor: "pointer",
+                  }}
+                >
+                  {parseRoomName(room.hotel_name) || "Không có tên"}
+                </TableCell>
+
+                {/* Trạng thái */}
+                <TableCell>{renderStatusChip(room.status)}</TableCell>
+
+                {/* Giá theo giờ */}
+                <TableCell>{formatPrice(room.price_hourly)}</TableCell>
+
+                {/* Giá qua đêm */}
+                <TableCell>{formatPrice(room.price_overnight)}</TableCell>
+
+                {/* Giá qua ngày */}
+                <TableCell>{formatPrice(room.price_daily)}</TableCell>
+
+                {/* Thao tác */}
+                <TableCell align="right">
+                  <ActionMenu
+                    hotel={room}
+                    activeTab={activeTab}
+                    setIdHotel={setRoom}
+                    setAction={setAction}
+                    setDeleteDialogOpen={setDeleteDialogOpen}
+                    setCancelDialogOpen={setCancelDialogOpen}
+                  />
+                </TableCell>
+              </TableRow>
+            ))
+          )}
+        </TableBody>
+      </Table>
+    </TableContainer>
+  );
+
+  // Mobile: Card dọc
+  const renderMobileRooms = () => (
+    <Box sx={{ mt: 4, display: "flex", flexDirection: "column", gap: 3 }}>
+      {rooms.length === 0 ? (
+        <Typography align="center" color="#999" py={6}>
+          Chưa có loại phòng nào
+        </Typography>
+      ) : (
+        rooms.map((room: any) => (
+          <Paper
+            key={room.id}
+            elevation={0}
+            sx={{
+              borderRadius: "12px",
+              border: "1px solid #eee",
+              overflow: "hidden",
+              boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
+              cursor: "pointer",
+              transition: "all 0.2s",
+              "&:hover": {
+                boxShadow: "0 4px 16px rgba(0,0,0,0.12)",
+                transform: "translateY(-2px)",
+              },
+            }}
+          
+          >
+            {/* Header card */}
+            <Box
+              onClick={() => handleRoomClick(room)}
+              sx={{
+                p: 2,
+                bgcolor: "#f8f9fa",
+                display: "flex",
+                flexDirection: "column",
+                gap: 0.5,
+              }}
+            >
+              <Typography variant="subtitle1" fontWeight="600">
+                {parseRoomName(room.name) || "Không có tên"}
+              </Typography>
+
+              <Typography variant="body2" color="text.secondary">
+                {parseRoomName(room.hotel_name) || "Không có tên"}
+              </Typography>
+
+              <Box sx={{ mt: 1 }}>{renderStatusChip(room.status)}</Box>
+            </Box>
+
+            <Divider />
+
+            {/* Các mức giá */}
+            <Box sx={{ p: 2 }}>
+              <Stack spacing={1.5}>
+                <Stack direction="row" justifyContent="space-between">
+                  <Box>
+                    <Typography variant="body2" color="text.secondary">
+                      Giá theo giờ
+                    </Typography>
+                    <Typography fontWeight="500">
+                      {formatPrice(room.price_hourly)}
+                    </Typography>
+                  </Box>
+
+                  <Box textAlign="right">
+                    <Typography variant="body2" color="text.secondary">
+                      Giá qua đêm
+                    </Typography>
+                    <Typography fontWeight="500">
+                      {formatPrice(room.price_overnight)}
+                    </Typography>
+                  </Box>
+                </Stack>
+
+                <Box>
+                  <Typography variant="body2" color="text.secondary">
+                    Giá qua ngày
+                  </Typography>
+                  <Typography fontWeight="500">
+                    {formatPrice(room.price_daily)}
+                  </Typography>
+                </Box>
+              </Stack>
+            </Box>
+
+            {/* Thao tác */}
+            <Box
+              sx={{
+                p: 2,
+                bgcolor: "#fafafa",
+                display: "flex",
+                justifyContent: "flex-end",
+              }}
+            >
+              <ActionMenu
+                hotel={room}
+                activeTab={activeTab}
+                setIdHotel={setRoom}
+                setAction={setAction}
+                setDeleteDialogOpen={setDeleteDialogOpen}
+                setCancelDialogOpen={setCancelDialogOpen}
+              />
+            </Box>
+          </Paper>
+        ))
+      )}
+    </Box>
+  );
   return (
     <Box sx={{ p: { xs: 2, sm: 3, md: 4 }, minHeight: "100vh" }}>
       {action == "detail" && (
@@ -361,91 +769,7 @@ export default function ApprovalView({
                   </Stack>
                 </Box>
 
-                <TableContainer>
-                  <Table sx={{ minWidth: 1000 }}>
-                    <TableHead>
-                      <TableRow sx={{ bgcolor: "#f8f9fa" }}>
-                        {[
-                          "#",
-                          "Tên khách sạn",
-                          "Hình thức",
-                          "Tình trạng",
-                          "Địa chỉ",
-                          "Mail",
-                          "Số điện thoại",
-                          "",
-                        ].map((head) => (
-                          <TableCell
-                            key={head}
-                            sx={{
-                              fontWeight: 600,
-                              color: "#555",
-                              fontSize: 14,
-                            }}>
-                            {head}
-                          </TableCell>
-                        ))}
-                      </TableRow>
-                    </TableHead>
-                    <TableBody>
-                      {hotels.length === 0 ? (
-                        <TableRow>
-                          <TableCell colSpan={8} align='center'>
-                            <Typography>Không có dữ liệu</Typography>
-                          </TableCell>
-                        </TableRow>
-                      ) : (
-                        <>
-                          {hotels?.map((hotel, index) => (
-                            <TableRow hover key={hotel.id}>
-                              <TableCell>{index + 1}</TableCell>
-
-                              <TableCell
-                                onClick={() => {
-                                  setIdHotel(hotel);
-                                  navigate(`/approval?id=${hotel.id}`);
-                                  setAction("edit_detail");
-                                }}
-                                sx={{ fontWeight: 500, cursor: "pointer" }}>
-                                {parseLang(hotel.name)}
-                              </TableCell>
-
-                              <TableCell>
-                                {renderCooperationChip(hotel.cooperation_type)}
-                              </TableCell>
-
-                              <TableCell>
-                                {renderStatusChip(hotel.status)}
-                              </TableCell>
-
-                              <TableCell sx={{ maxWidth: 280 }}>
-                                {parseLang(hotel.address)}
-                              </TableCell>
-
-                              <TableCell>{hotel.commission_rate}%</TableCell>
-
-                              <TableCell>
-                                {hotel.cooperation_type === "listing"
-                                  ? "Online"
-                                  : "Cả hai"}
-                              </TableCell>
-
-                              <TableCell>
-                                <ActionMenu
-                                  hotel={hotel}
-                                  setIdHotel={setIdHotel}
-                                  setAction={setAction}
-                                  setDeleteDialogOpen={setDeleteDialogOpen}
-                                  setCancelDialogOpen={setCancelDialogOpen}
-                                />
-                              </TableCell>
-                            </TableRow>
-                          ))}
-                        </>
-                      )}
-                    </TableBody>
-                  </Table>
-                </TableContainer>
+                {isMobile ? renderMobile() : renderDesktop()}
                 {hotels.length !== 0 && (
                   <Stack spacing={2} sx={{ mt: 3, alignItems: "center" }}>
                     <Pagination
@@ -501,103 +825,7 @@ export default function ApprovalView({
                     </Box>
                   </Stack>
                 </Box>
-                <TableContainer>
-                  <Table sx={{ minWidth: 1000 }}>
-                    <TableHead>
-                      <TableRow sx={{ bgcolor: "#f8f9fa" }}>
-                        {[
-                          "Tên loại phòng",
-                          "Tên khách sạn",
-                          "Trang thái",
-                          "Giá theo giờ",
-                          "Giá qua đêm",
-                          "Giá qua ngày",
-                          "",
-                        ].map((head) => (
-                          <TableCell
-                            key={head}
-                            sx={{
-                              fontWeight: 600,
-                              color: "#555",
-                              fontSize: 14,
-                            }}>
-                            {head}
-                          </TableCell>
-                        ))}
-                      </TableRow>
-                    </TableHead>
-                    <TableBody>
-                      {rooms.length === 0 ? (
-                        <TableRow>
-                          <TableCell colSpan={7} align='center' sx={{ py: 6 }}>
-                            <Typography color='#999'>
-                              Chưa có loại phòng nào
-                            </Typography>
-                          </TableCell>
-                        </TableRow>
-                      ) : (
-                        rooms.map((room: any) => (
-                          <TableRow key={room.id} hover>
-                            {/* Tên loại phòng */}
-                            <TableCell
-                              onClick={() => handleRoomClick(room)}
-                              sx={{
-                                fontWeight: 500,
-                                cursor: "pointer",
-                                "&:hover": {
-                                  textDecoration: "underline",
-                                  color: "#98B720",
-                                },
-                              }}>
-                              {parseRoomName(room.name) || "Không có tên"}
-                            </TableCell>
-                            <TableCell
-                             
-                              sx={{
-                                fontWeight: 500,
-                                cursor: "pointer",
-                               
-                              }}>
-                              {parseRoomName(room.hotel_name) || "Không có tên"}
-                            </TableCell>
-
-                            {/* Trang thái */}
-                            <TableCell>
-                              {renderStatusChip(room.status)}
-                            </TableCell>
-
-                            {/* Giá theo giờ */}
-                            <TableCell>
-                              {formatPrice(room.price_hourly)}
-                            </TableCell>
-
-                            {/* Giá qua đêm */}
-                            <TableCell>
-                              {formatPrice(room.price_overnight)}
-                            </TableCell>
-
-                            {/* Giá qua ngày */}
-                            <TableCell>
-                              {formatPrice(room.price_daily)}
-                            </TableCell>
-
-                            {/* Thao tác */}
-                            <TableCell align='right'>
-                              <ActionMenu
-                                hotel={room}
-                                activeTab={activeTab}
-                                setIdHotel={setRoom}
-                                setAction={setAction}
-                                setDeleteDialogOpen={setDeleteDialogOpen}
-                                setCancelDialogOpen={setCancelDialogOpen}
-                              />
-                            </TableCell>
-                          </TableRow>
-                        ))
-                      )}
-                    </TableBody>
-                  </Table>
-                </TableContainer>
+                {isMobile ? renderMobileRooms() : renderDesktopRooms()}
                 {rooms.length !== 0 && (
                   <Stack spacing={2} sx={{ mt: 3, alignItems: "center" }}>
                     <Pagination

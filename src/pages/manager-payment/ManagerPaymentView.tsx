@@ -51,7 +51,7 @@ export default function ManagerPaymentView({
 
   Payment,
   pagination,
-
+  loading,
   onPageChange,
   dateRange,
   setDateRange,
@@ -160,7 +160,7 @@ export default function ManagerPaymentView({
     onResetFilter();
   };
 
-
+  const formatPrice = (amount) => new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(amount).replace("₫", "").trim();
 
   const tabs = [
     { label: "Tất cả", value: "all" },
@@ -169,6 +169,239 @@ export default function ManagerPaymentView({
     { label: "Chờ xử lý", value: "pending" },
     { label: "Hoàn trả", value: "refunded" },
   ];
+ 
+
+  // Desktop: Bảng gốc (giữ nguyên 100%)
+  const renderDesktop = () => (
+    <TableContainer sx={{ mt: 5, width: "100%", overflowX: "auto" }}>
+      <Table>
+        <TableHead>
+          <TableRow sx={{ backgroundColor: "#f5f5f5" }}>
+            <TableCell><strong>#</strong></TableCell>
+            <TableCell><strong>Mã đặt phòng</strong></TableCell>
+            <TableCell><strong>Mã thanh toán</strong></TableCell>
+            <TableCell><strong>Phương thức thanh toán</strong></TableCell>
+            <TableCell><strong>Giá tiền</strong></TableCell>
+            <TableCell><strong>Thời gian</strong></TableCell>
+            <TableCell><strong>Tình trạng thanh toán</strong></TableCell>
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {loading ? (
+            <TableRow>
+              <TableCell colSpan={7} align="center">
+                <Typography>Đang tải...</Typography>
+              </TableCell>
+            </TableRow>
+          ) : Payment.length === 0 ? (
+            <TableRow>
+              <TableCell colSpan={7} align="center">
+                <Typography>Không có dữ liệu</Typography>
+              </TableCell>
+            </TableRow>
+          ) : (
+            Payment.map((payment, index) => {
+              const formattedAmount = formatPrice(payment.amount);
+              const formattedTime = dayjs(payment.created_at).format("HH:mm:ss DD/MM/YYYY");
+
+              const methodLabel = {
+                momo: "MoMo",
+                vnpay: "VN Pay",
+                cash: "Thanh toán trực tiếp",
+              }[payment.method?.toLowerCase()] || payment.method;
+
+              const statusConfig = {
+                paid: { label: "Thành công", color: "#98b720", textColor: "white" },
+                failed: { label: "Thất bại", color: "#d32f2f", textColor: "white" },
+                pending: { label: "Chờ xử lý", color: "#ffb020", textColor: "white" },
+                refunded: { label: "Hoàn trả", color: "#1976d2", textColor: "white" },
+              };
+
+              const status = statusConfig[payment.status] || {
+                label: "Không xác định",
+                color: "#9e9e9e",
+                textColor: "white",
+              };
+
+              return (
+                <TableRow
+                  key={payment.id}
+                  hover
+                  sx={{ cursor: "pointer" }}
+                  onClick={() => handleRowClick(payment)}
+                >
+                  <TableCell>{index + 1}</TableCell>
+                  <TableCell>
+                    <Stack>
+                      <Typography fontWeight={500}>{payment.booking_code}</Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        Khách sạn 123 {/* thay bằng dữ liệu thật nếu có */}
+                      </Typography>
+                    </Stack>
+                  </TableCell>
+                  <TableCell>
+                    <Typography fontWeight={500}>{payment.id}</Typography>
+                  </TableCell>
+                  <TableCell>
+                    <Typography>{methodLabel}</Typography>
+                  </TableCell>
+                  <TableCell>
+                    <Typography fontWeight={600} color="#333">
+                      {formattedAmount}
+                    </Typography>
+                  </TableCell>
+                  <TableCell>
+                    <Typography>{formattedTime}</Typography>
+                  </TableCell>
+                  <TableCell>
+                    <Chip
+                      label={status.label}
+                      size="small"
+                      sx={{
+                        bgcolor: status.color,
+                        color: status.textColor,
+                        fontWeight: 500,
+                        borderRadius: "12px",
+                        minWidth: 100,
+                      }}
+                    />
+                  </TableCell>
+                </TableRow>
+              );
+            })
+          )}
+        </TableBody>
+      </Table>
+    </TableContainer>
+  );
+
+  // Mobile: Card dọc
+  const renderMobile = () => (
+    <Box sx={{ mt: 5, display: "flex", flexDirection: "column", gap: 3 }}>
+      {loading ? (
+        <Typography align="center">Đang tải...</Typography>
+      ) : Payment.length === 0 ? (
+        <Typography align="center" color="#999" py={6}>
+          Không có dữ liệu
+        </Typography>
+      ) : (
+        Payment.map((payment, index) => {
+          const formattedAmount = formatPrice(payment.amount);
+          const formattedTime = dayjs(payment.created_at).format("HH:mm:ss DD/MM/YYYY");
+
+          const methodLabel = {
+            momo: "MoMo",
+            vnpay: "VN Pay",
+            cash: "Thanh toán trực tiếp",
+          }[payment.method?.toLowerCase()] || payment.method;
+
+          const statusConfig = {
+            paid: { label: "Thành công", color: "#98b720", textColor: "white" },
+            failed: { label: "Thất bại", color: "#d32f2f", textColor: "white" },
+            pending: { label: "Chờ xử lý", color: "#ffb020", textColor: "white" },
+            refunded: { label: "Hoàn trả", color: "#1976d2", textColor: "white" },
+          };
+
+          const status = statusConfig[payment.status] || {
+            label: "Không xác định",
+            color: "#9e9e9e",
+            textColor: "white",
+          };
+
+          return (
+            <Paper
+              key={payment.id}
+              elevation={0}
+              sx={{
+                borderRadius: "12px",
+                border: "1px solid #eee",
+                overflow: "hidden",
+                boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
+                cursor: "pointer",
+                transition: "all 0.2s",
+                "&:hover": {
+                  boxShadow: "0 4px 16px rgba(0,0,0,0.12)",
+                  transform: "translateY(-2px)",
+                },
+              }}
+              onClick={() => handleRowClick(payment)}
+            >
+              {/* Header card */}
+              <Box
+                sx={{
+                  p: 2,
+                  bgcolor: "#f8f9fa",
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  flexWrap: "wrap",
+                  gap: 1,
+                }}
+              >
+                <Stack direction="row" spacing={1.5} alignItems="center">
+                  <Typography variant="subtitle2" color="text.secondary">
+                    #{index + 1}
+                  </Typography>
+                  <Typography variant="subtitle1" fontWeight="600">
+                    {payment.booking_code}
+                  </Typography>
+                </Stack>
+
+                <Chip
+                  label={status.label}
+                  size="small"
+                  sx={{
+                    bgcolor: status.color,
+                    color: status.textColor,
+                    fontWeight: 500,
+                    borderRadius: "12px",
+                    minWidth: 100,
+                  }}
+                />
+              </Box>
+
+              <Divider />
+
+              {/* Nội dung chính */}
+              <Box sx={{ p: 2 }}>
+                <Stack spacing={1.5}>
+                  <Box>
+                    <Typography variant="body2" color="text.secondary">
+                      Phương thức
+                    </Typography>
+                    <Typography fontWeight="500">{methodLabel}</Typography>
+                  </Box>
+
+                  <Box>
+                    <Typography variant="body2" color="text.secondary">
+                      Giá tiền
+                    </Typography>
+                    <Typography fontWeight="600" color="#333">
+                      {formattedAmount}
+                    </Typography>
+                  </Box>
+
+                  <Box>
+                    <Typography variant="body2" color="text.secondary">
+                      Thời gian
+                    </Typography>
+                    <Typography color="#616161">{formattedTime}</Typography>
+                  </Box>
+
+                  <Box>
+                    <Typography variant="body2" color="text.secondary">
+                      Mã thanh toán
+                    </Typography>
+                    <Typography fontWeight="500">{payment.id}</Typography>
+                  </Box>
+                </Stack>
+              </Box>
+            </Paper>
+          );
+        })
+      )}
+    </Box>
+  );
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
       <Box sx={{ p: { xs: 2, sm: 3, md: 4 }, minHeight: "100vh" }}>
@@ -195,9 +428,9 @@ export default function ManagerPaymentView({
               direction={{ xs: "column", sm: "row" }}
               mb={4}
               spacing={2}
-              alignItems='end'>
+              alignItems={{xs:"start",md:'end'}}>
               {/* Tìm kiếm */}
-              <Box>
+              <Box width={{xs:"100%",md:"unset"}}>
                 <Typography sx={{ mb: 1.5 }}>Tìm kiếm</Typography>
                 <TextField
                   placeholder='Tìm mã đặt phòng'
@@ -216,7 +449,7 @@ export default function ManagerPaymentView({
                     ),
                   }}
                   sx={{
-                    width: 280,
+                    width: {xs:"100%",md:280},
                     "& .MuiOutlinedInput-root": {
                       height: 40,
                       borderRadius: "24px",
@@ -243,7 +476,7 @@ export default function ManagerPaymentView({
                   }}
                 />
               </Box>
-              <Box>
+              <Box width={{xs:"100%",md:"unset"}}>
                 <Typography sx={{ mb: 1.5 }}>Phương thức thanh toán</Typography>
                 <Select
                   displayEmpty
@@ -256,7 +489,7 @@ export default function ManagerPaymentView({
                     })
                   }
                   sx={{
-                    width: 200,
+                    width: {xs:"100%",md:200},
                     height: 40,
                     borderRadius: "24px",
                     bgcolor: "#fff",
@@ -290,7 +523,7 @@ export default function ManagerPaymentView({
               </Box>
 
               {/* 2 ô DatePicker – ĐÃ FIX LỖI 100% */}
-              <Box>
+              <Box width={{xs:"100%",md:"unset"}}>
                 <Typography sx={{ mb: 1.5 }}>Thời gian</Typography>
                 <SimpleDateSearchBar
                   value={dateRange}
@@ -353,138 +586,7 @@ export default function ManagerPaymentView({
               })}
             </Stack>
           </Stack>
-          <TableContainer sx={{ mt: 5, width: "100%" }}>
-            <Table>
-              <TableHead>
-                <TableRow sx={{ backgroundColor: "#f5f5f5" }}>
-                <TableCell>
-                    <strong>#</strong>
-                  </TableCell>
-                  <TableCell>
-                    <strong>Mã đặt phòng</strong>
-                  </TableCell>
-                  <TableCell>
-                    <strong>Mã thanh toán</strong>
-                  </TableCell>
-                  <TableCell>
-                    <strong>Phương thức thanh toán</strong>
-                  </TableCell>
-                  <TableCell>
-                    <strong>Giá tiền</strong>
-                  </TableCell>
-                  <TableCell>
-                    <strong>Thời gian</strong>
-                  </TableCell>
-                  <TableCell>
-                    <strong>Tình trạng thanh toán</strong>
-                  </TableCell>
-                </TableRow>
-              </TableHead>
-              
-                <TableBody>
-                {Payment.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={8} align='center'>
-                      <Typography>Không có dữ liệu</Typography>
-                    </TableCell>
-                  </TableRow>
-                ) :
-                  <>
-                  {Payment.map((payment, index) => {
-                    // Format giá tiền
-                    const formattedAmount = new Intl.NumberFormat("vi-VN", {
-                      style: "currency",
-                      currency: "VND",
-                    }).format(payment.amount);
-
-                    // Format thời gian
-                    const formattedTime = dayjs(payment.created_at).format("HH:mm:ss DD/MM/YYYY");
-
-                    // Mapping phương thức thanh toán hiển thị đẹp
-                    const methodLabel = {
-                      momo: "MoMo",
-                      vnpay: "VN Pay",
-                      Cash: "Thanh toán trực tiếp",
-                    }[payment.method.toLowerCase()] || payment.method;
-
-                    // Mapping trạng thái + màu chip
-                    const statusConfig = {
-                      paid: { label: "Thành công", color: "#98b720", textColor: "white" },
-                      failed: { label: "Thất bại", color: "#d32f2f", textColor: "white" },
-                      pending: { label: "Chờ xử lý", color: "#ffb020", textColor: "white" },
-                      refunded: { label: "Hoàn trả", color: "#1976d2", textColor: "white" },
-                    };
-
-                    const status = statusConfig[payment.status] || {
-                      label: "Không xác định",
-                      color: "#9e9e9e",
-                      textColor: "white",
-                    };
-
-                    return (
-                      <TableRow
-                        key={payment.id}
-                        hover
-                        sx={{ cursor: "pointer" }}
-                        onClick={() => handleRowClick(payment)} // Nếu cần mở chi tiết
-                      >
-                        {/* STT */}
-                        <TableCell>{index + 1}</TableCell>
-
-                        {/* Mã đặt phòng */}
-                        <TableCell>
-                          <Stack>
-                            <Typography fontWeight={500}>{payment.booking_code}</Typography>
-                            <Typography variant="body2" color="text.secondary">
-                              Khách sạn 123
-                            </Typography>
-                          </Stack>
-                        </TableCell>
-
-                        {/* Mã thanh toán */}
-                        <TableCell>
-                          <Typography fontWeight={500}>{payment.id}</Typography>
-                        </TableCell>
-
-                        {/* Phương thức thanh toán */}
-                        <TableCell>
-                          <Typography>{methodLabel}</Typography>
-                        </TableCell>
-
-                        {/* Giá tiền */}
-                        <TableCell>
-                          <Typography fontWeight={600} color="#333">
-                            {formattedAmount.replace("₫", "")}
-                          </Typography>
-                        </TableCell>
-
-                        {/* Thời gian */}
-                        <TableCell>
-                          <Typography>{formattedTime}</Typography>
-                        </TableCell>
-
-                        {/* Tình trạng thanh toán */}
-                        <TableCell>
-                          <Chip
-                            label={status.label}
-                            size="small"
-                            sx={{
-                              bgcolor: status.color,
-                              color: status.textColor,
-                              fontWeight: 500,
-                              borderRadius: "12px",
-                              minWidth: 80,
-                            }}
-                          />
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })}
-                  
-                  </>}
-                </TableBody>
-            </Table>
-          </TableContainer>
+          {isMobile ? renderMobile() : renderDesktop()}
           {Payment.length !== 0  &&<Stack spacing={2} sx={{ mt: 3, alignItems: "center" }}>
             <Pagination
               key={pagination.page} // ← THÊM DÒNG NÀY ĐỂ FORCE RE-RENDER KHI PAGE THAY ĐỔI

@@ -25,6 +25,7 @@ import {
   useTheme,
   useMediaQuery,
   Select,
+  Divider,
 } from "@mui/material";
 import {
   Search as SearchIcon,
@@ -165,6 +166,151 @@ export default function ManagerAttributeView({
   };
   console.log("AAAA data", data);
   console.log("AAAA selectedAttribute", selectedAttribute);
+
+
+  // Desktop: Bảng gốc (giữ nguyên 100%)
+  const renderDesktop = () => (
+    <TableContainer sx={{ mt: 5, width: "100%", overflowX: "auto" }}>
+      <Table>
+        <TableHead>
+          <TableRow sx={{ bgcolor: "#f5f5f5" }}>
+            <TableCell><strong>#</strong></TableCell>
+            <TableCell><strong>ID</strong></TableCell>
+            <TableCell><strong>Name</strong></TableCell>
+            <TableCell align="center"><strong></strong></TableCell>
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {loading ? (
+            <TableRow>
+              <TableCell colSpan={4} align="center">
+                Đang tải...
+              </TableCell>
+            </TableRow>
+          ) : data?.length === 0 ? (
+            <TableRow>
+              <TableCell colSpan={4} align="center">
+                Không có dữ liệu
+              </TableCell>
+            </TableRow>
+          ) : (
+            data?.map((item, index) => (
+              <TableRow
+                key={item.id}
+                hover
+                sx={{ cursor: "pointer" }}
+              >
+                <TableCell>{index + 1}</TableCell>
+                <TableCell sx={{ fontWeight: 500 }}>{item.id}</TableCell>
+                <TableCell sx={{ fontWeight: 500 }}>
+                  {parseRoomName(item.name)}
+                </TableCell>
+                <TableCell
+                  align="center"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <ActionMenu
+                    attribute={item}
+                    setSelectedAttribute={setSelectedAttribute}
+                    setConfirmOpen={setConfirmOpen}
+                    setModalOpen={setModalOpen}
+                  />
+                </TableCell>
+              </TableRow>
+            ))
+          )}
+        </TableBody>
+      </Table>
+    </TableContainer>
+  );
+
+  // Mobile: Card dọc (UI đẹp, gọn gàng)
+  const renderMobile = () => (
+    <Box sx={{ mt: 5, display: "flex", flexDirection: "column", gap: 3 }}>
+      {loading ? (
+        <Typography align="center">Đang tải...</Typography>
+      ) : data?.length === 0 ? (
+        <Typography align="center" color="#999" py={6}>
+          Không có dữ liệu
+        </Typography>
+      ) : (
+        data?.map((item, index) => (
+          <Paper
+            key={item.id}
+            elevation={0}
+            sx={{
+              borderRadius: "12px",
+              border: "1px solid #eee",
+              overflow: "hidden",
+              boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
+              cursor: "pointer",
+              transition: "all 0.2s",
+              "&:hover": {
+                boxShadow: "0 4px 16px rgba(0,0,0,0.12)",
+                transform: "translateY(-2px)",
+              },
+            }}
+          >
+            {/* Header card */}
+            <Box
+              sx={{
+                p: 2,
+                bgcolor: "#f8f9fa",
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                flexWrap: "wrap",
+                gap: 1,
+              }}
+            >
+              <Stack direction="row" spacing={1.5} alignItems="center">
+                <Typography variant="subtitle2" color="text.secondary">
+                  #{index + 1}
+                </Typography>
+                <Typography variant="subtitle1" fontWeight="600">
+                  {item.id}
+                </Typography>
+              </Stack>
+            </Box>
+
+            <Divider />
+
+            {/* Nội dung chính */}
+            <Box sx={{ p: 2 }}>
+              <Stack spacing={1.5}>
+                <Box>
+                  <Typography variant="body2" color="text.secondary">
+                    Tên
+                  </Typography>
+                  <Typography fontWeight="500" sx={{ mt: 0.5 }}>
+                    {parseRoomName(item.name)}
+                  </Typography>
+                </Box>
+              </Stack>
+            </Box>
+
+            {/* Thao tác */}
+            <Box
+              sx={{
+                p: 2,
+                bgcolor: "#fafafa",
+                display: "flex",
+                justifyContent: "flex-end",
+              }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <ActionMenu
+                attribute={item}
+                setSelectedAttribute={setSelectedAttribute}
+                setConfirmOpen={setConfirmOpen}
+                setModalOpen={setModalOpen}
+              />
+            </Box>
+          </Paper>
+        ))
+      )}
+    </Box>
+  );
   return (
     <Box sx={{ p: { xs: 2, sm: 3, md: 4 } }}>
       <AddEntryModal
@@ -262,64 +408,7 @@ export default function ManagerAttributeView({
         </Box>
 
         {/* Bảng */}
-        <TableContainer>
-          <Table>
-            <TableHead>
-              <TableRow sx={{ bgcolor: "#f5f5f5" }}>
-                <TableCell>
-                  <strong>#</strong>
-                </TableCell>
-                <TableCell>
-                  <strong>ID</strong>
-                </TableCell>
-                <TableCell>
-                  <strong>Name</strong>
-                </TableCell>
-
-                <TableCell align='center'>
-                  <strong></strong>
-                </TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {loading ? (
-                <TableRow>
-                  <TableCell colSpan={6} align='center'>
-                    Đang tải...
-                  </TableCell>
-                </TableRow>
-              ) : data?.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={6} align='center'>
-                    Không có dữ liệu
-                  </TableCell>
-                </TableRow>
-              ) : (
-                data?.map((item, index) => (
-                  <TableRow key={item.id} hover sx={{ cursor: "pointer" }}>
-                    <TableCell>{index + 1}</TableCell>
-                    <TableCell sx={{ fontWeight: 500 }}>{item.id}</TableCell>
-
-                    <TableCell sx={{ fontWeight: 500 }}>
-                      {parseRoomName(item.name)}
-                    </TableCell>
-
-                    <TableCell
-                      align='center'
-                      onClick={(e) => e.stopPropagation()}>
-                      <ActionMenu
-                        attribute={item}
-                        setSelectedAttribute={setSelectedAttribute}
-                        setConfirmOpen={setConfirmOpen}
-                        setModalOpen={setModalOpen}
-                      />
-                    </TableCell>
-                  </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
-        </TableContainer>
+        {isMobile ? renderMobile() : renderDesktop()}
 
         {/* Pagination */}
       </Paper>
@@ -587,9 +676,10 @@ function AddEntryModal({
     }
   };
 
+  
   return (
     <Dialog open={open} onClose={onClose} maxWidth='md' fullWidth>
-      <DialogTitle>
+      <DialogTitle sx={{padding:{xs:1,md:3}}}>
         <Box display='flex' alignItems='center' justifyContent='space-between'>
           <Typography variant='h6' fontWeight='medium'>
             {attribute?.id ? "Chỉnh sửa cơ sở" : "Thêm cơ sở"}
@@ -601,7 +691,7 @@ function AddEntryModal({
       </DialogTitle>
 
       <form onSubmit={handleSubmit}>
-        <DialogContent dividers>
+        <DialogContent sx={{padding:{xs:1,md:3}}} dividers>
           <Grid container spacing={3}>
             {/* Key */}
             <Grid item xs={12}>

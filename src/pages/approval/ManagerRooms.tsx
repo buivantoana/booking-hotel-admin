@@ -16,6 +16,7 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
+  Divider,
   IconButton,
   Menu,
   MenuItem,
@@ -29,6 +30,8 @@ import {
   TableRow,
   TextField,
   Typography,
+  useMediaQuery,
+  useTheme,
 } from "@mui/material";
 import React, { useState } from "react";
 import { parseRoomName } from "../../utils/utils";
@@ -143,6 +146,193 @@ const ManagerRooms = ({
       console.log(error);
     }
   };
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
+
+  // Desktop: Bảng gốc (giữ nguyên)
+  const renderDesktop = () => (
+    <TableContainer sx={{ overflowX: "auto", mt: 4 }}>
+      <Table sx={{ minWidth: 1000 }}>
+        <TableHead>
+          <TableRow sx={{ bgcolor: "#f8f9fa" }}>
+            {[
+              "Tên loại phòng",
+              "Trạng thái",
+              "Giá theo giờ",
+              "Giá qua đêm",
+              "Giá qua ngày",
+              "",
+            ].map((head) => (
+              <TableCell
+                key={head}
+                sx={{
+                  fontWeight: 600,
+                  color: "#555",
+                  fontSize: 14,
+                }}
+              >
+                {head}
+              </TableCell>
+            ))}
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {roomTypes.length === 0 ? (
+            <TableRow>
+              <TableCell colSpan={6} align="center" sx={{ py: 6 }}>
+                <Typography color="#999">Chưa có loại phòng nào</Typography>
+              </TableCell>
+            </TableRow>
+          ) : (
+            roomTypes.map((room: any) => (
+              <TableRow key={room.id} hover>
+                {/* Tên loại phòng */}
+                <TableCell
+                  onClick={() => handleRoomClick(room)}
+                  sx={{
+                    fontWeight: 500,
+                    cursor: "pointer",
+                    "&:hover": {
+                      textDecoration: "underline",
+                      color: "#98B720",
+                    },
+                  }}
+                >
+                  {room.parsedName}
+                </TableCell>
+
+                {/* Trạng thái */}
+                <TableCell>{renderStatusChip(room.status)}</TableCell>
+
+                {/* Giá theo giờ */}
+                <TableCell>{room.price_hourly_formatted}</TableCell>
+
+                {/* Giá qua đêm */}
+                <TableCell>{room.price_overnight_formatted}</TableCell>
+
+                {/* Giá qua ngày */}
+                <TableCell>{room.price_daily_formatted}</TableCell>
+
+                {/* Thao tác */}
+                <TableCell align="right">
+                  <ActionMenu
+                    hotel={room}
+                    setIdHotel={setRoom}
+                    setDeleteDialogOpen={setDeleteDialogOpen}
+                    setCancelDialogOpen={setCancelDialogOpen}
+                  />
+                </TableCell>
+              </TableRow>
+            ))
+          )}
+        </TableBody>
+      </Table>
+    </TableContainer>
+  );
+
+  // Mobile: Card dọc
+  const renderMobile = () => (
+    <Box sx={{ mt: 4, display: "flex", flexDirection: "column", gap: 3 }}>
+      {roomTypes.length === 0 ? (
+        <Typography align="center" color="#999" py={6}>
+          Chưa có loại phòng nào
+        </Typography>
+      ) : (
+        roomTypes.map((room: any) => (
+          <Paper
+            key={room.id}
+            elevation={0}
+            sx={{
+              borderRadius: "12px",
+              border: "1px solid #eee",
+              overflow: "hidden",
+              boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
+              cursor: "pointer",
+              transition: "all 0.2s",
+              "&:hover": {
+                boxShadow: "0 4px 16px rgba(0,0,0,0.12)",
+                transform: "translateY(-2px)",
+              },
+            }}
+           
+          >
+            {/* Header card */}
+            <Box
+              sx={{
+                p: 2,
+                bgcolor: "#f8f9fa",
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                flexWrap: "wrap",
+                gap: 1,
+              }}
+              onClick={() => handleRoomClick(room)}
+            >
+              <Typography variant="subtitle1" fontWeight="600">
+                {room.parsedName}
+              </Typography>
+
+              {renderStatusChip(room.status)}
+            </Box>
+
+            <Divider />
+
+            {/* Nội dung chính - Các mức giá */}
+            <Box sx={{ p: 2 }}>
+              <Stack spacing={1.5}>
+                <Stack direction="row" justifyContent="space-between">
+                  <Box>
+                    <Typography variant="body2" color="text.secondary">
+                      Giá theo giờ
+                    </Typography>
+                    <Typography fontWeight="500">
+                      {room.price_hourly_formatted}
+                    </Typography>
+                  </Box>
+
+                  <Box textAlign="right">
+                    <Typography variant="body2" color="text.secondary">
+                      Giá qua đêm
+                    </Typography>
+                    <Typography fontWeight="500">
+                      {room.price_overnight_formatted}
+                    </Typography>
+                  </Box>
+                </Stack>
+
+                <Box>
+                  <Typography variant="body2" color="text.secondary">
+                    Giá qua ngày
+                  </Typography>
+                  <Typography fontWeight="500">
+                    {room.price_daily_formatted}
+                  </Typography>
+                </Box>
+              </Stack>
+            </Box>
+
+            {/* Thao tác */}
+            <Box
+              sx={{
+                p: 2,
+                bgcolor: "#fafafa",
+                display: "flex",
+                justifyContent: "flex-end",
+              }}
+            >
+              <ActionMenu
+                hotel={room}
+                setIdHotel={setRoom}
+                setDeleteDialogOpen={setDeleteDialogOpen}
+                setCancelDialogOpen={setCancelDialogOpen}
+              />
+            </Box>
+          </Paper>
+        ))
+      )}
+    </Box>
+  );
   return (
     <>
       <Paper
@@ -158,77 +348,7 @@ const ManagerRooms = ({
           Danh sách loại phòng
         </Typography>
 
-        <TableContainer>
-          <Table sx={{ minWidth: 1000 }}>
-            <TableHead>
-              <TableRow sx={{ bgcolor: "#f8f9fa" }}>
-                {[
-                  "Tên loại phòng",
-                  "Trang thái",
-                  "Giá theo giờ",
-                  "Giá qua đêm",
-                  "Giá qua ngày",
-                  "",
-                ].map((head) => (
-                  <TableCell
-                    key={head}
-                    sx={{ fontWeight: 600, color: "#555", fontSize: 14 }}>
-                    {head}
-                  </TableCell>
-                ))}
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {roomTypes.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={7} align='center' sx={{ py: 6 }}>
-                    <Typography color='#999'>Chưa có loại phòng nào</Typography>
-                  </TableCell>
-                </TableRow>
-              ) : (
-                roomTypes.map((room: any) => (
-                  <TableRow key={room.id} hover>
-                    {/* Tên loại phòng */}
-                    <TableCell
-                      onClick={() => handleRoomClick(room)}
-                      sx={{
-                        fontWeight: 500,
-                        cursor: "pointer",
-                        "&:hover": {
-                          textDecoration: "underline",
-                          color: "#98B720",
-                        },
-                      }}>
-                      {room.parsedName}
-                    </TableCell>
-
-                    {/* Trang thái */}
-                    <TableCell>{renderStatusChip(room.status)}</TableCell>
-
-                    {/* Giá theo giờ */}
-                    <TableCell>{room.price_hourly_formatted}</TableCell>
-
-                    {/* Giá qua đêm */}
-                    <TableCell>{room.price_overnight_formatted}</TableCell>
-
-                    {/* Giá qua ngày */}
-                    <TableCell>{room.price_daily_formatted}</TableCell>
-
-                    {/* Thao tác */}
-                    <TableCell align='right'>
-                      <ActionMenu
-                        hotel={room}
-                        setIdHotel={setRoom}
-                        setDeleteDialogOpen={setDeleteDialogOpen}
-                        setCancelDialogOpen={setCancelDialogOpen}
-                      />
-                    </TableCell>
-                  </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
-        </TableContainer>
+        {isMobile ? renderMobile() : renderDesktop()}
       </Paper>
       <Dialog
         open={deleteDialogOpen}
