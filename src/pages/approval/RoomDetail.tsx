@@ -26,13 +26,10 @@ import remove from "../../images/delete.png";
 import confirm from "../../images/Frame.png";
 import { useSearchParams } from "react-router-dom";
 import { direction, facilities, parseRoomName, type_bed } from "../../utils/utils";
-const getLabelsByIds = (
-  ids: string[] | null | undefined,
-  list: typeof type_bed
-) => {
+const getLabelsByIds = (ids: string[] | null | undefined, list) => {
   if (!ids || !Array.isArray(ids) || ids.length === 0) return [];
   return ids
-    .map((id) => list.find((item) => item.id === id)?.label)
+    .map((id) => list.find((item) => item.id === id)?.name?.vi)
     .filter(Boolean) as string[];
 };
 export default function RoomDetail({
@@ -41,7 +38,9 @@ export default function RoomDetail({
   getHotelDetail,
   detailHotel,
   setDeleteDialogOpen,
-  setCancelDialogOpen
+  setCancelDialogOpen,
+  attribute,
+  rooms
 }) {
 
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
@@ -54,36 +53,36 @@ export default function RoomDetail({
   const parsedNameHotel = room
     ? parseRoomName(room.hotel_name) || "Không có tên"
     : parseRoomName(detailHotel.name);
-    const bedTypeIds = React.useMemo(() => {
-      if (!room?.bed_type) return [];
-      try {
-        return typeof room.bed_type === "string"
-          ? JSON.parse(room.bed_type)
-          : Array.isArray(room.bed_type)
+  const bedTypeIds = React.useMemo(() => {
+    if (!room?.bed_type) return [];
+    try {
+      return typeof room.bed_type === "string"
+        ? JSON.parse(room.bed_type)
+        : Array.isArray(room.bed_type)
           ? room.bed_type
           : [];
-      } catch {
-        return [];
-      }
-    }, [room?.bed_type]);
-  
-    const directionIds = React.useMemo(() => {
-      if (!room?.direction) return [];
-      try {
-        return typeof room.direction === "string"
-          ? JSON.parse(room.direction)
-          : Array.isArray(room.direction)
+    } catch {
+      return [];
+    }
+  }, [room?.bed_type]);
+
+  const directionIds = React.useMemo(() => {
+    if (!room?.direction) return [];
+    try {
+      return typeof room.direction === "string"
+        ? JSON.parse(room.direction)
+        : Array.isArray(room.direction)
           ? room.direction
           : [];
-      } catch {
-        return [];
-      }
-    }, [room?.direction]);
-  
-    // Chuyển sang label để hiển thị
-    const bedTypeLabels = getLabelsByIds(bedTypeIds, type_bed);
-    const directionLabels = getLabelsByIds(directionIds, direction);
-    const area = room?.area_m2 ? `${room.area_m2}m²` : "-";
+    } catch {
+      return [];
+    }
+  }, [room?.direction]);
+
+  // Chuyển sang label để hiển thị
+  const bedTypeLabels = getLabelsByIds(bedTypeIds, attribute?.bed_type || []);
+  const directionLabels = getLabelsByIds(directionIds, attribute?.direction || []);
+  const area = room?.area_m2 ? `${room.area_m2}m²` : "-";
 
   // Parse hình ảnh phòng
   const roomImages = React.useMemo(() => {
@@ -107,6 +106,10 @@ export default function RoomDetail({
     );
   };
 
+  console.log("AAAA detailHotel", detailHotel)
+  console.log("AAAA room", room)
+  console.log("AAAA rooms", rooms)
+  console.log("AAAA searchParams", detailHotel?.room_types?.some((item) => item.status == "pending" && item.id == room.id))
   return (
     <Box sx={{ minHeight: "100vh" }}>
       {/* Dialog ngừng kinh doanh */}
@@ -263,9 +266,9 @@ export default function RoomDetail({
           <Box sx={{ display: "flex", alignItems: "center", mb: 3 }}>
             <KeyboardArrowLeftIcon
               onClick={() => {
-                if(searchParams.get("tab") == "all"){
+                if (searchParams.get("tab") == "all") {
                   onNext("manager");
-                }else{
+                } else {
                   const params = new URLSearchParams(searchParams);
                   params.set("manager_room", "true"); // thêm params mới
                   setSearchParams(params);
@@ -274,25 +277,31 @@ export default function RoomDetail({
               }}
               sx={{ fontSize: 30, mr: 1, cursor: "pointer" }}
             />
-           <Box>
+            <Box>
               <Typography variant='h5' fontWeight={600}>
                 {parsedName}
               </Typography>
-              {!isMobile&&<Typography color='gray'>{parsedNameHotel}</Typography>}
+              {!isMobile && <Typography color='gray'>{parsedNameHotel}</Typography>}
+
             </Box>
+            <Chip
+              label={"Chờ duyệt"}
+              size='small'
+              sx={{ bgcolor: "#FEF7F2", color: "#EA6A00",ml:2 }}
+            />
             <Box sx={{ flexGrow: 1 }} />
 
-            <Box display={"flex"} gap={"10px"}>
+            {(searchParams.get("tab") == "all" ? rooms?.some((item) => item.id == room.id) : detailHotel?.room_types?.some((item) => item.status == "pending" && item.id == room.id)) && <Box display={"flex"} gap={"10px"}>
               <Button
                 variant='contained'
-                onClick={() =>setCancelDialogOpen(true)}
+                onClick={() => setCancelDialogOpen(true)}
                 sx={{
                   bgcolor: "#F0F1F3",
                   color: "black",
                   fontWeight: 600,
                   fontSize: 15,
-                  px: isMobile?2:4,
-                  py: isMobile?1:1.4,
+                  px: isMobile ? 2 : 4,
+                  py: isMobile ? 1 : 1.4,
                   borderRadius: "50px",
                   textTransform: "none",
                   boxShadow: "none",
@@ -301,21 +310,21 @@ export default function RoomDetail({
               </Button>
               <Button
                 variant='contained'
-                onClick={() =>setDeleteDialogOpen(true)}
+                onClick={() => setDeleteDialogOpen(true)}
                 sx={{
                   bgcolor: "#98B720",
                   color: "white",
                   fontWeight: 600,
                   fontSize: 15,
-                  px: isMobile?2:4,
-                  py: isMobile?1:1.4,
+                  px: isMobile ? 2 : 4,
+                  py: isMobile ? 1 : 1.4,
                   borderRadius: "50px",
                   textTransform: "none",
                   boxShadow: "none",
                 }}>
                 Phê duyệt
               </Button>
-            </Box>
+            </Box>}
           </Box>
 
           {/* Container chính */}
@@ -331,7 +340,7 @@ export default function RoomDetail({
               Thông tin phòng
             </Typography>
 
-            <Grid container spacing={2} gap={{xs:5,md:0}} mb={4}>
+            <Grid container spacing={2} gap={{ xs: 5, md: 0 }} mb={4}>
               {[
                 { label: "Số lượng phòng bán", value: room?.number },
                 { label: "Diện tích", value: area },
@@ -411,8 +420,8 @@ export default function RoomDetail({
                       typeof room.amenities === "string"
                         ? JSON.parse(room.amenities)
                         : Array.isArray(room.amenities)
-                        ? room.amenities
-                        : [];
+                          ? room.amenities
+                          : [];
                     return Array.isArray(parsed) ? parsed : [];
                   } catch (e) {
                     console.warn("Parse facilities error:", e);
@@ -421,7 +430,7 @@ export default function RoomDetail({
                 };
 
                 // Map id → object đầy đủ (label + icon)
-                const selectedFacilities = facilities.filter((fac) =>
+                const selectedFacilities = attribute?.amenities?.filter((fac) =>
                   facilityIds().includes(fac.id)
                 );
 
@@ -444,19 +453,19 @@ export default function RoomDetail({
                           alignItems: "center",
                           gap: 1.5,
                           bgcolor: "#f8f9fa",
-                          border: "1px solid #e9ecef",
+                          border: "1px solid #98B720",
                           borderRadius: 3,
-                          px: 2,
-                          py: 1.5,
-                          minWidth: 140,
+                          px: 1.5,
+                          py: 1,
+
                         }}>
                         <Box
                           component='img'
                           src={fac.icon}
                           alt={fac.name.vi}
-                          sx={{ width: 32, height: 32, objectFit: "contain" }}
+                          sx={{ objectFit: "contain" }}
                         />
-                        <Typography fontWeight={500} fontSize='0.95rem'>
+                        <Typography fontWeight={500} color="#98B720" fontSize='0.95rem'>
                           {fac.name.vi}
                         </Typography>
                       </Box>
@@ -498,11 +507,19 @@ export default function RoomDetail({
               Giá phòng
             </Typography>
 
-            <Grid container spacing={3}>
+            <Grid container spacing={3} sx={{ alignItems: 'stretch' }}>
               {/* Theo giờ */}
-              <Grid item xs={12} md={4}>
-                <Card sx={{ borderRadius: 3, border: "1px solid #DCEFD8" }}>
-                  <CardContent>
+              <Grid item xs={12} md={4} sx={{ display: 'flex' }}>
+                <Card
+                  sx={{
+                    borderRadius: 3,
+                    border: "1px solid #DCEFD8",
+                    flex: 1,           // ← quan trọng: giãn full height
+                    display: 'flex',   // để CardContent có thể giãn
+                    flexDirection: 'column'
+                  }}
+                >
+                  <CardContent sx={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
                     <Box
                       sx={{
                         background: "#E8F5E9",
@@ -512,30 +529,25 @@ export default function RoomDetail({
                         fontWeight: 700,
                         color: "#2E7D32",
                         display: "inline-block",
-                      }}>
+                      }}
+                    >
                       Theo giờ
                     </Box>
-                    <Box display='flex' justifyContent='space-between'>
+                    <Box display='flex' justifyContent='space-between' sx={{ mb: 2 }}>
                       <Box>
                         <Typography fontWeight={600}>Giá 2 giờ đầu</Typography>
-                        <Typography
-                          color='#82B440'
-                          fontWeight={700}
-                          fontSize='1.2rem'>
+                        <Typography color='#82B440' fontWeight={700} fontSize='1.2rem'>
                           {formatPrice(room.price_hourly)}
                         </Typography>
                       </Box>
                       <Box>
                         <Typography fontWeight={600}>Giá giờ thêm</Typography>
-                        <Typography
-                          color='#82B440'
-                          fontWeight={700}
-                          fontSize='1.2rem'>
+                        <Typography color='#82B440' fontWeight={700} fontSize='1.2rem'>
                           {formatPrice(room.price_hourly_increment)}
                         </Typography>
                       </Box>
                     </Box>
-                    <Typography fontSize={13} mt={2} color='#666'>
+                    <Typography fontSize={13} mt='auto' color='#666'>
                       ✓ Cho phép khách đặt tối đa thêm giờ tùy theo quy định
                     </Typography>
                   </CardContent>
@@ -543,9 +555,17 @@ export default function RoomDetail({
               </Grid>
 
               {/* Qua đêm */}
-              <Grid item xs={12} md={4}>
-                <Card sx={{ borderRadius: 3, border: "1px solid #D4E4FB" }}>
-                  <CardContent>
+              <Grid item xs={12} md={4} sx={{ display: 'flex' }}>
+                <Card
+                  sx={{
+                    borderRadius: 3,
+                    border: "1px solid #D4E4FB",
+                    flex: 1,
+                    display: 'flex',
+                    flexDirection: 'column'
+                  }}
+                >
+                  <CardContent sx={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
                     <Box
                       sx={{
                         background: "#E3F2FD",
@@ -555,24 +575,32 @@ export default function RoomDetail({
                         fontWeight: 700,
                         color: "#1976D2",
                         display: "inline-block",
-                      }}>
+                      }}
+                    >
                       Qua đêm
                     </Box>
-                    <Typography fontWeight={600}>Giá 1 đêm</Typography>
-                    <Typography
-                      color='#1565C0'
-                      fontWeight={700}
-                      fontSize='1.4rem'>
-                      {formatPrice(room.price_overnight)}
-                    </Typography>
+                    <Box sx={{}}>
+                      <Typography fontWeight={600}>Giá 1 đêm</Typography>
+                      <Typography color='#1565C0' fontWeight={700} fontSize='1.4rem'>
+                        {formatPrice(room.price_overnight)}
+                      </Typography>
+                    </Box>
                   </CardContent>
                 </Card>
               </Grid>
 
               {/* Theo ngày */}
-              <Grid item xs={12} md={4}>
-                <Card sx={{ borderRadius: 3, border: "1px solid #FFF3C4" }}>
-                  <CardContent>
+              <Grid item xs={12} md={4} sx={{ display: 'flex' }}>
+                <Card
+                  sx={{
+                    borderRadius: 3,
+                    border: "1px solid #FFF3C4",
+                    flex: 1,
+                    display: 'flex',
+                    flexDirection: 'column'
+                  }}
+                >
+                  <CardContent sx={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
                     <Box
                       sx={{
                         background: "#FFFDE7",
@@ -582,16 +610,16 @@ export default function RoomDetail({
                         fontWeight: 700,
                         color: "#DAA200",
                         display: "inline-block",
-                      }}>
+                      }}
+                    >
                       Theo ngày
                     </Box>
-                    <Typography fontWeight={600}>Giá 1 ngày</Typography>
-                    <Typography
-                      color='#DAA200'
-                      fontWeight={700}
-                      fontSize='1.4rem'>
-                      {formatPrice(room.price_daily)}
-                    </Typography>
+                    <Box sx={{}}>
+                      <Typography fontWeight={600}>Giá 1 ngày</Typography>
+                      <Typography color='#DAA200' fontWeight={700} fontSize='1.4rem'>
+                        {formatPrice(room.price_daily)}
+                      </Typography>
+                    </Box>
                   </CardContent>
                 </Card>
               </Grid>

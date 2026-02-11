@@ -18,6 +18,12 @@ import {
   Tab,
   LinearProgress,
   OutlinedInput,
+  IconButton,
+  Fade,
+  Modal,
+  Backdrop,
+  useMediaQuery,
+  useTheme,
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import {
@@ -56,7 +62,7 @@ import FlightTakeoffIcon from "@mui/icons-material/FlightTakeoff";
 import NotificationsNoneIcon from "@mui/icons-material/NotificationsNone";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
-import { Star } from "@mui/icons-material";
+import { Close, FullscreenExit, Star, ZoomIn } from "@mui/icons-material";
 const CARD_CONFIG = [
   {
     key: "hourly",
@@ -331,7 +337,6 @@ const formatCurrency = (value: number) =>
 // Performance Chart
 const PerformanceChart = ({
   title,
-
   subtitle,
   data,
   markedDateStart,
@@ -341,31 +346,46 @@ const PerformanceChart = ({
   setRoomType,
   roomType,
 }: any) => {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const [openFullscreen, setOpenFullscreen] = useState(false);
+  
   const isVisit = title.includes("ghé thăm");
+  const isView = title.includes("xem");
+  const isBooking = title.includes("đặt phòng");
+  const isCheckin = title.includes("nhận phòng");
+  
   const [selectedPeriod, setSelectedPeriod] = useState<Dayjs | null>(dayjs());
   const dayLabels = [
-    "Thứ Hai", // 2025-12-08
-    "Thứ Ba", // 2025-12-09
-    "Thứ Tư", // 2025-12-10
-    "Thứ Năm", // 2025-12-11
-    "Thứ Sáu", // 2025-12-12
-    "Thứ Bảy", // 2025-12-13
-    "Chủ Nhật", // 2025-12-14
+    "Thứ Hai",
+    "Thứ Ba",
+    "Thứ Tư",
+    "Thứ Năm",
+    "Thứ Sáu",
+    "Thứ Bảy",
+    "Chủ Nhật",
   ];
 
   // Tạo map nhanh để lấy value theo date
   const prevMap = new Map(data?.start?.map((item) => [item.date, item.value]));
   const currentMap = new Map(data?.end?.map((item) => [item.date, item.value]));
 
-  // Tạo mảng data cho chart (7 ngày đầy đủ, value = 0 nếu không có dữ liệu)
-
+  // Tạo mảng data cho chart với đầy đủ thông tin
   const isWeek = data?.end?.length === 7;
 
   const chartData = data?.end?.map((item, index) => {
+    const prevValue = data?.start?.[index]?.value ?? 0;
+    const currentValue = item.value ?? 0;
+    const changePercent = prevValue === 0 
+      ? (currentValue > 0 ? 100 : 0) 
+      : ((currentValue - prevValue) / prevValue) * 100;
+    
     return {
+      date: item.date,
       day: isWeek ? dayLabels[index] : dayjs(item.date).format("DD/MM"),
-      prev: data?.start?.[index]?.value ?? 0, // ✅ FIX
-      current: item.value ?? 0,
+      prev: prevValue,
+      current: currentValue,
+      change: changePercent,
     };
   });
 
@@ -388,6 +408,55 @@ const PerformanceChart = ({
 
   // Format text hiển thị
   const change = `${changePercent >= 0 ? "+" : ""}${changePercent.toFixed(1)}%`;
+  
+  // ===== TÍNH SUBTITLE DỰA TRÊN PHẦN TRĂM THAY ĐỔI =====
+  const getSubtitle = () => {
+    const periodText = dateRangeRevenueEvent?.mode === "week" ? "tuần" : "tháng";
+    
+    if (isVisit) {
+      // For "Khách ghé thăm"
+      if (changePercent > 20) return `Khách ghé thăm tăng mạnh – tiếp tục duy trì chiến dịch marketing hiệu quả`;
+      if (changePercent > 0) return `Khách ghé thăm tăng – bạn hãy thêm những ưu đãi để hút khách hơn nữa`;
+      if (changePercent === 0) return `Số lượng khách ghé thăm ổn định – cần thêm chiến dịch để tăng tương tác`;
+      if (changePercent > -20) return `Khách ghé thăm giảm nhẹ – xem lại nội dung và hình ảnh hiển thị`;
+      return `Khách ghé thăm giảm đáng kể – cần cải thiện SEO và quảng cáo ngay`;
+    }
+    
+    if (isView) {
+      // For "Lượt xem"
+      if (changePercent > 20) return `Lượt xem tăng mạnh – nội dung đang thu hút, tiếp tục phát huy`;
+      if (changePercent > 0) return `Lượt xem tăng – tối ưu thêm hình ảnh và mô tả để tăng tỉ lệ chuyển đổi`;
+      if (changePercent === 0) return `Lượt xem ổn định – thử A/B testing với các tiêu đề khác nhau`;
+      if (changePercent > -20) return `Lượt xem giảm nhẹ – cập nhật hình ảnh và thông tin mới nhất`;
+      return `Lượt xem giảm nhiều – cần chiến dịch truyền thông để kéo lại sự chú ý`;
+    }
+    
+    if (isBooking) {
+      // For "Lượt đặt phòng"
+      if (changePercent > 20) return `Đặt phòng tăng mạnh – chính sách giá và ưu đãi đang hiệu quả`;
+      if (changePercent > 0) return `Đặt phòng đang tăng – bạn hãy thêm những ưu đãi để hút khách hơn nữa`;
+      if (changePercent === 0) return `Số đặt phòng ổn định – cân nhắc chương trình khuyến mãi theo mùa`;
+      if (changePercent > -20) return `Đặt phòng giảm nhẹ – xem xét điều chỉnh giá hoặc thêm dịch vụ bổ sung`;
+      return `Đặt phòng giảm đáng kể – cần xem lại chính sách giá và quy trình đặt phòng`;
+    }
+    
+    if (isCheckin) {
+      // For "Lượt nhận phòng"
+      if (changePercent > 20) return `Nhận phòng tăng mạnh – dịch vụ check-in đang hoạt động tốt`;
+      if (changePercent > 0) return `Tỉ lệ nhận phòng tăng – quy trình check-in thuận tiện được đánh giá cao`;
+      if (changePercent === 0) return `Số nhận phòng ổn định – tiếp tục duy trì chất lượng dịch vụ`;
+      if (changePercent > -20) return `Nhận phòng giảm nhẹ – kiểm tra lại quy trình và thời gian check-in`;
+      return `Khách nhận phòng giảm nhiều – cần xem lại trải nghiệm khách khi nhận phòng`;
+    }
+    
+    // Default fallback
+    if (changePercent > 0) return `Chỉ số đang tăng ${changePercent.toFixed(1)}% so với ${periodText} trước – tiếp tục duy trì`;
+    if (changePercent < 0) return `Chỉ số giảm ${Math.abs(changePercent).toFixed(1)}% so với ${periodText} trước – cần cải thiện`;
+    return `Chỉ số ổn định so với ${periodText} trước`;
+  };
+
+  const subtitleText = getSubtitle();
+  
   const startData = data?.start ?? [];
   const endData = data?.end ?? [];
 
@@ -397,160 +466,438 @@ const PerformanceChart = ({
     0
   );
   const yMax = maxValue <= 1 ? 2 : Math.ceil(maxValue * 1.2);
-  return (
-    <Card sx={{ borderRadius: 3, height: "100%" }}>
-      <CardContent sx={{ pb: 4 }}>
-        <Typography fontSize={"18px"} fontWeight='bold' gutterBottom>
-          {title}
-        </Typography>
 
-        <Stack direction='row' alignItems='center' gap={2} mb={1}>
-          <Typography
-            variant='h3'
-            fontWeight='bold'
-            sx={{ fontSize: "2.5rem" }}>
-            {value}
+  // Custom Tooltip Component
+  const CustomTooltip = ({ active, payload, label }: any) => {
+    if (active && payload && payload.length) {
+      const prevValue = payload[0]?.value || 0;
+      const currentValue = payload[1]?.value || 0;
+      const changeValue = prevValue === 0 
+        ? (currentValue > 0 ? 100 : 0) 
+        : ((currentValue - prevValue) / prevValue) * 100;
+      
+      return (
+        <Box
+          sx={{
+            bgcolor: 'white',
+            border: '1px solid #e0e0e0',
+            borderRadius: 2,
+            p: 2,
+            boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+            minWidth: 200,
+          }}
+        >
+          <Typography variant="subtitle2" fontWeight="bold" gutterBottom>
+            {label}
           </Typography>
-          <Chip
-            label={change}
-            size='small'
-            sx={{
-              bgcolor: "#E6F4EA",
-              color: "#1A9739",
-              fontWeight: "bold",
-              height: 32,
-            }}
-          />
-        </Stack>
-
-        <Typography variant='body2' color='text.secondary' mb={3}>
-          {subtitle}
-        </Typography>
-
-        {!roomType && (
-          <Stack direction='row' alignItems='center' gap={2} mb={3}>
-            <Box width={"30%"}>
-              <SimpleDatePopup
-                value={dateRangeRevenueEvent}
-                onChange={setDateRangeRevenueEvent}
-              />
-            </Box>
-            <CompareBar
-              sx={{
-                height: "35px",
-                alignItems: "center",
-                display: "flex",
-                borderRadius: 2,
-              }}>
-              So sánh với{" "}
-              {dateRangeRevenueEvent.mode === "week"
-                ? "Tuần trước"
-                : "Tháng trước"}
-            </CompareBar>
-          </Stack>
-        )}
-        {roomType && (
-          <Box mb={3}>
-            <RoomTypeSelect
-              value={roomType}
-              onChange={(newValue) => setRoomType(newValue)}
-            />
-          </Box>
-        )}
-
-        <Box sx={{ height: 280, position: "relative" }}>
-          <ResponsiveContainer width='100%' height='100%'>
-            <LineChart data={chartData} margin={{ left: -20, right: 10 }}>
-              <CartesianGrid
-                stroke='#f0f0f0'
-                vertical={false}
-                strokeDasharray='5 5'
-              />
-              <XAxis
-                dataKey='day'
-                tick={{ fontSize: 12, fill: "#888" }}
-                axisLine={false}
-                tickLine={false}
-              />
-              <YAxis
-                tick={{ fontSize: 12, fill: "#888" }}
-                axisLine={false}
-                tickLine={false}
-                domain={[0, yMax]}
-                allowDecimals={false}
-              />
-              <Line
-                type='monotone'
-                dataKey='prev'
-                stroke='#BDC3C7'
-                strokeWidth={2}
-                strokeDasharray='7 7'
-                dot={false}
-              />
-              <Line
-                type='monotone'
-                dataKey='current'
-                stroke='#3B82F6'
-                strokeWidth={3.5}
-                dot={<CustomDot />}
-                activeDot={{ r: 7 }}
-              />
-              <ReferenceLine x='Thứ 4' stroke='#ddd' strokeWidth={1.5} />
-
-              <foreignObject x='42%' y='50' width='140' height='60'>
+          
+          <Stack spacing={1}>
+            <Stack direction="row" justifyContent="space-between" alignItems="center">
+              <Stack direction="row" alignItems="center" gap={1}>
                 <Box
                   sx={{
-                    bgcolor: "white",
-                    border: "1px solid #e0e0e0",
-                    borderRadius: 2,
-                    px: 1.8,
-                    py: 1,
-                    textAlign: "center",
-                    boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
-                    fontSize: 13,
-                  }}>
-                  <Typography variant='subtitle2' fontWeight='bold'>
-                    {markedDateStart}
-                  </Typography>
-                  <Typography
-                    variant='caption'
-                    color='#3B82F6'
-                    fontWeight='medium'>
-                    {markedDateEnd}
-                  </Typography>
-                </Box>
-              </foreignObject>
-            </LineChart>
-          </ResponsiveContainer>
-        </Box>
-
-        <Stack direction='row' justifyContent='center' spacing={4} mt={3}>
-          <Stack direction='row' alignItems='center' gap={1.5}>
+                    width: 12,
+                    height: 12,
+                    borderRadius: '50%',
+                    bgcolor: '#BDC3C7',
+                  }}
+                />
+                <Typography variant="body2" color="text.secondary">
+                  Kỳ trước:
+                </Typography>
+              </Stack>
+              <Typography variant="body2" fontWeight="bold">
+                {prevValue.toLocaleString()}
+              </Typography>
+            </Stack>
+            
+            <Stack direction="row" justifyContent="space-between" alignItems="center">
+              <Stack direction="row" alignItems="center" gap={1}>
+                <Box
+                  sx={{
+                    width: 12,
+                    height: 12,
+                    borderRadius: '50%',
+                    bgcolor: '#3B82F6',
+                  }}
+                />
+                <Typography variant="body2" color="text.secondary">
+                  Kỳ này:
+                </Typography>
+              </Stack>
+              <Typography variant="body2" fontWeight="bold" color="#3B82F6">
+                {currentValue.toLocaleString()}
+              </Typography>
+            </Stack>
+            
             <Box
               sx={{
-                width: 12,
-                height: 12,
-                borderRadius: "50%",
-                bgcolor: "#3B82F6",
+                mt: 1,
+                pt: 1,
+                borderTop: '1px solid #f0f0f0',
               }}
-            />
-            <Typography variant='body2' color='#666' fontWeight={500}>
-              Kỳ này
-            </Typography>
+            >
+              <Stack direction="row" justifyContent="space-between" alignItems="center">
+                <Typography variant="body2" color="text.secondary">
+                  Thay đổi:
+                </Typography>
+                <Chip
+                  label={`${changeValue >= 0 ? '+' : ''}${changeValue.toFixed(1)}%`}
+                  size="small"
+                  sx={{
+                    bgcolor: changeValue >= 0 ? '#E6F4EA' : '#FFEBEE',
+                    color: changeValue >= 0 ? '#1A9739' : '#D32F2F',
+                    fontWeight: 'bold',
+                    fontSize: '0.75rem',
+                  }}
+                />
+              </Stack>
+              
+              {changeValue !== 0 && (
+                <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.5 }}>
+                  {changeValue >= 0 ? 'Tăng' : 'Giảm'} {Math.abs(currentValue - prevValue).toLocaleString()} 
+                  {` so với ${dateRangeRevenueEvent.mode === "week" ? "tuần" : "tháng"} trước`}
+                </Typography>
+              )}
+            </Box>
           </Stack>
-          <Stack direction='row' alignItems='center' gap={1.5}>
-            <Box
-              sx={{ width: 20, height: 2, bgcolor: "#BDC3C7", borderRadius: 1 }}
+        </Box>
+      );
+    }
+    return null;
+  };
+
+  // Component Chart để tái sử dụng
+  const renderChart = (isFullscreen = false) => (
+    <Box sx={{ 
+      height: isFullscreen ? 'calc(100vh - 200px)' : 280, 
+      position: 'relative',
+      width: '100%'
+    }}>
+      <ResponsiveContainer width='100%' height='100%'>
+        <LineChart 
+          data={chartData} 
+          margin={{ 
+            left: isFullscreen ? 10 : -20, 
+            right: 10,
+            top: isFullscreen ? 20 : 0,
+            bottom: isFullscreen ? 20 : 0
+          }}
+        >
+          <CartesianGrid
+            stroke='#f0f0f0'
+            vertical={false}
+            strokeDasharray='5 5'
+          />
+          <XAxis
+            dataKey='day'
+            tick={{ fontSize: isFullscreen ? 14 : 12, fill: "#888" }}
+            axisLine={false}
+            tickLine={false}
+          />
+          <YAxis
+            tick={{ fontSize: isFullscreen ? 14 : 12, fill: "#888" }}
+            axisLine={false}
+            tickLine={false}
+            domain={[0, yMax]}
+            allowDecimals={false}
+          />
+          
+          {/* Tooltip với custom styling */}
+          <Tooltip 
+            content={<CustomTooltip />}
+            cursor={{ stroke: '#e0e0e0', strokeWidth: 1, strokeDasharray: '3 3' }}
+          />
+          
+          {/* Line cho kỳ trước */}
+          <Line
+            type='monotone'
+            dataKey='prev'
+            name="Kỳ trước"
+            stroke='#BDC3C7'
+            strokeWidth={isFullscreen ? 3 : 2}
+            strokeDasharray='7 7'
+            dot={false}
+            activeDot={{ r: isFullscreen ? 8 : 6, strokeWidth: 2, stroke: '#fff' }}
+          />
+          
+          {/* Line cho kỳ này */}
+          <Line
+            type='monotone'
+            dataKey='current'
+            name="Kỳ này"
+            stroke='#3B82F6'
+            strokeWidth={isFullscreen ? 4.5 : 3.5}
+            dot={<CustomDot />}
+            activeDot={{ r: isFullscreen ? 10 : 8, strokeWidth: 2, stroke: '#fff' }}
+          />
+          
+          {!isFullscreen && (
+            <ReferenceLine x='Thứ 4' stroke='#ddd' strokeWidth={1.5} />
+          )}
+          
+          {!isFullscreen && (
+            <foreignObject x='42%' y='50' width='140' height='60'>
+              <Box
+                sx={{
+                  bgcolor: "white",
+                  border: "1px solid #e0e0e0",
+                  borderRadius: 2,
+                  px: 1.8,
+                  py: 1,
+                  textAlign: "center",
+                  boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+                  fontSize: 13,
+                }}>
+                <Typography variant='subtitle2' fontWeight='bold'>
+                  {markedDateStart}
+                </Typography>
+                <Typography
+                  variant='caption'
+                  color='#3B82F6'
+                  fontWeight='medium'>
+                  {markedDateEnd}
+                </Typography>
+              </Box>
+            </foreignObject>
+          )}
+        </LineChart>
+      </ResponsiveContainer>
+    </Box>
+  );
+
+  const renderChartContent = (isFullscreen = false) => (
+    <>
+      <Typography 
+        fontSize={isFullscreen ? "24px" : "18px"} 
+        fontWeight='bold' 
+        gutterBottom
+      >
+        {title}
+      </Typography>
+
+      <Stack direction='row' alignItems='center' gap={2} mb={1}>
+        <Typography
+          variant='h3'
+          fontWeight='bold'
+          sx={{ fontSize: isFullscreen ? "3.5rem" : "2.5rem" }}>
+          {value.toLocaleString()}
+        </Typography>
+        <Chip
+          label={change}
+          size='small'
+          sx={{
+            bgcolor: changePercent >= 0 ? "#E6F4EA" : "#FFEBEE",
+            color: changePercent >= 0 ? "#1A9739" : "#D32F2F",
+            fontWeight: "bold",
+            height: isFullscreen ? 40 : 32,
+            fontSize: isFullscreen ? '0.9rem' : '0.8rem',
+          }}
+        />
+      </Stack>
+
+      <Typography 
+        variant='body2' 
+        color='text.secondary' 
+        mb={3}
+        fontSize={isFullscreen ? "1.1rem" : "0.875rem"}
+      >
+         {subtitleText} 
+      </Typography>
+
+      {!roomType && !isFullscreen && (
+        <Stack direction='row' alignItems='center' gap={2} mb={3}>
+          <Box width={"30%"}>
+            <SimpleDatePopup
+              value={dateRangeRevenueEvent}
+              onChange={setDateRangeRevenueEvent}
             />
-            <Typography variant='body2' color='#666' fontWeight={500}>
-              Kỳ trước
-            </Typography>
-          </Stack>
+          </Box>
+          <CompareBar
+            sx={{
+              height: "35px",
+              alignItems: "center",
+              display: "flex",
+              borderRadius: 2,
+            }}>
+            So sánh với{" "}
+            {dateRangeRevenueEvent.mode === "week"
+              ? "Tuần trước"
+              : "Tháng trước"}
+          </CompareBar>
         </Stack>
-      </CardContent>
-    </Card>
+      )}
+      {roomType && !isFullscreen && (
+        <Box mb={3}>
+          <RoomTypeSelect
+            value={roomType}
+            onChange={(newValue) => setRoomType(newValue)}
+          />
+        </Box>
+      )}
+
+      {renderChart(isFullscreen)}
+
+      <Stack 
+        direction='row' 
+        justifyContent='center' 
+        spacing={isFullscreen ? 6 : 4} 
+        mt={isFullscreen ? 4 : 3}
+      >
+        <Stack direction='row' alignItems='center' gap={1.5}>
+          <Box
+            sx={{
+              width: isFullscreen ? 24 : 30, 
+              height: isFullscreen ? 3 : 2, 
+              borderRadius: 1 ,
+              bgcolor: "#3B82F6",
+            }}
+          />
+          <Typography 
+            variant='body2' 
+            color='#666' 
+            fontWeight={500}
+            fontSize={isFullscreen ? "1rem" : "0.875rem"}
+          >
+            Kỳ này
+          </Typography>
+        </Stack>
+        <Stack direction='row' alignItems='center' gap={1}>
+
+          <Box
+            sx={{ 
+              width: isFullscreen ? 24 : 15, 
+              height: isFullscreen ? 3 : 2, 
+              bgcolor: "#BDC3C7", 
+              borderRadius: 1 
+            }}
+          />
+          <Box
+            sx={{ 
+              width: isFullscreen ? 24 : 15, 
+              height: isFullscreen ? 3 : 2, 
+              bgcolor: "#BDC3C7", 
+              borderRadius: 1 
+            }}
+          />
+          <Typography 
+            variant='body2' 
+            color='#666' 
+            fontWeight={500}
+            fontSize={isFullscreen ? "1rem" : "0.875rem"}
+          >
+            Kỳ trước
+          </Typography>
+        </Stack>
+      </Stack>
+    </>
+  );
+
+  return (
+    <>
+      <Card sx={{ borderRadius: 3, height: "100%" }}>
+        <CardContent sx={{ pb: 4, position: 'relative' }}>
+          {/* Nút phóng to */}
+          <IconButton
+            onClick={() => setOpenFullscreen(true)}
+            sx={{
+              position: 'absolute',
+              top: 16,
+              right: 16,
+              zIndex: 1,
+              bgcolor: 'rgba(255,255,255,0.9)',
+              boxShadow: 1,
+              '&:hover': {
+                bgcolor: 'rgba(255,255,255,1)',
+              },
+            }}
+            size="small"
+          >
+            <ZoomIn />
+          </IconButton>
+          
+          {renderChartContent(false)}
+        </CardContent>
+      </Card>
+
+      {/* Modal Fullscreen */}
+      <Modal
+        open={openFullscreen}
+        onClose={() => setOpenFullscreen(false)}
+        closeAfterTransition
+        slots={{ backdrop: Backdrop }}
+        slotProps={{
+          backdrop: {
+            timeout: 500,
+          },
+        }}
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
+        <Fade in={openFullscreen}>
+          <Box
+            sx={{
+              position: 'relative',
+              width: isMobile ? '95vw' : '90vw',
+              height: isMobile ? '95vh' : '90vh',
+              bgcolor: 'background.paper',
+              borderRadius: 3,
+              boxShadow: 24,
+              p: isMobile ? 3 : 4,
+              overflow: 'auto',
+            }}
+          >
+            {/* Nút đóng modal */}
+            <IconButton
+              onClick={() => setOpenFullscreen(false)}
+              sx={{
+                position: 'absolute',
+                top: 16,
+                right: 16,
+                zIndex: 1,
+                bgcolor: 'background.paper',
+                boxShadow: 1,
+                '&:hover': {
+                  bgcolor: 'background.paper',
+                },
+              }}
+              size="medium"
+            >
+              <Close />
+            </IconButton>
+
+            {/* Nút thu nhỏ (alternative) */}
+            <IconButton
+              onClick={() => setOpenFullscreen(false)}
+              sx={{
+                position: 'absolute',
+                top: 16,
+                right: 60,
+                zIndex: 1,
+                bgcolor: 'background.paper',
+                boxShadow: 1,
+                '&:hover': {
+                  bgcolor: 'background.paper',
+                },
+              }}
+              size="medium"
+            >
+              <FullscreenExit />
+            </IconButton>
+
+            {renderChartContent(true)}
+          </Box>
+        </Fade>
+      </Modal>
+    </>
   );
 };
+
+
+// Component CustomDot nếu cần
 
 // Doanh thu
 const RevenueCompareChart = ({
@@ -894,7 +1241,7 @@ export default function HomeView({
             Tổng quan đặt phòng
           </Typography>
           <Typography variant='body2' color='text.secondary' mb={4}>
-            Tổng quan đặt phòng khách sạn của bạn trong hôm nay
+            Tổng quan đặt phòng khách sạn của bạn từ ngày {formatDate(dateRange.checkIn)} - {formatDate(dateRange.checkOut)}
           </Typography>
         </Box>
         <SimpleDateSearchBar value={dateRange} onChange={setDateRange} />
@@ -1531,6 +1878,7 @@ import {
   SelectProps,
 } from "@mui/material";
 import HotelSelect from "../../components/HotelSelect";
+import { formatDate } from "../../utils/utils";
 
 type RoomType = "all" | "hourly" | "overnight" | "daily";
 

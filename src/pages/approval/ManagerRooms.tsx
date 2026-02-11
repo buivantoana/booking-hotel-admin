@@ -136,7 +136,7 @@ const ManagerRooms = ({
       }
       if (result?.message && !result?.code) {
         setReason("");
-        toast.success(result?.message);
+        toast.success(status == "approve"?"Phê duyệt loại phòng thành công":"Từ chối loại phòng thành công");
         getHotelDetail();
       } else {
         toast.error(result?.message);
@@ -217,6 +217,7 @@ const ManagerRooms = ({
                 <TableCell align="right">
                   <ActionMenu
                     hotel={room}
+                    handleRoomClick={handleRoomClick}
                     setIdHotel={setRoom}
                     setDeleteDialogOpen={setDeleteDialogOpen}
                     setCancelDialogOpen={setCancelDialogOpen}
@@ -384,7 +385,7 @@ const ManagerRooms = ({
             Xác nhận phê duyệt loại phòng
           </Typography>
           <Typography fontSize='14px' color='#666'>
-            Hãy đảm bảo đầy đủ thông tin, giá và tình trạng sãn sàng trước khi
+            Hãy đảm bảo đầy đủ thông tin, giá và tình trạng sẵn sàng trước khi
             duyệt phòng để tránh sai sót trong quá trình đặt phòng.
           </Typography>
         </DialogContent>
@@ -407,7 +408,7 @@ const ManagerRooms = ({
               "&:hover": { bgcolor: "#8ab020" },
               width: "100%",
             }}>
-            Gửi duyệt
+            Phê duyệt
           </Button>
           <Button
             onClick={() => setDeleteDialogOpen(false)}
@@ -529,6 +530,7 @@ function ActionMenu({
   hotel,
   setCancelDialogOpen,
   setAction,
+  handleRoomClick
 }) {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
@@ -577,7 +579,7 @@ function ActionMenu({
           onClick={() => {
             setIdHotel(hotel);
 
-            setAction("detail");
+            handleRoomClick(hotel);
           }}
           sx={{ gap: 1.5, fontSize: 14, color: "#424242" }} // Màu xám đậm nhẹ
         >

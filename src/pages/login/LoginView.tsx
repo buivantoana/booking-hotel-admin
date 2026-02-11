@@ -13,6 +13,7 @@ import {
   Checkbox,
   FormGroup,
   FormControlLabel,
+  IconButton,
 } from "@mui/material";
 import { MuiOtpInput } from "mui-one-time-password-input";
 import AppleIcon from "@mui/icons-material/Apple";
@@ -29,6 +30,8 @@ import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import { useBookingContext } from "../../App";
 import { GoogleOAuthProvider, GoogleLogin } from "@react-oauth/google";
+import { Visibility, VisibilityOff } from "@mui/icons-material";
+import { getErrorMessage } from "../../utils/utils";
 
 const GOOGLE_CLIENT_ID =
   "285312507829-8puo8pp5kikc3ahdivtr9ehq1fm3kkks.apps.googleusercontent.com";
@@ -45,8 +48,31 @@ const RegistrationForm = () => {
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const context = useBookingContext();
   const navigate = useNavigate();
+  const [touchedEmail, setTouchedEmail] = useState(false);
+  const [touchedPassword, setTouchedPassword] = useState(false);
+
+  const isValidEmail = (value: string): boolean => {
+    if (!value) return false;
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    return emailRegex.test(value);
+  };
+
+  const getEmailError = () => {
+    if (!touchedEmail) return false;
+    if (!email) return "Email không được để trống";
+    if (!isValidEmail(email)) return "Email không đúng định dạng";
+    return false;
+  };
+
+  const getPasswordError = () => {
+    if (!touchedPassword) return false;
+    if (!password) return "Mật khẩu không được để trống";
+    return false;
+  };
+
   const handleRegister = async () => {
     setLoading(true);
     try {
@@ -65,9 +91,9 @@ const RegistrationForm = () => {
             user: { ...result.account },
           },
         });
-        toast.success(result.message);
+        toast.success("Đăng nhập thành công");
       } else {
-        toast.error(result.message);
+        toast.error(getErrorMessage(result?.code) || result?.message );
       }
     } catch (error) {
       console.log(error);
@@ -137,8 +163,11 @@ const RegistrationForm = () => {
                 placeholder='Nhập email của khách sạn'
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
+                onBlur={() => setTouchedEmail(true)}
+                error={!!getEmailError()}
+                helperText={getEmailError() || " "}
                 sx={{
-                  mb: 3,
+                  mb: 2,
                   "& .MuiOutlinedInput-root": {
                     borderRadius: "16px",
                     height: "60px",
@@ -158,7 +187,10 @@ const RegistrationForm = () => {
               <TextField
                 fullWidth
                 placeholder='Nhập mật khẩu'
-                type='password'
+                type={showPassword ? "text" : "password"} // ← Toggle type
+                onBlur={() => setTouchedPassword(true)}
+                error={!!getPasswordError()}
+                helperText={getPasswordError() || " "}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 sx={{
@@ -172,6 +204,21 @@ const RegistrationForm = () => {
                       borderWidth: 1.5,
                     },
                   },
+                }}
+                InputProps={{
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <IconButton
+                        aria-label="toggle password visibility"
+                        onClick={() => setShowPassword(!showPassword)}
+                        onMouseDown={(e) => e.preventDefault()} // ngăn focus mất
+                        edge="end"
+                        sx={{ color: "#666" }}
+                      >
+                        {showPassword ? <VisibilityOff /> : <Visibility />}
+                      </IconButton>
+                    </InputAdornment>
+                  ),
                 }}
               />
               <FormGroup>

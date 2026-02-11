@@ -16,7 +16,8 @@ export default function HotelDetail({
   setDeleteDialogOpen,
   setCancelDialogOpen,
   room,
-  locations
+  locations,
+  hotels
 }) {
   return (
     <Box sx={{ minHeight: "100vh" }}>
@@ -35,6 +36,7 @@ export default function HotelDetail({
         getHotelDetail={getHotelDetail}
         setRoom={setRoom}
         locations={locations}
+        hotels={hotels}
       />
     </Box>
   );
@@ -90,17 +92,10 @@ function HotelHeader({
         </Box>
 
         <Chip
-          label='Đang hoạt động'
-          size='small'
-          sx={{
-            bgcolor: "#98B720",
-            color: "white",
-            fontWeight: 600,
-            fontSize: 13,
-            height: 28,
-            borderRadius: "16px",
-          }}
-        />
+              label={"Chờ duyệt"}
+              size='small'
+              sx={{ bgcolor: "#FEF7F2", color: "#EA6A00", }}
+            />
       </Box>
       <Box />
     </Box>
@@ -115,7 +110,8 @@ function HotelInfoDetail({
   getHotelDetail,
   setDeleteDialogOpen,
   setCancelDialogOpen,
-  locations
+  locations,
+  hotels
 }) {
   const [action, setAction] = useState("manager");
   const parseVi = (str) => {
@@ -214,7 +210,7 @@ function HotelInfoDetail({
           </Typography>
         </Box>
 
-        {action != "rooms" && (
+        {(action != "rooms"&&hotels.some((item)=>item.id == detailHotel.id) )  && (
           <Box display={"flex"} gap={"10px"}>
             <Button
               variant='contained'
@@ -404,14 +400,17 @@ function HotelInfoDetail({
 
             {/* Cột 2: Thông tin chính */}
             <Grid item xs={12} md={4}>
-              <Typography fontSize={16} fontWeight={600} color='#333' mb={2}>
-                Tên khách sạn/ Mã
-              </Typography>
-              <Typography fontSize={18} fontWeight={700} color='#222' mb={3}>
-                {hotelName} ({detailHotel.id || "ABC_123456"})
-              </Typography>
+             
 
               <Stack spacing={2.5}>
+              <Box>
+                  <Typography fontSize={14} color='black' fontWeight={600}>
+                  Tên khách sạn
+                  </Typography>
+                  <Typography fontSize={15} color='#333'>
+                  {hotelName} 
+                  </Typography>
+                </Box>
                 <Box>
                   <Typography fontSize={14} color='black' fontWeight={600}>
                     Email
@@ -430,13 +429,36 @@ function HotelInfoDetail({
                   </Typography>
                 </Box>
 
-                <Box>
-                  <Typography fontSize={14} color='black' fontWeight={600}>
-                    Theo giờ/ Qua đêm/ Theo ngày
-                  </Typography>
-                  <Typography fontSize={15} color='#333'>
-                    {rentStr}
-                  </Typography>
+                <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'flex-start' }}>
+                  {/* Cột 1: Theo giờ */}
+                  <Box sx={{  width: 120 }}>
+                    <Typography fontSize={14} color="black" fontWeight={600}>
+                      Theo giờ
+                    </Typography>
+                    <Typography fontSize={15} color="#333">
+                      08:00 - 22:00
+                    </Typography>
+                  </Box>
+                  
+                  {/* Cột 2: Qua đêm */}
+                  <Box sx={{  width: 120 }}>
+                    <Typography fontSize={14} color="black" fontWeight={600}>
+                      Qua đêm
+                    </Typography>
+                    <Typography fontSize={15} color="#333">
+                      {rentTypes.overnight?.from || "22:00"} - {rentTypes.overnight?.to || "08:00"}
+                    </Typography>
+                  </Box>
+
+                  {/* Cột 3: Theo ngày */}
+                  <Box sx={{  width: 120 }}>
+                    <Typography fontSize={14} color="black" fontWeight={600}>
+                      Theo ngày
+                    </Typography>
+                    <Typography fontSize={15} color="#333">
+                      {rentTypes.daily?.from || "14:00"} - {rentTypes.daily?.to || "12:00"}
+                    </Typography>
+                  </Box>
                 </Box>
 
                 <Box>

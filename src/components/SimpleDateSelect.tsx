@@ -22,6 +22,7 @@ import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import dayjs, { Dayjs } from "dayjs";
 import isoWeek from "dayjs/plugin/isoWeek";
 import isBetween from "dayjs/plugin/isBetween";
+import "dayjs/locale/vi";
 dayjs.extend(isBetween);
 
 /* ================= TYPES ================= */
@@ -114,7 +115,7 @@ export default function SimpleDatePopup({ value, onChange }: Props) {
   /* ================= UI ================= */
 
   return (
-    <LocalizationProvider dateAdapter={AdapterDayjs}>
+    <LocalizationProvider adapterLocale={"vi"} dateAdapter={AdapterDayjs}>
       <ClickAwayListener onClickAway={() => setOpen(false)}>
         <Box>
           {/* ===== TRIGGER ===== */}
@@ -139,7 +140,7 @@ export default function SimpleDatePopup({ value, onChange }: Props) {
             }}
           >
             <Typography fontWeight={500}>
-              {mode === "week" ? "7 ngày gần nhất" : "Tháng này"}
+              {mode === "week" ? "Tuần này" : "Tháng này"}
             </Typography>
             <KeyboardArrowDownIcon />
           </Box>
@@ -167,7 +168,7 @@ export default function SimpleDatePopup({ value, onChange }: Props) {
                       color: mode === "week" ? "#9DBD00" : "inherit",
                     }}
                   >
-                    7 ngày gần nhất
+                    Tuần này
                   </Typography>
 
                   <Typography
@@ -235,6 +236,10 @@ export default function SimpleDatePopup({ value, onChange }: Props) {
                   ) : (
                     <DateCalendar
                     value={checkOut}
+                    dayOfWeekFormatter={(date) => {
+                      const shortDay = date.format('dd');
+                      return shortDay;
+                    }}
                       slots={{
                         day: renderWeekDay(checkIn, checkOut),
                       }}

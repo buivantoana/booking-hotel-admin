@@ -223,6 +223,9 @@ input[type="number"] {
 .MuiCheckbox-root:hover {
   background-color: rgba(124, 181, 24, 0.08) !important;
 }
+.MuiPickersCalendarHeader-label{
+  text-transform: capitalize;
+}
 /* --- CUSTOM THUMB DOTS STYLE --- */
 /* .slick-thumb {
   display: flex !important;

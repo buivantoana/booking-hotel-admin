@@ -161,7 +161,8 @@ export default function ApprovalView({
   paginationRooms,
   onPageChangeRooms,
   rooms,
-  locations
+  locations,
+  attribute
 }) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
@@ -194,7 +195,7 @@ export default function ApprovalView({
       let result = await getHotel(searchParams.get("id"));
       if (result?.id) {
         setDetailHotel(result);
-        if (room.id) {
+        if (room?.id) {
           setRoom(result?.room_types.find((item) => item.id == room.id));
         }
       }
@@ -235,11 +236,14 @@ export default function ApprovalView({
       }
       if (result?.message && !result?.code) {
         setReason("");
-        toast.success(result?.message);
+       
         if (activeTab == "manager") {
           getDataHotels();
+          toast.success(status == "approve"?"Phê duyệt khách sạn thành công":"Từ chối khách sạn thành công");
         } else {
           getDataRooms();
+          toast.success(status == "approve"?"Phê duyệt loại phòng thành công":"Từ chối loại phòng thành công");
+          getHotelDetail()
         }
       } else {
         toast.error(result?.message);
@@ -680,6 +684,8 @@ export default function ApprovalView({
           onNext={setAction}
           setDeleteDialogOpen={setDeleteDialogOpen}
           setCancelDialogOpen={setCancelDialogOpen}
+          attribute={attribute}
+          rooms={rooms}
         />
       )}
 
@@ -694,6 +700,7 @@ export default function ApprovalView({
           setCancelDialogOpen={setCancelDialogOpen}
           room={room}
           locations={locations}
+          hotels={hotels}
         />
       )}
       {action == "manager" && (
@@ -906,8 +913,8 @@ export default function ApprovalView({
           </Typography>
           <Typography fontSize='14px' color='#666'>
             {activeTab == "manager"
-              ? ` Hãy đảm bảo đầy đủ thông tin, giá và tình trạng sãn sàng trước khi duyệt khách sạn để tránh sai sót trong quá trình đặt phòng.`
-              : ` Hãy đảm bảo đầy đủ thông tin, giá và tình trạng sãn sàng trước khi duyệt phòng để tránh sai sót trong quá trình đặt phòng.`}
+              ? ` Hãy đảm bảo đầy đủ thông tin, giá và tình trạng sẵn sàng trước khi duyệt khách sạn để tránh sai sót trong quá trình đặt phòng.`
+              : ` Hãy đảm bảo đầy đủ thông tin, giá và tình trạng sẵn sàng trước khi duyệt phòng để tránh sai sót trong quá trình đặt phòng.`}
           </Typography>
         </DialogContent>
         <DialogActions
@@ -929,7 +936,7 @@ export default function ApprovalView({
               "&:hover": { bgcolor: "#8ab020" },
               width: "100%",
             }}>
-            Gửi duyệt
+            Phê duyệt
           </Button>
           <Button
             onClick={() => setDeleteDialogOpen(false)}
@@ -964,14 +971,16 @@ export default function ApprovalView({
           </Box>
         </DialogTitle>
         <DialogContent sx={{ pb: 3, padding: 1 }}>
-          <Typography fontSize='14px' color='#666'>
-            Từ chối kinh doanh khách sạn. Bạn có thể mở kinh doanh lại trong
-            tương lai.
+          <Typography fontSize='16px' >
+            {activeTab == "manager"?parseRoomName(idHotel?.name): parseRoomName(room?.hotel_name) }
+          </Typography>
+          <Typography fontSize='16px' color="#98B720" >
+            {activeTab != "manager"&&parseRoomName(room?.name) }
           </Typography>
           <TextField
             multiline
             rows={4}
-            placeholder='Nhập nội dung từ chối loại phòng...'
+            placeholder='Nhập nội dung từ chối ...'
             value={reason}
             onChange={(e) => setReason(e.target.value)}
             variant='outlined'

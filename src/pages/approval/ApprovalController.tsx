@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from "react";
 import ApprovalView from "./ApprovalView";
-import { getHotels, getLocations, getRooms } from "../../service/hotel";
+import { getAttribute, getHotels, getLocations, getRooms } from "../../service/hotel";
 
 type Props = {};
 
 const ApprovalController = (props: Props) => {
   const [hotels,setHotels] = useState([])
   const [locations, setLocations] = useState<Location[]>([]);
+  const [attribute, setAttribute] = useState({});
   const [pagination, setPagination] = useState({
     page: 1,
     limit: 10,
@@ -104,6 +105,8 @@ const ApprovalController = (props: Props) => {
     const fetchLocations = async () => {
       try {
      
+        const resultAttribute = await getAttribute();
+        setAttribute(resultAttribute);
         const result = await getLocations();
         // Giả sử API trả về { locations: [...] }
         if (result?.locations && Array.isArray(result.locations)) {
@@ -125,6 +128,7 @@ const ApprovalController = (props: Props) => {
   onPageChangeRooms={handlePageChangeRooms}
   rooms={rooms}
   locations={locations}
+  attribute={attribute}
   getDataRooms={getDataRooms}
   getDataHotels={getDataHotels} />;
 };

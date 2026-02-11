@@ -564,3 +564,45 @@ export const direction = [
     "label": "Ban công"
   }
 ]
+
+
+export const ERROR_MESSAGES = {
+  OK: "Thành công",
+
+  USER_NOT_FOUND: "Tài khoản không tồn tại",
+  USER_NOT_PW: "Tài khoản chưa cấu hình mã pin",
+  WRONG_PW: "Sai mật khẩu",
+
+  UPDATE_ERROR: "Cập nhật thất bại",
+  UNAUTHORIZED: "Lỗi đăng nhập",
+
+  INVALID_DATETIME_FORMAT: "Sai định dạng thời gian",
+  INVALID_BODY: "Vui lòng điền đầy đủ các thông tin cần thiết",
+  INVALID_PARTNER: "Đối tác không hợp lệ hoặc bị khoá",
+  INVALID_STATUS: "Trạng thái không hợp lệ, vui lòng kiểm tra lại",
+  INVALID_ACTION: "Hành động không hợp lệ, vui lòng kiểm tra lại",
+
+  ROOM_TYPE_NOT_FOUND: "Không tìm thấy hạng phòng",
+  RENT_TYPE_NOT_FOUND:
+    "Không tìm thấy kiểu thuê phù hợp, vui lòng kiểm tra cấu hình thuê theo giờ, đêm hoặc ngày",
+  ROOM_NOT_FREE: "Phòng không còn trống hoặc mới bị giữ chỗ",
+
+  EMAIL_USED: "Email đã được sử dụng",
+  PHONE_USED: "Số điện thoại đã được sử dụng",
+
+  ACCOUNT_LOCKED: "Tài khoản bị khoá",
+  NOT_PERMISSION: "Không có quyền truy cập",
+
+  BOOKING_NOT_FOUND: "Mã đặt phòng không tồn tại",
+  HOTEL_NOT_FOUND: "Không tìm thấy khách sạn",
+  NOT_FOUND: "Không tìm thấy dữ liệu",
+
+  INTERNAL_ERROR: "Lỗi nội bộ hệ thống",
+};
+// Hàm lấy message từ code lỗi
+export const getErrorMessage = (errorCode) => {
+  return ERROR_MESSAGES[errorCode] || null;
+};
+
+export const formatDate = (date: Dayjs | null) =>
+    date ? date.format("DD/MM/YYYY") : "Chọn ngày";
