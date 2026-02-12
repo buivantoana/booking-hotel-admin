@@ -8,6 +8,7 @@ type Props = {};
 const ManagerHotelController = (props: Props) => {
   const [hotels, setHotels] = useState([])
   const [locations, setLocations] = useState([])
+  const [selectedStatus, setSelectedStatus] = useState<string | null>(null);
   const [pagination, setPagination] = useState({
     page: 1,
     limit: 10,
@@ -32,7 +33,9 @@ const ManagerHotelController = (props: Props) => {
     getDataHotels(1, defaultFilters)
     getLocations()
   }, [])
-
+  useEffect(()=>{
+    getDataHotels(pagination.page,filters)
+  },[selectedStatus])
   const getLocations = async () => {
     try {
       let result = await getLocation()
@@ -63,6 +66,9 @@ const ManagerHotelController = (props: Props) => {
 
       if (filterParams.cooperation_type) {
         query.cooperation_type = filterParams.cooperation_type;
+      }
+      if (selectedStatus && selectedStatus!="all") {
+        query.status = selectedStatus
       }
       const params1 = new URLSearchParams();
       Object.entries(query).forEach(([key, value]) => {
@@ -126,6 +132,8 @@ const ManagerHotelController = (props: Props) => {
     onResetFilter={handleResetFilter}
     onPageChange={handlePageChange}
     loading={loading}
+    setSelectedStatus={setSelectedStatus}
+    selectedStatus={selectedStatus}
     getDataHotels={getDataHotels} />;
 };
 

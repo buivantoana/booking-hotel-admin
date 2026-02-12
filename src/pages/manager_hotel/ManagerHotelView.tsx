@@ -42,6 +42,7 @@ import {
 import { useEffect, useState } from "react";
 import remove from "../../images/delete.png";
 import success from "../../images/Frame.png";
+import empty from "../../images/Frame 1321317883.png";
 import HotelDetail from "./HotelDetail";
 import RoomDetail from "./RoomDetail";
 import { getHotel, toggleHotels, updateHotelStatus, updateRoomStatus } from "../../service/hotel";
@@ -190,7 +191,9 @@ export default function ManagerHotelView({
   filters,
   onFilterChange,
   onResetFilter,
-  loading
+  loading,
+  selectedStatus,
+  setSelectedStatus
 
 }) {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -210,6 +213,7 @@ export default function ManagerHotelView({
   const [reason, setReason] = useState("");
   const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
   const [approveDialogOpen, setApproveDialogOpen] = useState(false);
+  
   const [localFilters, setLocalFilters] = useState({
     name: "",
     cooperation_type: "",
@@ -352,6 +356,7 @@ export default function ManagerHotelView({
               "Hình thức",
               "Tình trạng",
               "Địa chỉ",
+              "Email",
               "Số điện thoại",
               "",
             ].map((head) => (
@@ -378,7 +383,7 @@ export default function ManagerHotelView({
           ) : hotels.length === 0 ? (
             <TableRow>
               <TableCell colSpan={7} align="center">
-                <Typography>Không có dữ liệu</Typography>
+                <img src={empty} alt="" />
               </TableCell>
             </TableRow>
           ) : (
@@ -400,10 +405,10 @@ export default function ManagerHotelView({
 
                 <TableCell>{renderStatusChip(hotel.status)}</TableCell>
 
-                <TableCell sx={{ maxWidth: 280 }}>
+                <TableCell sx={{ maxWidth: 200 }}>
                   {parseLang(hotel.address)}
                 </TableCell>
-
+                <TableCell  sx={{ minWidth: 100 }}>{hotel?.email}</TableCell>
                 <TableCell>{hotel.phone}</TableCell>
 
                 <TableCell>
@@ -539,6 +544,49 @@ export default function ManagerHotelView({
       )}
     </Box>
   );
+  const renderStats = () => {
+    const stats = [
+      { label: "Tất cả",  status: null },
+      { label: "Đang hoạt động", status: "active" },
+      { label: "Ngừng kinh doanh",  status: "paused" },
+      { label: "Chờ duyệt",  status: "pending" },
+      { label: "Bị từ chối",  status: "rejected" },
+      { label: "Ngừng hợp tác",  status: "terminated" },
+    ];
+
+    return (
+      <Box sx={{ mb: 3 }}>
+        <Stack
+          direction={{ xs: "column", sm: "row" }}
+          spacing={{ xs: 1.5, sm: 2.5, md: 2 }}
+          flexWrap="wrap"
+          color="#555"
+          fontSize={14}
+        >
+          {stats.map((item) => (
+            <Box
+              key={item.label}
+              onClick={() => setSelectedStatus(item.status)}
+              sx={{
+                cursor: "pointer",
+                px: 1.5,
+                py: 0.8,
+                borderRadius: "8px",
+                transition: "all 0.2s",
+                bgcolor: selectedStatus === item.status ? "#F0F1F3" : "transparent",
+
+                "&:hover": {
+                  bgcolor: selectedStatus === item.status ? "transparent" : "#F0F1F3",
+                },
+              }}
+            >
+              {item.label} 
+            </Box>
+          ))}
+        </Stack>
+      </Box>
+    );
+  };
   return (
     <Box sx={{ p: { xs: 2, sm: 3, md: 4 }, minHeight: "100vh" }}>
         <Dialog
@@ -929,7 +977,7 @@ export default function ManagerHotelView({
               border: "1px solid #eee",
               padding: 3,
             }}>
-            <Typography variant='h6' fontWeight='600'>
+            <Typography variant='h6' mb={3} fontWeight='600'>
               Danh sách khách sạn
             </Typography>
             <Stack
@@ -939,7 +987,7 @@ export default function ManagerHotelView({
               alignItems={{xs:"start",md:'end'}}>
               {/* Tìm kiếm */}
               <Box width={{xs:"100%",md:"unset"}}>
-                <Typography sx={{ mb: 1.5 }}>Tìm kiếm</Typography>
+                <Typography sx={{ mb: 1.5 }} fontWeight='bold'>Tìm kiếm</Typography>
                 <TextField
                   placeholder='Tên khách sạn'
                   value={localFilters.name}
@@ -985,7 +1033,7 @@ export default function ManagerHotelView({
                 />
               </Box>
               <Box width={{xs:"100%",md:"unset"}}>
-                <Typography sx={{ mb: 1.5 }}>Địa điểm</Typography>
+                <Typography sx={{ mb: 1.5 }} fontWeight='bold'>Địa điểm</Typography>
                 <Select
                   displayEmpty
                   defaultValue=''
@@ -1039,7 +1087,7 @@ export default function ManagerHotelView({
 
               {/* 2 ô DatePicker – ĐÃ FIX LỖI 100% */}
               <Box width={{xs:"100%",md:"unset"}}>
-                <Typography sx={{ mb: 1.5 }}>Hình thức hợp tác</Typography>
+                <Typography sx={{ mb: 1.5 }} fontWeight='bold'>Hình thức hợp tác</Typography>
                 <Select
                   displayEmpty
                   defaultValue=''
@@ -1115,17 +1163,7 @@ export default function ManagerHotelView({
               </Stack>
             </Stack>
             <Box sx={{ mb: 3 }}>
-              <Stack direction='row' spacing={4} color='#555' fontSize={14}>
-                <Box>
-                  Tất cả <strong>{total}</strong>
-                </Box>
-                <Box>
-                  Dạng hoạt động <strong>{active}</strong>
-                </Box>
-                <Box>
-                  Ngừng kinh doanh <strong>{inactive}</strong>
-                </Box>
-              </Stack>
+            {renderStats()}
             </Box>
             {isMobile ? renderMobile() : renderDesktop()}
             {hotels.length !== 0 && (
