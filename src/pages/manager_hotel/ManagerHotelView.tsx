@@ -412,7 +412,7 @@ export default function ManagerHotelView({
                 <TableCell>{hotel.phone}</TableCell>
 
                 <TableCell>
-                  {["pending", "active", "terminated"].includes(hotel.status) && (
+                  {["pending", "active", "terminated","paused"].includes(hotel.status) && (
                     <ActionMenu
                       hotel={hotel}
                       setAction={setAction}
@@ -623,7 +623,7 @@ export default function ManagerHotelView({
             Xác nhận mở lại phòng
           </Typography>
           <Typography fontSize='14px' color='#666'>
-            Hãy đảm bảo đầy đủ thông tin, giá và tình trạng sãn sàng trước khi
+            Hãy đảm bảo đầy đủ thông tin, giá và tình trạng sẵn sàng trước khi
             duyệt khách sạn để tránh sai sót trong quá trình đặt phòng.
           </Typography>
         </DialogContent>
@@ -646,7 +646,7 @@ export default function ManagerHotelView({
               "&:hover": { bgcolor: "#8ab020" },
               width: "100%",
             }}>
-            Gửi duyệt
+            Duyệt
           </Button>
           <Button
             onClick={() => setApproveDialogOpenRoom(false)}
@@ -790,7 +790,7 @@ export default function ManagerHotelView({
             Xác nhận mở lại khách sạn
           </Typography>
           <Typography fontSize='14px' color='#666'>
-            Hãy đảm bảo đầy đủ thông tin, giá và tình trạng sãn sàng trước khi
+            Hãy đảm bảo đầy đủ thông tin, giá và tình trạng sẵn sàng trước khi
             duyệt khách sạn để tránh sai sót trong quá trình đặt phòng.
           </Typography>
         </DialogContent>
@@ -813,7 +813,7 @@ export default function ManagerHotelView({
               "&:hover": { bgcolor: "#8ab020" },
               width: "100%",
             }}>
-            Gửi duyệt
+            Duyệt
           </Button>
           <Button
             onClick={() => setApproveDialogOpen(false)}
@@ -1247,7 +1247,7 @@ export default function ManagerHotelView({
           </Typography>
           <Typography fontSize='14px' color='#666'>
             {idHotel?.status == "paused"
-              ? "Hãy đảm bảo cập nhật đầu đủ thông tin, giá và tình trạng sãn sàng trước khi mở lại hoạt động kinh doanh để tránh sai sót trong quá trình đặt phòng."
+              ? "Hãy đảm bảo cập nhật đầu đủ thông tin, giá và tình trạng sẵn sàng trước khi mở lại hoạt động kinh doanh để tránh sai sót trong quá trình đặt phòng."
               : " Khách sẽ không nhìn thấy khách sạn này sau khi bạn ngừng kinh doanh khách sạn. Bạn có thể mở kinh doanh lại loại phòng trong tương lai."}
           </Typography>
         </DialogContent>
@@ -1273,7 +1273,7 @@ export default function ManagerHotelView({
               width: "100%",
             }}>
             {idHotel?.status == "paused"
-              ? "Gửi duyệt"
+              ? "Duyệt"
               : "Xác nhận ngừng kinh doanh"}
           </Button>
           <Button
@@ -1309,7 +1309,7 @@ const renderStatusChip = (status) => {
       sx: { bgcolor: "#98B720", color: "white" },
     },
     paused: {
-      label: "Tạm dừng",
+      label: "Ngừng kinh doanh",
       sx: { bgcolor: "#FFB020", color: "white" },
     },
     pending: {
@@ -1317,7 +1317,7 @@ const renderStatusChip = (status) => {
       sx: { bgcolor: "#1976D2", color: "white" },
     },
     terminated: {
-      label: "Đã chấm dứt",
+      label: "Ngừng hợp tác",
       sx: { bgcolor: "#D32F2F", color: "white" },
     },
     rejected: {

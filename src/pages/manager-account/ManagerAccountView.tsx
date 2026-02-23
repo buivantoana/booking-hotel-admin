@@ -25,6 +25,7 @@ import {
   useTheme,
   useMediaQuery,
   Divider,
+  CircularProgress,
 } from "@mui/material";
 import {
   Search as SearchIcon,
@@ -42,7 +43,7 @@ import remove from "../../images/delete.png";
 import success from "../../images/Frame.png";
 import { useNavigate } from "react-router-dom";
 import { updateAccounts, updatePartner } from "../../service/account";
-
+import empty from "../../images/Frame 1321317883.png";
 function ActionMenu({ account, onToggleStatus, onViewDetail }) {
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
@@ -218,9 +219,9 @@ export default function ManagerAccountView({
       if (result?.message && !result?.code) {
         setConfirmOpen(false);
         fetchAccounts();
-        toast.success(result?.message);
+        toast.success("Ngừng hợp tác thành công");
       } else {
-        toast.success(result?.message);
+        toast.success("Ngừng hợp tác thất bại");
       }
       console.log("AAA result", result);
     } catch (error) {
@@ -246,14 +247,12 @@ export default function ManagerAccountView({
         <TableBody>
           {loading ? (
             <TableRow>
-              <TableCell colSpan={6} align="center">
-                Đang tải...
-              </TableCell>
+              <Typography><CircularProgress sx={{color:"#98B720"}} /></Typography>
             </TableRow>
           ) : displayedAccounts.length === 0 ? (
             <TableRow>
               <TableCell colSpan={6} align="center">
-                Không có dữ liệu
+              <img src={empty} alt="" />
               </TableCell>
             </TableRow>
           ) : (
@@ -497,9 +496,10 @@ export default function ManagerAccountView({
               onClick={() => handleTabChange(tab.value)}
               sx={{
                 cursor: "pointer",
-                bgcolor: currentTab === tab.value ? "#98b720" : "transparent",
-                color: currentTab === tab.value ? "white" : "#666",
+                bgcolor: currentTab === tab.value ? "#F0F1F3" : "transparent",
+                color:  "#555",
                 fontWeight: currentTab === tab.value ? "bold" : "normal",
+                borderRadius:"8px"
               }}
             />
           ))}

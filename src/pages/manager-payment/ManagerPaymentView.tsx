@@ -24,6 +24,7 @@ import {
   useMediaQuery,
   useTheme,
   Menu,
+  CircularProgress,
 } from "@mui/material";
 import { Dialog, DialogContent, DialogTitle, Divider } from "@mui/material";
 import {
@@ -43,6 +44,8 @@ import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import dayjs from "dayjs";
 import edit from "../../images/brush-square.png";
 import SimpleDateSearchBar from "../../components/SimpleDateSearchBar";
+import DateSearch from "../../components/DateSearch";
+import empty from "../../images/Frame 1321317883.png";
 
 
 
@@ -92,6 +95,23 @@ export default function ManagerPaymentView({
     }
   }, [filters]);
   // Handler click row
+  useEffect(() => {
+    if (dateRange.checkIn && dateRange?.checkOut) {
+      const formatDateForAPI = (date: dayjs.Dayjs) => {
+        if (!date) {
+          return
+        }
+        return date.format("YYYY-MM-DDTHH:mm:ssZ");
+      };
+      const updatedFilters = {
+        ...localFilters,
+        check_in_from: formatDateForAPI(dateRange?.checkIn),
+        check_in_to: formatDateForAPI(dateRange?.checkOut),
+      };
+
+      onFilterChange(updatedFilters);
+    }
+  }, [dateRange])
   const handleRowClick = (booking) => {
     setSelectedBooking(booking);
     setOpenDetail(true);
@@ -190,13 +210,13 @@ export default function ManagerPaymentView({
           {loading ? (
             <TableRow>
               <TableCell colSpan={7} align="center">
-                <Typography>Đang tải...</Typography>
+              <Typography><CircularProgress sx={{color:"#98B720"}} /></Typography>
               </TableCell>
             </TableRow>
           ) : Payment.length === 0 ? (
             <TableRow>
               <TableCell colSpan={7} align="center">
-                <Typography>Không có dữ liệu</Typography>
+              <img src={empty} alt="" />
               </TableCell>
             </TableRow>
           ) : (
@@ -525,9 +545,13 @@ export default function ManagerPaymentView({
               {/* 2 ô DatePicker – ĐÃ FIX LỖI 100% */}
               <Box width={{xs:"100%",md:"unset"}}>
                 <Typography sx={{ mb: 1.5 }}>Thời gian</Typography>
-                <SimpleDateSearchBar
+                <DateSearch
                   value={dateRange}
+                  type="daily"
                   onChange={setDateRange}
+                  restrictToFuture={true}
+                // Nếu SimpleDateSearchBar hỗ trợ fullWidth thì thêm prop fullWidth={true}
+                // hoặc wrap trong Box với width 100% như trên
                 />
               </Box>
 
@@ -571,14 +595,14 @@ export default function ManagerPaymentView({
                     onClick={() => handleTabChange(tab.label)}
                     sx={{
                       cursor: "pointer",
-                      borderRadius: "18px",
+                      borderRadius: "8px",
                       height: 36,
-                      bgcolor: isActive ? "#98b720" : "transparent",
-                      color: isActive ? "white" : "#666",
-                      border: isActive ? "none" : "1px solid #e0e0e0",
+                      bgcolor: isActive ? "#F0F1F3" : "transparent",
+                      color: "#555",
+                      // border: isActive ? "none" : "1px solid #e0e0e0",
                       fontWeight: isActive ? "bold" : "normal",
                       "&:hover": {
-                        bgcolor: isActive ? "#7cb342" : "#f5f5f5",
+                        bgcolor: isActive ? "transparent" : "#F0F1F3",
                       },
                     }}
                   />

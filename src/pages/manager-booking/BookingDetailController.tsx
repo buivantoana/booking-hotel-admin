@@ -8,8 +8,8 @@ import dayjs from "dayjs";
 const BookingDetailController = () => {
   
   const [dateRange, setDateRange] = useState({
-    checkIn: dayjs("2025-01-01T00:00:00"),
-    checkOut: dayjs(),
+    checkIn: null,
+    checkOut: null,
   });
 
   // State cho booking và phân trang

@@ -279,7 +279,8 @@ export default function ManagerReviewView({
     try {
       let result = await toggleVisibility(review.id,{disabled:!review.disabled})
       if(result?.review_id){
-        toast.success(result?.message)
+        toast.success("Ẩn đánh giá thành công")
+        setDetailDialogOpen(false)
         if(localFilters.disabled){
           fetchReviews("",localFilters)
         }else{
@@ -703,14 +704,14 @@ export default function ManagerReviewView({
                   onClick={() => handleTabChange(tab.value)}
                   sx={{
                     cursor: "pointer",
-                    borderRadius: "18px",
+                    borderRadius: "8px",
                     height: 36,
-                    bgcolor: String(localFilters.disabled) == tab.value ? "#98b720" : "transparent",
-                    color: String(localFilters.disabled) == tab.value ? "white" : "#666",
-                    border: String(localFilters.disabled) == tab.value ? "none" : "1px solid #e0e0e0",
+                    bgcolor: String(localFilters.disabled) == tab.value ? "#F0F1F3" : "transparent",
+                    color:  "#555",
+                    // border: String(localFilters.disabled) == tab.value ? "none" : "1px solid #e0e0e0",
                     fontWeight: String(localFilters.disabled) == tab.value ? "bold" : "normal",
                     "&:hover": {
-                      bgcolor: String(localFilters.disabled) == tab.value ? "#7cb342" : "#f5f5f5",
+                      bgcolor: String(localFilters.disabled) == tab.value ? "transparent" : "#F0F1F3",
                     },
                   }}
                 />
@@ -746,7 +747,7 @@ export default function ManagerReviewView({
           </Stack>
         </Paper>
       </Box>
-      <ReviewDetailModal handleVisibleAndHidden={handleVisibleAndHidden} open={detailDialogOpen} setOpen={setDetailDialogOpen} review={review} />
+      <ReviewDetailModal handleVisibleAndHidden={handleVisibleAndHidden} setHiddenDialogOpen={setHiddenDialogOpen} open={detailDialogOpen} setOpen={setDetailDialogOpen} review={review} />
       <Dialog open={hiddenDialogOpen} onClose={() => setHiddenDialogOpen(false)}>
         <DialogContent sx={{ textAlign: "center", py: 4 }}>
 
@@ -860,7 +861,7 @@ const StyledModal = styled(Dialog)(({ theme }) => ({
   },
 }));
 
-function ReviewDetailModal({ open, setOpen, review, handleVisibleAndHidden }) {
+function ReviewDetailModal({ open, setOpen, review, handleVisibleAndHidden,setHiddenDialogOpen }) {
 
   const [detail, setDetail] = useState({}); // ← Đây là nguồn dữ liệu chính để hiển thị
   const [loading, setLoading] = useState(false);
@@ -1112,12 +1113,13 @@ function ReviewDetailModal({ open, setOpen, review, handleVisibleAndHidden }) {
           <Button 
           
           onClick={async()=>{
-            setLoading(true)
-            let result = await handleVisibleAndHidden()
-            if(result){
-              setOpen(false)
-            }
-            setLoading(false)
+            setHiddenDialogOpen(true)
+            // setLoading(true)
+            // let result = await setHiddenDialogOpen()
+            // if(result){
+            //   setOpen(false)
+            // }
+            // setLoading(false)
           }}
           disabled={loading}
           sx={{

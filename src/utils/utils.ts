@@ -606,3 +606,12 @@ export const getErrorMessage = (errorCode) => {
 
 export const formatDate = (date: Dayjs | null) =>
     date ? date.format("DD/MM/YYYY") : "Chọn ngày";
+
+export const formatPrice = (price: number | null | undefined): string => {
+  if (!price || price === 0) return "-";
+  return new Intl.NumberFormat("vi-VN", {
+    style: "currency",
+    currency: "VND",
+    minimumFractionDigits: 0,
+  }).format(price);
+};

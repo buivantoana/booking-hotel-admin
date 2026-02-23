@@ -26,6 +26,7 @@ import {
   useMediaQuery,
   Select,
   Divider,
+  CircularProgress,
 } from "@mui/material";
 import {
   Search as SearchIcon,
@@ -39,13 +40,15 @@ import {
   HighlightOff,
   Add,
   Edit,
+  VisibilityOff,
+  Visibility,
 } from "@mui/icons-material";
 import { toast } from "react-toastify";
 import remove from "../../images/delete.png";
 import success from "../../images/Frame.png";
 import { useNavigate } from "react-router-dom";
 import { createAccounts, updateAccounts } from "../../service/account";
-
+import empty from "../../images/Frame 1321317883.png";
 function ActionMenu({
   account,
   onToggleStatus,
@@ -226,9 +229,9 @@ export default function ManagerStaffView({
       if (result?.message && !result?.code) {
         setConfirmOpen(false);
         fetchAccounts();
-        toast.success(result?.message);
+        toast.success(selectedAccount.active == 1 ? "Khóa tài khoản thành công" : "Mở tài khoản thành công" );
       } else {
-        toast.success(result?.message);
+        toast.success(selectedAccount.active == 1 ? "Khóa tài khoản thất bại" : "Mở tài khoản thất bại");
       }
       console.log("AAA result", result);
     } catch (error) {
@@ -244,9 +247,9 @@ export default function ManagerStaffView({
         <TableHead>
           <TableRow sx={{ bgcolor: "#f5f5f5" }}>
             <TableCell><strong>#</strong></TableCell>
+            <TableCell><strong>Tên</strong></TableCell>
+            <TableCell><strong>Vai trò</strong></TableCell>
             <TableCell><strong>Email</strong></TableCell>
-            <TableCell><strong>Trạng thái</strong></TableCell>
-            <TableCell><strong>Số lượng khách sạn</strong></TableCell>
             <TableCell><strong>Số điện thoại</strong></TableCell>
             <TableCell align="center"><strong></strong></TableCell>
           </TableRow>
@@ -254,14 +257,12 @@ export default function ManagerStaffView({
         <TableBody>
           {loading ? (
             <TableRow>
-              <TableCell colSpan={6} align="center">
-                Đang tải...
-              </TableCell>
+              <Typography><CircularProgress sx={{color:"#98B720"}} /></Typography>
             </TableRow>
           ) : displayedAccounts.length === 0 ? (
             <TableRow>
               <TableCell colSpan={6} align="center">
-                Không có dữ liệu
+              <img src={empty} alt="" />
               </TableCell>
             </TableRow>
           ) : (
@@ -276,19 +277,19 @@ export default function ManagerStaffView({
                   {(pagination.page - 1) * pagination.limit + index + 1}
                 </TableCell>
                 <TableCell sx={{ fontWeight: 500 }}>
-                  {account.email}
+                  {account.name}
                 </TableCell>
                 <TableCell>
                   <Chip
-                    label={account.active ? "Đang hoạt động" : "Ngừng hợp tác"}
+                    label={account.role}
                     sx={{
-                      bgcolor: account.active ? "#e8f5e9" : "#ffebee",
-                      color: account.active ? "#4caf50" : "#f44336",
+                      bgcolor: "#e8f5e9" ,
+                      color:  "#4caf50",
                       fontWeight: "medium",
                     }}
                   />
                 </TableCell>
-                <TableCell>{account.hotel_count || 0}</TableCell>
+                <TableCell>{account.email}</TableCell>
                 <TableCell>{account.phone || "-"}</TableCell>
                 <TableCell
                   align="center"
@@ -535,7 +536,7 @@ export default function ManagerStaffView({
         </Stack>
 
         {/* Tabs */}
-        <Stack direction='row' gap={1.5} mb={4} flexWrap='wrap'>
+        {/* <Stack direction='row' gap={1.5} mb={4} flexWrap='wrap'>
           {tabs.map((tab) => (
             <Chip
               key={tab.value}
@@ -548,13 +549,14 @@ export default function ManagerStaffView({
               onClick={() => handleTabChange(tab.value)}
               sx={{
                 cursor: "pointer",
-                bgcolor: currentTab === tab.value ? "#98b720" : "transparent",
-                color: currentTab === tab.value ? "white" : "#666",
+                bgcolor: currentTab === tab.value ? "#F0F1F3" : "transparent",
+                color:  "#555",
                 fontWeight: currentTab === tab.value ? "bold" : "normal",
+                borderRadius:"8px"
               }}
             />
           ))}
-        </Stack>
+        </Stack> */}
 
         {/* Bảng */}
         {isMobile ? renderMobile() : renderDesktop()}
@@ -716,7 +718,8 @@ const AccountModal: React.FC<AccountModalProps> = ({
   onSuccess,
 }) => {
   const isEdit = !!account;
-
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -786,9 +789,9 @@ const AccountModal: React.FC<AccountModalProps> = ({
       if (result?.message && !result?.code) {
         onSuccess?.();
         onClose();
-        toast.success(result?.message);
+        toast.success(isEdit? "Chỉnh sửa nhân viên thành công": "Thêm nhân viên thành công");
       } else {
-        toast.error(result?.message);
+        toast.error(isEdit? "Chỉnh sửa nhân viên thất bại": "Thêm nhân viên thất bại");
       }
     } catch (error: any) {
       console.error(error);
@@ -822,6 +825,7 @@ const AccountModal: React.FC<AccountModalProps> = ({
 
               value={formData.name}
               onChange={handleChange("name")}
+              placeholder="Nguyễn Văn A"
               fullWidth
               required
               variant='outlined'
@@ -847,6 +851,7 @@ const AccountModal: React.FC<AccountModalProps> = ({
               type='email'
               value={formData.email}
               onChange={handleChange("email")}
+              placeholder="ABC@gmail.com"
               fullWidth
               required
               variant='outlined'
@@ -871,6 +876,7 @@ const AccountModal: React.FC<AccountModalProps> = ({
 
               value={formData.phone}
               onChange={handleChange("phone")}
+              placeholder="0123456789"
               fullWidth
               required
               variant='outlined'
@@ -938,10 +944,54 @@ const AccountModal: React.FC<AccountModalProps> = ({
             </Typography>
             <TextField
 
-              type='password'
+type={showPassword ? "text" : "password"}
               value={formData.password}
               onChange={handleChange("password")}
               fullWidth
+              required
+              placeholder="Nhập mật khẩu mới"
+              variant='outlined'
+              sx={{
+                "& .MuiOutlinedInput-root": {
+                  borderRadius: "16px",
+                  height: "45px",
+                  backgroundColor: "#fff",
+                  "&.Mui-focused fieldset": {
+                    borderColor: "#98b720",
+                    borderWidth: 1.5,
+                  },
+                },
+                
+              }}
+              InputProps={{
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton
+                      aria-label="toggle password visibility"
+                      onClick={() => setShowPassword(!showPassword)}
+                      onMouseDown={(e) => e.preventDefault()} // ngăn focus mất
+                      edge="end"
+                      sx={{ color: "#666" }}
+                    >
+                      {showPassword ? <VisibilityOff /> : <Visibility />}
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              }}
+            />
+          </Box>
+          <Box mt={2}>
+            <Typography variant='subtitle2' color='text.secondary' mb={0.5}>
+              Xác nhận mật khẩu
+
+            </Typography>
+            <TextField
+
+type={showConfirmPassword ? "text" : "password"}
+              value={formData.confirmPassword}
+              onChange={handleChange("confirmPassword")}
+              fullWidth
+              placeholder="Xác nhận mật khẩu"
               required
               variant='outlined'
               sx={{
@@ -956,32 +1006,20 @@ const AccountModal: React.FC<AccountModalProps> = ({
                 },
                 
               }}
-            />
-          </Box>
-          <Box mt={2}>
-            <Typography variant='subtitle2' color='text.secondary' mb={0.5}>
-              Xác nhận mật khẩu
-
-            </Typography>
-            <TextField
-
-              type='password'
-              value={formData.confirmPassword}
-              onChange={handleChange("confirmPassword")}
-              fullWidth
-              required
-              variant='outlined'
-              sx={{
-                "& .MuiOutlinedInput-root": {
-                  borderRadius: "16px",
-                  height: "45px",
-                  backgroundColor: "#fff",
-                  "&.Mui-focused fieldset": {
-                    borderColor: "#98b720",
-                    borderWidth: 1.5,
-                  },
-                },
-                
+              InputProps={{
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton
+                      aria-label="toggle password visibility"
+                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                      onMouseDown={(e) => e.preventDefault()} // ngăn focus mất
+                      edge="end"
+                      sx={{ color: "#666" }}
+                    >
+                      {showConfirmPassword ? <VisibilityOff /> : <Visibility />}
+                    </IconButton>
+                  </InputAdornment>
+                ),
               }}
             />
           </Box>

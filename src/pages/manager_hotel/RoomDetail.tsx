@@ -239,7 +239,7 @@ export default function RoomDetail({
               "&:hover": { bgcolor: "#8ab020" },
               width: "100%",
             }}>
-            Gửi duyệt
+            Duyệt
           </Button>
           <Button
             onClick={() => setConfirmDialogOpen(false)}
