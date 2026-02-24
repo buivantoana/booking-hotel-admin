@@ -769,11 +769,19 @@ const AccountModal: React.FC<AccountModalProps> = ({
       role: formData.role,
     };
     if (formData.password !== formData.confirmPassword) {
-      alert("Mật khẩu xác nhận không khớp!");
+      toast.warning("Mật khẩu xác nhận không khớp!");
       return;
     } else {
-      if (formData.password && formData.password == formData.confirmPassword)
-        payload.password = formData.password;
+      
+      if (formData.password && formData.password == formData.confirmPassword){
+        if(formData.password.length>=6){
+          payload.password = formData.password;
+        }else{
+          toast.warning("Mật khẩu ít nhất 6 ký tự")
+          return
+        }
+      }
+       
     }
 
     try {
