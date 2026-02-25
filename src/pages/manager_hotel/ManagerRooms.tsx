@@ -435,7 +435,7 @@ function ActionMenu({
                 onClick={handleTogglePause}
                 sx={{ gap: 1.5, fontSize: 14, color: "#d32f2f" }}>
                 <PauseCircle fontSize='small' />
-                Ngừng kinh doanh
+                Ngừng hợp tác
               </MenuItem>
             ) : (
               <MenuItem

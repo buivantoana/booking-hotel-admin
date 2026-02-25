@@ -26,13 +26,10 @@ import remove from "../../images/delete.png";
 import confirm from "../../images/Frame.png";
 import { useSearchParams } from "react-router-dom";
 import { direction, facilities, parseRoomName, type_bed } from "../../utils/utils";
-const getLabelsByIds = (
-  ids: string[] | null | undefined,
-  list: typeof type_bed
-) => {
+const getLabelsByIds = (ids: string[] | null | undefined, list) => {
   if (!ids || !Array.isArray(ids) || ids.length === 0) return [];
   return ids
-    .map((id) => list.find((item) => item.id === id)?.label)
+    .map((id) => list.find((item) => item.id === id)?.name?.vi)
     .filter(Boolean) as string[];
 };
 export default function RoomDetail({
@@ -42,6 +39,7 @@ export default function RoomDetail({
   detailHotel,
   setCancelDialogOpenRoom,
   setApproveDialogOpenRoom,
+  attribute
 }) {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
@@ -81,8 +79,8 @@ export default function RoomDetail({
   }, [room?.direction]);
 
   // Chuyển sang label để hiển thị
-  const bedTypeLabels = getLabelsByIds(bedTypeIds, type_bed);
-  const directionLabels = getLabelsByIds(directionIds, direction);
+  const bedTypeLabels = getLabelsByIds(bedTypeIds, attribute?.bed_type || []);
+  const directionLabels = getLabelsByIds(directionIds, attribute?.direction || []);
   const area = room?.area_m2 ? `${room.area_m2}m²` : "-";
 
   // Parse hình ảnh phòng
@@ -458,7 +456,7 @@ export default function RoomDetail({
                 };
 
                 // Map id → object đầy đủ (label + icon)
-                const selectedFacilities = facilities.filter((fac) =>
+                const selectedFacilities = attribute?.amenities?.filter((fac) =>
                   facilityIds().includes(fac.id)
                 );
 
@@ -481,19 +479,19 @@ export default function RoomDetail({
                           alignItems: "center",
                           gap: 1.5,
                           bgcolor: "#f8f9fa",
-                          border: "1px solid #e9ecef",
+                          border: "1px solid #98B720",
                           borderRadius: 3,
-                          px: 2,
-                          py: 1.5,
-                          minWidth: 140,
+                          px: 1.5,
+                          py: 1,
+
                         }}>
                         <Box
                           component='img'
                           src={fac.icon}
                           alt={fac.name.vi}
-                          sx={{ width: 32, height: 32, objectFit: "contain" }}
+                          sx={{ objectFit: "contain" }}
                         />
-                        <Typography fontWeight={500} fontSize='0.95rem'>
+                        <Typography fontWeight={500} color="#98B720" fontSize='0.95rem'>
                           {fac.name.vi}
                         </Typography>
                       </Box>
@@ -535,11 +533,19 @@ export default function RoomDetail({
               Giá phòng
             </Typography>
 
-            <Grid container spacing={3}>
+            <Grid container spacing={3} sx={{ alignItems: 'stretch' }}>
               {/* Theo giờ */}
-              <Grid item xs={12} md={4}>
-                <Card sx={{ borderRadius: 3, border: "1px solid #DCEFD8" }}>
-                  <CardContent>
+              <Grid item xs={12} md={4} sx={{ display: 'flex' }}>
+                <Card
+                  sx={{
+                    borderRadius: 3,
+                    border: "1px solid #DCEFD8",
+                    flex: 1,           // ← quan trọng: giãn full height
+                    display: 'flex',   // để CardContent có thể giãn
+                    flexDirection: 'column'
+                  }}
+                >
+                  <CardContent sx={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
                     <Box
                       sx={{
                         background: "#E8F5E9",
@@ -549,30 +555,25 @@ export default function RoomDetail({
                         fontWeight: 700,
                         color: "#2E7D32",
                         display: "inline-block",
-                      }}>
+                      }}
+                    >
                       Theo giờ
                     </Box>
-                    <Box display='flex' justifyContent='space-between'>
+                    <Box display='flex' justifyContent='space-between' sx={{ mb: 2 }}>
                       <Box>
                         <Typography fontWeight={600}>Giá 2 giờ đầu</Typography>
-                        <Typography
-                          color='#82B440'
-                          fontWeight={700}
-                          fontSize='1.2rem'>
+                        <Typography color='#82B440' fontWeight={700} fontSize='1.2rem'>
                           {formatPrice(room.price_hourly)}
                         </Typography>
                       </Box>
                       <Box>
                         <Typography fontWeight={600}>Giá giờ thêm</Typography>
-                        <Typography
-                          color='#82B440'
-                          fontWeight={700}
-                          fontSize='1.2rem'>
+                        <Typography color='#82B440' fontWeight={700} fontSize='1.2rem'>
                           {formatPrice(room.price_hourly_increment)}
                         </Typography>
                       </Box>
                     </Box>
-                    <Typography fontSize={13} mt={2} color='#666'>
+                    <Typography fontSize={13} mt='auto' color='#666'>
                       ✓ Cho phép khách đặt tối đa thêm giờ tùy theo quy định
                     </Typography>
                   </CardContent>
@@ -580,9 +581,17 @@ export default function RoomDetail({
               </Grid>
 
               {/* Qua đêm */}
-              <Grid item xs={12} md={4}>
-                <Card sx={{ borderRadius: 3, border: "1px solid #D4E4FB" }}>
-                  <CardContent>
+              <Grid item xs={12} md={4} sx={{ display: 'flex' }}>
+                <Card
+                  sx={{
+                    borderRadius: 3,
+                    border: "1px solid #D4E4FB",
+                    flex: 1,
+                    display: 'flex',
+                    flexDirection: 'column'
+                  }}
+                >
+                  <CardContent sx={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
                     <Box
                       sx={{
                         background: "#E3F2FD",
@@ -592,24 +601,32 @@ export default function RoomDetail({
                         fontWeight: 700,
                         color: "#1976D2",
                         display: "inline-block",
-                      }}>
+                      }}
+                    >
                       Qua đêm
                     </Box>
-                    <Typography fontWeight={600}>Giá 1 đêm</Typography>
-                    <Typography
-                      color='#1565C0'
-                      fontWeight={700}
-                      fontSize='1.4rem'>
-                      {formatPrice(room.price_overnight)}
-                    </Typography>
+                    <Box sx={{}}>
+                      <Typography fontWeight={600}>Giá 1 đêm</Typography>
+                      <Typography color='#1565C0' fontWeight={700} fontSize='1.4rem'>
+                        {formatPrice(room.price_overnight)}
+                      </Typography>
+                    </Box>
                   </CardContent>
                 </Card>
               </Grid>
 
               {/* Theo ngày */}
-              <Grid item xs={12} md={4}>
-                <Card sx={{ borderRadius: 3, border: "1px solid #FFF3C4" }}>
-                  <CardContent>
+              <Grid item xs={12} md={4} sx={{ display: 'flex' }}>
+                <Card
+                  sx={{
+                    borderRadius: 3,
+                    border: "1px solid #FFF3C4",
+                    flex: 1,
+                    display: 'flex',
+                    flexDirection: 'column'
+                  }}
+                >
+                  <CardContent sx={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
                     <Box
                       sx={{
                         background: "#FFFDE7",
@@ -619,16 +636,16 @@ export default function RoomDetail({
                         fontWeight: 700,
                         color: "#DAA200",
                         display: "inline-block",
-                      }}>
+                      }}
+                    >
                       Theo ngày
                     </Box>
-                    <Typography fontWeight={600}>Giá 1 ngày</Typography>
-                    <Typography
-                      color='#DAA200'
-                      fontWeight={700}
-                      fontSize='1.4rem'>
-                      {formatPrice(room.price_daily)}
-                    </Typography>
+                    <Box sx={{}}>
+                      <Typography fontWeight={600}>Giá 1 ngày</Typography>
+                      <Typography color='#DAA200' fontWeight={700} fontSize='1.4rem'>
+                        {formatPrice(room.price_daily)}
+                      </Typography>
+                    </Box>
                   </CardContent>
                 </Card>
               </Grid>

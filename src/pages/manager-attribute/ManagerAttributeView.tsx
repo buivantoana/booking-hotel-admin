@@ -666,9 +666,9 @@ function AddEntryModal({
         });
         onSuccess();
         onClose();
-        toast.success(result?.message);
+        toast.success(attribute?.id? "Chỉnh sửa cơ sở thành công" :"Thêm cơ sở thành công");
       } else {
-        toast.error(result?.message);
+        toast.error("Thêm cơ sở thất bại");
       }
     } catch (error) {
       console.log(error);

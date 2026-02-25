@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import ManagerHotelView from "./ManagerHotelView";
-import { getHotels, getLocation } from "../../service/hotel";
+import { getAttribute, getHotels, getLocation } from "../../service/hotel";
 import { useSearchParams } from "react-router-dom";
 
 type Props = {};
@@ -17,6 +17,7 @@ const ManagerHotelController = (props: Props) => {
   });
   const [searchParams, setSearchParams] = useSearchParams();
   const [loading, setLoading] = useState(false);
+  const [attribute, setAttribute] = useState({});
   const [filters, setFilters] = useState({
     name: "",
     cooperation_type: "",
@@ -38,6 +39,8 @@ const ManagerHotelController = (props: Props) => {
   },[selectedStatus])
   const getLocations = async () => {
     try {
+      const resultAttribute = await getAttribute();
+      setAttribute(resultAttribute);
       let result = await getLocation()
       console.log("AAA getLocations", result)
       if (result?.locations) {
@@ -134,6 +137,7 @@ const ManagerHotelController = (props: Props) => {
     loading={loading}
     setSelectedStatus={setSelectedStatus}
     selectedStatus={selectedStatus}
+    attribute={attribute}
     getDataHotels={getDataHotels} />;
 };
 

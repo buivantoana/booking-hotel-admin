@@ -19,6 +19,8 @@ export default function HotelDetail({
   setApproveDialogOpen,
   setCancelDialogOpenRoom,
   setApproveDialogOpenRoom,
+  attribute,
+  setDeleteDialogOpen
 }) {
   return (
     <Box sx={{ minHeight: "100vh" }}>
@@ -27,6 +29,7 @@ export default function HotelDetail({
         setCancelDialogOpen={setCancelDialogOpen}
         setApproveDialogOpen={setApproveDialogOpen}
         setAction={setAction}
+        setDeleteDialogOpen={setDeleteDialogOpen}
       />
       <HotelInfoDetail
         detailHotel={detailHotel}
@@ -37,6 +40,7 @@ export default function HotelDetail({
         locations={locations}
         setCancelDialogOpenRoom={setCancelDialogOpenRoom}
         setApproveDialogOpenRoom={setApproveDialogOpenRoom}
+        attribute={attribute}
       />
     </Box>
   );
@@ -47,6 +51,7 @@ function HotelHeader({
   detailHotel,
   setCancelDialogOpen,
   setApproveDialogOpen,
+  setDeleteDialogOpen
 }) {
   const parseVi = (str) => {
     if (!str) return "";
@@ -169,7 +174,7 @@ function HotelHeader({
           variant='outlined'
           onClick={() => {
             if (status === "active" || status === "paused") {
-              setCancelDialogOpen(true);
+              setDeleteDialogOpen(true);
             } else {
               setApproveDialogOpen(true);
             }
@@ -200,6 +205,7 @@ function HotelInfoDetail({
   locations,
   setCancelDialogOpenRoom,
   setApproveDialogOpenRoom,
+  attribute
 }) {
   const [action, setAction] = useState("manager");
   const parseVi = (str) => {
@@ -469,13 +475,36 @@ function HotelInfoDetail({
                   </Typography>
                 </Box>
 
-                <Box>
-                  <Typography fontSize={14} color='black' fontWeight={600}>
-                    Theo giờ/ Qua đêm/ Theo ngày
-                  </Typography>
-                  <Typography fontSize={15} color='#333'>
-                    {rentStr}
-                  </Typography>
+                <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'flex-start' }}>
+                  {/* Cột 1: Theo giờ */}
+                  <Box sx={{  width: 120 }}>
+                    <Typography fontSize={14} color="black" fontWeight={600}>
+                      Theo giờ
+                    </Typography>
+                    <Typography fontSize={15} color="#333">
+                      08:00 - 22:00
+                    </Typography>
+                  </Box>
+                  
+                  {/* Cột 2: Qua đêm */}
+                  <Box sx={{  width: 120 }}>
+                    <Typography fontSize={14} color="black" fontWeight={600}>
+                      Qua đêm
+                    </Typography>
+                    <Typography fontSize={15} color="#333">
+                      {rentTypes.overnight?.from || "22:00"} - {rentTypes.overnight?.to || "08:00"}
+                    </Typography>
+                  </Box>
+
+                  {/* Cột 3: Theo ngày */}
+                  <Box sx={{  width: 120 }}>
+                    <Typography fontSize={14} color="black" fontWeight={600}>
+                      Theo ngày
+                    </Typography>
+                    <Typography fontSize={15} color="#333">
+                      {rentTypes.daily?.from || "14:00"} - {rentTypes.daily?.to || "12:00"}
+                    </Typography>
+                  </Box>
                 </Box>
 
                 <Box>
@@ -559,7 +588,7 @@ function HotelInfoDetail({
                     };
 
                     // Map id → object đầy đủ (label + icon)
-                    const selectedFacilities = facilities.filter((fac) =>
+                    const selectedFacilities = attribute.amenities.filter((fac) =>
                       facilityIds().includes(fac.id)
                     );
 

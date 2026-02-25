@@ -189,7 +189,7 @@ const ProfileView = () => {
 
   const handleCloseSnackbar = () => setOpenSnackbar(false);
   return (
-    <Container maxWidth='lg' sx={{ p: { xs: 2, sm: 3, md: 4 } }}>
+    <Box sx={{ p: { xs: 2, sm: 3, md: 4 } }}>
       <Typography variant='h5' mb={3} fontWeight='bold'>
         Hồ sơ cá nhân
       </Typography>
@@ -484,7 +484,7 @@ const ProfileView = () => {
           {snackbarMessage}
         </Alert>
       </Snackbar>
-    </Container>
+    </Box>
   );
 };
 
