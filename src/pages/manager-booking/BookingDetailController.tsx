@@ -6,7 +6,6 @@ import { listBooking } from "../../service/booking";
 import dayjs from "dayjs";
 
 const BookingDetailController = () => {
-  
   const [dateRange, setDateRange] = useState({
     checkIn: null,
     checkOut: null,
@@ -61,11 +60,7 @@ const BookingDetailController = () => {
   };
 
   // Gọi API lấy booking với filter
-  const fetchBookings = async (
-    page: number,
-    filterParams = filters
-  ) => {
-  
+  const fetchBookings = async (page: number, filterParams = filters) => {
     setLoading(true);
     try {
       let query: any = {
@@ -120,7 +115,7 @@ const BookingDetailController = () => {
       console.log("Cách 2 (Manual build):", queryString1);
 
       // Chọn cách 2 (manual build) để kiểm soát tốt hơn
-      const result = await listBooking( queryString1);
+      const result = await listBooking(queryString1);
 
       setBookings(result.bookings || []);
       setPagination({
@@ -139,20 +134,18 @@ const BookingDetailController = () => {
 
   // Khi chọn khách sạn mới
   useEffect(() => {
-   
-      // Set default date range filter khi load lần đầu
-      const defaultFilters = {
-        booking_code: "",
-        hotel_name:"",
-        rent_type: "all",
-        status: "all",
-        check_in_from: formatDateForAPI(dateRange?.checkIn),
-        check_in_to: formatDateForAPI(dateRange?.checkOut),
-      };
-      console.log("Initial filters:", defaultFilters);
-      setFilters(defaultFilters);
-      fetchBookings( 1, defaultFilters);
-   
+    // Set default date range filter khi load lần đầu
+    const defaultFilters = {
+      booking_code: "",
+      hotel_name: "",
+      rent_type: "all",
+      status: "all",
+      check_in_from: formatDateForAPI(dateRange?.checkIn),
+      check_in_to: formatDateForAPI(dateRange?.checkOut),
+    };
+    console.log("Initial filters:", defaultFilters);
+    setFilters(defaultFilters);
+    fetchBookings(1, defaultFilters);
   }, []);
 
   // Xử lý đổi trang
@@ -160,25 +153,22 @@ const BookingDetailController = () => {
     event: React.ChangeEvent<unknown>,
     newPage: number
   ) => {
-   
-      fetchBookings( newPage);
-    
+    fetchBookings(newPage);
   };
 
   // Xử lý filter thay đổi
   const handleFilterChange = (newFilters: any) => {
     console.log("Filter changed to:", newFilters);
     setFilters(newFilters);
-   
-      fetchBookings( 1, newFilters);
-    
+
+    fetchBookings(1, newFilters);
   };
 
   // Reset filter
   const handleResetFilter = () => {
     const resetDateRange = {
-      checkIn:  dayjs("2025-01-01T00:00:00"),
-      checkOut:  dayjs(),
+      checkIn: null,
+      checkOut: null,
     };
 
     const resetFilters = {
@@ -194,9 +184,7 @@ const BookingDetailController = () => {
     setFilters(resetFilters);
     setDateRange(resetDateRange);
 
-    
-      fetchBookings(1, resetFilters);
-    
+    fetchBookings(1, resetFilters);
   };
 
   // Xử lý khi dateRange thay đổi
@@ -212,14 +200,12 @@ const BookingDetailController = () => {
 
     console.log("Updated filters:", updatedFilters);
     setFilters(updatedFilters);
-   
-      fetchBookings( 1, updatedFilters);
-    
+
+    // fetchBookings(1, updatedFilters);
   };
 
   return (
     <BookingDetailView
-     
       bookings={bookings}
       pagination={pagination}
       loading={loading}

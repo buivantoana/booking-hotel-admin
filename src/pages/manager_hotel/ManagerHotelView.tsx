@@ -45,7 +45,12 @@ import success from "../../images/Frame.png";
 import empty from "../../images/Frame 1321317883.png";
 import HotelDetail from "./HotelDetail";
 import RoomDetail from "./RoomDetail";
-import { getHotel, toggleHotels, updateHotelStatus, updateRoomStatus } from "../../service/hotel";
+import {
+  getHotel,
+  toggleHotels,
+  updateHotelStatus,
+  updateRoomStatus,
+} from "../../service/hotel";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import { parseRoomName } from "../../utils/utils";
@@ -160,7 +165,7 @@ function ActionMenu({
         {/* Các status khác: Ngừng hoặc Mở lại */}
         {status !== "pending" && (
           <>
-            {status === "active"  ? (
+            {status === "active" ? (
               <MenuItem
                 onClick={handleTogglePause}
                 sx={{ gap: 1.5, fontSize: 14, color: "#d32f2f" }}>
@@ -193,9 +198,8 @@ export default function ManagerHotelView({
   onResetFilter,
   loading,
   selectedStatus,
-  setSelectedStatus
-  ,
-  attribute 
+  setSelectedStatus,
+  attribute,
 }) {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [cancelDialogOpenRoom, setCancelDialogOpenRoom] = useState(false);
@@ -214,12 +218,11 @@ export default function ManagerHotelView({
   const [reason, setReason] = useState("");
   const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
   const [approveDialogOpen, setApproveDialogOpen] = useState(false);
-  
+
   const [localFilters, setLocalFilters] = useState({
     name: "",
     cooperation_type: "",
     city: "",
-
   });
   useEffect(() => {
     if (filters) {
@@ -231,10 +234,10 @@ export default function ManagerHotelView({
     }
   }, [filters]);
   const displayedHotels = hotels.filter((hotel) =>
-    parseRoomName(hotel.name).toLowerCase().includes(localFilters.name.toLowerCase())
+    parseRoomName(hotel.name)
+      .toLowerCase()
+      .includes(localFilters.name.toLowerCase())
   );
-
-
 
   useEffect(() => {
     if (searchParams.get("id")) {
@@ -272,8 +275,8 @@ export default function ManagerHotelView({
     }
   };
   const handleStatusHotel = async (status) => {
-    let message = ""
-    console.log("AAAAA status",status)
+    let message = "";
+    console.log("AAAAA status", status);
     try {
       let result;
       if (status == "reject") {
@@ -282,14 +285,17 @@ export default function ManagerHotelView({
           reason,
         });
         setCancelDialogOpen(false);
-        message = "Từ chối khách sạn thành công"
+        message = "Từ chối khách sạn thành công";
       }
       if (status == "approve") {
         result = await updateHotelStatus(detailHotel?.id || idHotel.id, {
           action: "approve",
         });
         setApproveDialogOpen(false);
-        message = idHotel.status == "terminated"? "Mở lại kinh doanh thành công": "Duyệt khách sạn thành công"
+        message =
+          idHotel.status == "terminated"
+            ? "Mở lại kinh doanh thành công"
+            : "Duyệt khách sạn thành công";
       }
       if (status == "paused") {
         result = await updateHotelStatus(detailHotel?.id || idHotel.id, {
@@ -303,7 +309,7 @@ export default function ManagerHotelView({
           reason,
         });
         setDeleteDialogOpen(false);
-        message = "Ngừng hợp tác khách sạn thành công"
+        message = "Ngừng hợp tác khách sạn thành công";
       }
       if (result?.message && !result?.code) {
         setReason("");
@@ -321,24 +327,26 @@ export default function ManagerHotelView({
     }
   };
   const handleStatusHotelRoom = async (status) => {
-    
-    let message= ""
+    let message = "";
     try {
       let result;
       if (status == "reject") {
         result = await updateRoomStatus(room.id, {
-          action:room?.status=="pending"?"reject": "terminate",
+          action: room?.status == "pending" ? "reject" : "terminate",
           reason,
         });
         setCancelDialogOpenRoom(false);
-        message= room?.status=="pending" ?"Từ chối phòng thành công" : "Ngừng hợp tác phòng thành công"
+        message =
+          room?.status == "pending"
+            ? "Từ chối phòng thành công"
+            : "Ngừng hợp tác phòng thành công";
       }
       if (status == "approve") {
         result = await updateRoomStatus(room.id, {
           action: "approve",
         });
         setApproveDialogOpenRoom(false);
-         message= "Duyệt phòng thành công"
+        message = "Duyệt phòng thành công";
       }
 
       if (result?.message && !result?.code) {
@@ -353,7 +361,6 @@ export default function ManagerHotelView({
       console.log(error);
     }
   };
- 
 
   // Desktop: Bảng gốc (giữ nguyên 100%)
   const renderDesktop = () => (
@@ -377,8 +384,7 @@ export default function ManagerHotelView({
                   fontWeight: 600,
                   color: "#555",
                   fontSize: 14,
-                }}
-              >
+                }}>
                 {head}
               </TableCell>
             ))}
@@ -387,14 +393,14 @@ export default function ManagerHotelView({
         <TableBody>
           {loading ? (
             <TableRow>
-              <TableCell colSpan={7} align="center">
+              <TableCell colSpan={7} align='center'>
                 <Typography>Đang tải...</Typography>
               </TableCell>
             </TableRow>
           ) : hotels.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={7} align="center">
-                <img src={empty} alt="" />
+              <TableCell colSpan={7} align='center'>
+                <img src={empty} alt='' />
               </TableCell>
             </TableRow>
           ) : (
@@ -407,23 +413,26 @@ export default function ManagerHotelView({
                     navigate(`/manager-hotel?id=${hotel.id}`);
                     setAction("edit_detail");
                   }}
-                  sx={{ fontWeight: 500, cursor: "pointer" }}
-                >
+                  sx={{ fontWeight: 500, cursor: "pointer" }}>
                   {parseLang(hotel.name)}
                 </TableCell>
 
-                <TableCell>{renderCooperationChip(hotel.cooperation_type)}</TableCell>
+                <TableCell>
+                  {renderCooperationChip(hotel.cooperation_type)}
+                </TableCell>
 
                 <TableCell>{renderStatusChip(hotel.status)}</TableCell>
 
                 <TableCell sx={{ maxWidth: 200 }}>
                   {parseLang(hotel.address)}
                 </TableCell>
-                <TableCell  sx={{ minWidth: 100 }}>{hotel?.email}</TableCell>
+                <TableCell sx={{ minWidth: 100 }}>{hotel?.email}</TableCell>
                 <TableCell>{hotel.phone}</TableCell>
 
                 <TableCell>
-                  {["pending", "active", "terminated","paused"].includes(hotel.status) && (
+                  {["pending", "active", "terminated"].includes(
+                    hotel.status
+                  ) && (
                     <ActionMenu
                       hotel={hotel}
                       setAction={setAction}
@@ -446,9 +455,9 @@ export default function ManagerHotelView({
   const renderMobile = () => (
     <Box sx={{ mt: 4, display: "flex", flexDirection: "column", gap: 3 }}>
       {loading ? (
-        <Typography align="center">Đang tải...</Typography>
+        <Typography align='center'>Đang tải...</Typography>
       ) : hotels.length === 0 ? (
-        <Typography align="center" color="#999" py={6}>
+        <Typography align='center' color='#999' py={6}>
           Không có dữ liệu
         </Typography>
       ) : (
@@ -467,9 +476,7 @@ export default function ManagerHotelView({
                 boxShadow: "0 4px 16px rgba(0,0,0,0.12)",
                 transform: "translateY(-2px)",
               },
-            }}
-          
-          >
+            }}>
             {/* Header card */}
             <Box
               onClick={() => {
@@ -484,13 +491,12 @@ export default function ManagerHotelView({
                 alignItems: "center",
                 flexWrap: "wrap",
                 gap: 1,
-              }}
-            >
-              <Stack direction="row" spacing={1.5} alignItems="center">
-                <Typography variant="subtitle2" color="text.secondary">
+              }}>
+              <Stack direction='row' spacing={1.5} alignItems='center'>
+                <Typography variant='subtitle2' color='text.secondary'>
                   #{index + 1}
                 </Typography>
-                <Typography variant="subtitle1" fontWeight="600">
+                <Typography variant='subtitle1' fontWeight='600'>
                   {parseLang(hotel.name)}
                 </Typography>
               </Stack>
@@ -504,7 +510,7 @@ export default function ManagerHotelView({
             <Box sx={{ p: 2 }}>
               <Stack spacing={1.5}>
                 <Box>
-                  <Typography variant="body2" color="text.secondary">
+                  <Typography variant='body2' color='text.secondary'>
                     Hình thức
                   </Typography>
                   <Box sx={{ mt: 0.5 }}>
@@ -513,19 +519,21 @@ export default function ManagerHotelView({
                 </Box>
 
                 <Box>
-                  <Typography variant="body2" color="text.secondary">
+                  <Typography variant='body2' color='text.secondary'>
                     Địa chỉ
                   </Typography>
-                  <Typography variant="body1" sx={{ mt: 0.5 }}>
+                  <Typography variant='body1' sx={{ mt: 0.5 }}>
                     {parseLang(hotel.address)}
                   </Typography>
                 </Box>
 
                 <Box>
-                  <Typography variant="body2" color="text.secondary">
+                  <Typography variant='body2' color='text.secondary'>
                     Số điện thoại
                   </Typography>
-                  <Typography fontWeight="500">{hotel.phone || "N/A"}</Typography>
+                  <Typography fontWeight='500'>
+                    {hotel.phone || "N/A"}
+                  </Typography>
                 </Box>
               </Stack>
             </Box>
@@ -537,8 +545,7 @@ export default function ManagerHotelView({
                 bgcolor: "#fafafa",
                 display: "flex",
                 justifyContent: "flex-end",
-              }}
-            >
+              }}>
               {["pending", "active", "terminated"].includes(hotel.status) && (
                 <ActionMenu
                   hotel={hotel}
@@ -557,12 +564,12 @@ export default function ManagerHotelView({
   );
   const renderStats = () => {
     const stats = [
-      { label: "Tất cả",  status: null },
+      { label: "Tất cả", status: null },
       { label: "Đang hoạt động", status: "active" },
-      { label: "Ngừng kinh doanh",  status: "paused" },
-      { label: "Chờ duyệt",  status: "pending" },
-      { label: "Bị từ chối",  status: "rejected" },
-      { label: "Ngừng hợp tác",  status: "terminated" },
+      { label: "Ngừng kinh doanh", status: "paused" },
+      { label: "Chờ duyệt", status: "pending" },
+      { label: "Bị từ chối", status: "rejected" },
+      { label: "Ngừng hợp tác", status: "terminated" },
     ];
 
     return (
@@ -570,10 +577,9 @@ export default function ManagerHotelView({
         <Stack
           direction={{ xs: "column", sm: "row" }}
           spacing={{ xs: 1.5, sm: 2.5, md: 2 }}
-          flexWrap="wrap"
-          color="#555"
-          fontSize={14}
-        >
+          flexWrap='wrap'
+          color='#555'
+          fontSize={14}>
           {stats.map((item) => (
             <Box
               key={item.label}
@@ -584,14 +590,15 @@ export default function ManagerHotelView({
                 py: 0.8,
                 borderRadius: "8px",
                 transition: "all 0.2s",
-                bgcolor: selectedStatus === item.status ? "#F0F1F3" : "transparent",
+                bgcolor:
+                  selectedStatus === item.status ? "#F0F1F3" : "transparent",
 
                 "&:hover": {
-                  bgcolor: selectedStatus === item.status ? "transparent" : "#F0F1F3",
+                  bgcolor:
+                    selectedStatus === item.status ? "transparent" : "#F0F1F3",
                 },
-              }}
-            >
-              {item.label} 
+              }}>
+              {item.label}
             </Box>
           ))}
         </Stack>
@@ -600,7 +607,7 @@ export default function ManagerHotelView({
   };
   return (
     <Box sx={{ p: { xs: 2, sm: 3, md: 4 }, minHeight: "100vh" }}>
-        <Dialog
+      <Dialog
         open={approveDialogOpenRoom}
         onClose={() => setApproveDialogOpenRoom(false)}
         maxWidth='xs'
@@ -679,134 +686,137 @@ export default function ManagerHotelView({
         maxWidth='xs'
         fullWidth
         PaperProps={{ sx: { borderRadius: "16px" } }}>
-       {room?.status == "pending"?  <>
-        <DialogTitle sx={{ textAlign: "left", p: 1 }}>
-          <Box sx={{ position: "relative" }}>
-            <Typography fontWeight={600} fontSize='20px' mb={1}>
-              Từ chối phòng
-            </Typography>
-            <IconButton
-              onClick={() => setCancelDialogOpenRoom(false)}
-              sx={{ position: "absolute", top: -5, right: 0 }}>
-              <Close />
-            </IconButton>
-          </Box>
-        </DialogTitle>
-        <DialogContent sx={{ pb: 3, padding: 1 }}>
-          <Typography fontSize='14px' color='#666'>
-            Từ chối kinh doanh khách sạn. Bạn có thể mở kinh doanh lại trong
-            tương lai.
-          </Typography>
-          <TextField
-            multiline
-            rows={4}
-            placeholder='Nhập nội dung từ chối loại phòng...'
-            value={reason}
-            onChange={(e) => setReason(e.target.value)}
-            variant='outlined'
-            fullWidth
-            sx={{
-              mt: 2,
-              "& .MuiOutlinedInput-root": {
-                borderRadius: 1,
-
-                backgroundColor: "#fff",
-                "& fieldset": {
-                  borderColor: "#cddc39", // Border mặc định
-                  borderWidth: "1px", // Tăng độ dày nếu muốn nổi bật hơn
-                },
-                "&:hover fieldset": {
-                  borderColor: "#c0ca33", // Hover: đậm hơn một chút (tùy chọn)
-                  borderWidth: "1px",
-                },
-                "&.Mui-focused fieldset": {
-                  borderColor: "#cddc39 !important", // QUAN TRỌNG: Khi focus vẫn giữ màu này
-                  borderWidth: "1px",
-                  boxShadow: "0 0 0 3px rgba(205, 220, 57, 0.2)", // Hiệu ứng glow nhẹ (tùy chọn)
-                },
-                // Tắt màu legend primary khi focus (nếu có label)
-                "&.Mui-focused .MuiInputLabel-root": {
-                  color: "#666",
-                },
-              },
-            }}
-          />
-        </DialogContent>
-          </>:
+        {room?.status == "pending" ? (
           <>
-          
-          <DialogTitle sx={{ textAlign: "center", pt: 4, pb: 1 }}>
-          <Box sx={{ position: "relative" }}>
-            <Box
-              sx={{
-                width: 64,
-                height: 64,
-                bgcolor: "#ffebee",
-                borderRadius: "50%",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                mx: "auto",
-                mb: 2,
-              }}>
-              <img
-                src={room?.status == "paused" ? success : remove}
-                alt=''
-              />
-            </Box>
-            <IconButton
-              onClick={() => setDeleteDialogOpen(false)}
-              sx={{ position: "absolute", top: -40, left: -30 }}>
-              <Close />
-            </IconButton>
-          </Box>
-        </DialogTitle>
-        <DialogContent sx={{ textAlign: "center",px:1, pb: 3 }}>
-          <Typography fontWeight={600} fontSize='20px' mb={1}>
-            {room?.status == "paused"
-              ? "Xác nhận mở lại kinh doanh"
-              : "Bạn Chắc chứ?"}
-          </Typography>
-          <Typography fontSize='14px' color='#666'>
-            {room?.status == "paused"
-              ? "Hãy đảm bảo cập nhật đầu đủ thông tin, giá và tình trạng sẵn sàng trước khi mở lại hoạt động kinh doanh để tránh sai sót trong quá trình đặt phòng."
-              : " Khách sẽ không nhìn thấy loại phòng này sau khi bạn ngừng hợp tác loại phòng. Chủ khách sạn có thể hợp tác phòng lại trong tương lai."}
-          </Typography>
-          <TextField
-            multiline
-            rows={4}
-            placeholder='Nhập nội dung ngừng hợp tác loại phòng...'
-            value={reason}
-            onChange={(e) => setReason(e.target.value)}
-            variant='outlined'
-            fullWidth
-            sx={{
-              mt: 2,
-              "& .MuiOutlinedInput-root": {
-                borderRadius: 1,
+            <DialogTitle sx={{ textAlign: "left", p: 1 }}>
+              <Box sx={{ position: "relative" }}>
+                <Typography fontWeight={600} fontSize='20px' mb={1}>
+                  Từ chối phòng
+                </Typography>
+                <IconButton
+                  onClick={() => setCancelDialogOpenRoom(false)}
+                  sx={{ position: "absolute", top: -5, right: 0 }}>
+                  <Close />
+                </IconButton>
+              </Box>
+            </DialogTitle>
+            <DialogContent sx={{ pb: 3, padding: 1 }}>
+              <Typography fontSize='14px' color='#666'>
+                Từ chối kinh doanh khách sạn. Bạn có thể mở kinh doanh lại trong
+                tương lai.
+              </Typography>
+              <TextField
+                multiline
+                rows={4}
+                placeholder='Nhập nội dung từ chối loại phòng...'
+                value={reason}
+                onChange={(e) => setReason(e.target.value)}
+                variant='outlined'
+                fullWidth
+                sx={{
+                  mt: 2,
+                  "& .MuiOutlinedInput-root": {
+                    borderRadius: 1,
 
-                backgroundColor: "#fff",
-                "& fieldset": {
-                  borderColor: "#cddc39", // Border mặc định
-                  borderWidth: "1px", // Tăng độ dày nếu muốn nổi bật hơn
-                },
-                "&:hover fieldset": {
-                  borderColor: "#c0ca33", // Hover: đậm hơn một chút (tùy chọn)
-                  borderWidth: "1px",
-                },
-                "&.Mui-focused fieldset": {
-                  borderColor: "#cddc39 !important", // QUAN TRỌNG: Khi focus vẫn giữ màu này
-                  borderWidth: "1px",
-                  boxShadow: "0 0 0 3px rgba(205, 220, 57, 0.2)", // Hiệu ứng glow nhẹ (tùy chọn)
-                },
-                // Tắt màu legend primary khi focus (nếu có label)
-                "&.Mui-focused .MuiInputLabel-root": {
-                  color: "#666",
-                },
-              },
-            }}
-          />
-        </DialogContent></>}
+                    backgroundColor: "#fff",
+                    "& fieldset": {
+                      borderColor: "#cddc39", // Border mặc định
+                      borderWidth: "1px", // Tăng độ dày nếu muốn nổi bật hơn
+                    },
+                    "&:hover fieldset": {
+                      borderColor: "#c0ca33", // Hover: đậm hơn một chút (tùy chọn)
+                      borderWidth: "1px",
+                    },
+                    "&.Mui-focused fieldset": {
+                      borderColor: "#cddc39 !important", // QUAN TRỌNG: Khi focus vẫn giữ màu này
+                      borderWidth: "1px",
+                      boxShadow: "0 0 0 3px rgba(205, 220, 57, 0.2)", // Hiệu ứng glow nhẹ (tùy chọn)
+                    },
+                    // Tắt màu legend primary khi focus (nếu có label)
+                    "&.Mui-focused .MuiInputLabel-root": {
+                      color: "#666",
+                    },
+                  },
+                }}
+              />
+            </DialogContent>
+          </>
+        ) : (
+          <>
+            <DialogTitle sx={{ textAlign: "center", pt: 4, pb: 1 }}>
+              <Box sx={{ position: "relative" }}>
+                <Box
+                  sx={{
+                    width: 64,
+                    height: 64,
+                    bgcolor: "#ffebee",
+                    borderRadius: "50%",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    mx: "auto",
+                    mb: 2,
+                  }}>
+                  <img
+                    src={room?.status == "paused" ? success : remove}
+                    alt=''
+                  />
+                </Box>
+                <IconButton
+                  onClick={() => setDeleteDialogOpen(false)}
+                  sx={{ position: "absolute", top: -40, left: -30 }}>
+                  <Close />
+                </IconButton>
+              </Box>
+            </DialogTitle>
+            <DialogContent sx={{ textAlign: "center", px: 1, pb: 3 }}>
+              <Typography fontWeight={600} fontSize='20px' mb={1}>
+                {room?.status == "paused"
+                  ? "Xác nhận mở lại kinh doanh"
+                  : "Bạn Chắc chứ?"}
+              </Typography>
+              <Typography fontSize='14px' color='#666'>
+                {room?.status == "paused"
+                  ? "Hãy đảm bảo cập nhật đầu đủ thông tin, giá và tình trạng sẵn sàng trước khi mở lại hoạt động kinh doanh để tránh sai sót trong quá trình đặt phòng."
+                  : " Khách sẽ không nhìn thấy loại phòng này sau khi bạn ngừng hợp tác loại phòng. Chủ khách sạn có thể hợp tác phòng lại trong tương lai."}
+              </Typography>
+              <TextField
+                multiline
+                rows={4}
+                placeholder='Nhập nội dung ngừng hợp tác loại phòng...'
+                value={reason}
+                onChange={(e) => setReason(e.target.value)}
+                variant='outlined'
+                fullWidth
+                sx={{
+                  mt: 2,
+                  "& .MuiOutlinedInput-root": {
+                    borderRadius: 1,
+
+                    backgroundColor: "#fff",
+                    "& fieldset": {
+                      borderColor: "#cddc39", // Border mặc định
+                      borderWidth: "1px", // Tăng độ dày nếu muốn nổi bật hơn
+                    },
+                    "&:hover fieldset": {
+                      borderColor: "#c0ca33", // Hover: đậm hơn một chút (tùy chọn)
+                      borderWidth: "1px",
+                    },
+                    "&.Mui-focused fieldset": {
+                      borderColor: "#cddc39 !important", // QUAN TRỌNG: Khi focus vẫn giữ màu này
+                      borderWidth: "1px",
+                      boxShadow: "0 0 0 3px rgba(205, 220, 57, 0.2)", // Hiệu ứng glow nhẹ (tùy chọn)
+                    },
+                    // Tắt màu legend primary khi focus (nếu có label)
+                    "&.Mui-focused .MuiInputLabel-root": {
+                      color: "#666",
+                    },
+                  },
+                }}
+              />
+            </DialogContent>
+          </>
+        )}
         <DialogActions
           sx={{
             justifyContent: "center",
@@ -827,7 +837,9 @@ export default function ManagerHotelView({
               "&:hover": { bgcolor: "#8ab020" },
               width: "100%",
             }}>
-           {room?.status == "pending"?"Xác nhận từ chối kinh doanh":"Xác nhận ngừng hợp tác"}  
+            {room?.status == "pending"
+              ? "Xác nhận từ chối kinh doanh"
+              : "Xác nhận ngừng hợp tác"}
           </Button>
           <Button
             onClick={() => setCancelDialogOpenRoom(false)}
@@ -1073,10 +1085,12 @@ export default function ManagerHotelView({
               direction={{ xs: "column", sm: "row" }}
               mb={4}
               spacing={2}
-              alignItems={{xs:"start",md:'end'}}>
+              alignItems={{ xs: "start", md: "end" }}>
               {/* Tìm kiếm */}
-              <Box width={{xs:"100%",md:"unset"}}>
-                <Typography sx={{ mb: 1.5 }} fontWeight='bold'>Tìm kiếm</Typography>
+              <Box width={{ xs: "100%", md: "unset" }}>
+                <Typography sx={{ mb: 1.5 }} fontWeight='bold'>
+                  Tìm kiếm
+                </Typography>
                 <TextField
                   placeholder='Tên khách sạn'
                   value={localFilters.name}
@@ -1094,7 +1108,7 @@ export default function ManagerHotelView({
                     ),
                   }}
                   sx={{
-                    width:{xs:"100%",md:280},
+                    width: { xs: "100%", md: 280 },
                     "& .MuiOutlinedInput-root": {
                       height: 40,
                       borderRadius: "24px",
@@ -1121,8 +1135,10 @@ export default function ManagerHotelView({
                   }}
                 />
               </Box>
-              <Box width={{xs:"100%",md:"unset"}}>
-                <Typography sx={{ mb: 1.5 }} fontWeight='bold'>Địa điểm</Typography>
+              <Box width={{ xs: "100%", md: "unset" }}>
+                <Typography sx={{ mb: 1.5 }} fontWeight='bold'>
+                  Địa điểm
+                </Typography>
                 <Select
                   displayEmpty
                   defaultValue=''
@@ -1134,7 +1150,7 @@ export default function ManagerHotelView({
                     })
                   }
                   sx={{
-                    width:{xs:"100%",md:200},
+                    width: { xs: "100%", md: 200 },
                     height: 40,
 
                     borderRadius: "24px",
@@ -1175,8 +1191,10 @@ export default function ManagerHotelView({
               </Box>
 
               {/* 2 ô DatePicker – ĐÃ FIX LỖI 100% */}
-              <Box width={{xs:"100%",md:"unset"}}>
-                <Typography sx={{ mb: 1.5 }} fontWeight='bold'>Hình thức hợp tác</Typography>
+              <Box width={{ xs: "100%", md: "unset" }}>
+                <Typography sx={{ mb: 1.5 }} fontWeight='bold'>
+                  Hình thức hợp tác
+                </Typography>
                 <Select
                   displayEmpty
                   defaultValue=''
@@ -1188,7 +1206,7 @@ export default function ManagerHotelView({
                     })
                   }
                   sx={{
-                    width:{xs:"100%",md:200},
+                    width: { xs: "100%", md: 200 },
                     height: 40,
                     borderRadius: "24px",
                     bgcolor: "#fff",
@@ -1251,9 +1269,7 @@ export default function ManagerHotelView({
                 </Button>
               </Stack>
             </Stack>
-            <Box sx={{ mb: 3 }}>
-            {renderStats()}
-            </Box>
+            <Box sx={{ mb: 3 }}>{renderStats()}</Box>
             {isMobile ? renderMobile() : renderDesktop()}
             {hotels.length !== 0 && (
               <Stack spacing={2} sx={{ mt: 3, alignItems: "center" }}>
@@ -1328,7 +1344,7 @@ export default function ManagerHotelView({
             </IconButton>
           </Box>
         </DialogTitle>
-        <DialogContent sx={{ textAlign: "center",px:1, pb: 3 }}>
+        <DialogContent sx={{ textAlign: "center", px: 1, pb: 3 }}>
           <Typography fontWeight={600} fontSize='20px' mb={1}>
             {idHotel?.status == "paused"
               ? "Xác nhận mở lại kinh doanh"
@@ -1385,7 +1401,11 @@ export default function ManagerHotelView({
             disabled={!reason}
             onClick={async () => {
               handleStatusHotel(
-                idHotel?.status == "active" ? "active" : detailHotel?.status=="active" ? "active": "terminate"
+                idHotel?.status == "active"
+                  ? "active"
+                  : detailHotel?.status == "active"
+                  ? "active"
+                  : "terminate"
               );
             }}
             variant='contained'
@@ -1396,9 +1416,7 @@ export default function ManagerHotelView({
               "&:hover": { bgcolor: "#8ab020" },
               width: "100%",
             }}>
-            {idHotel?.status == "paused"
-              ? "Duyệt"
-              : "Xác nhận ngừng hợp tác"}
+            {idHotel?.status == "paused" ? "Duyệt" : "Xác nhận ngừng hợp tác"}
           </Button>
           <Button
             onClick={() => setDeleteDialogOpen(false)}

@@ -163,7 +163,7 @@ export default function BookingDetailView({
   onResetFilter,
 }: {
   hotels: any[];
-  
+
   bookings: any[];
   pagination: { page: number; total_pages: number; total: number };
   loading: boolean;
@@ -181,7 +181,7 @@ export default function BookingDetailView({
   const [selectedBooking, setSelectedBooking] = useState(null);
   const [localFilters, setLocalFilters] = useState({
     booking_code: "",
-    hotel_name:"",
+    hotel_name: "",
     rent_type: "all",
     status: "all",
   });
@@ -191,28 +191,28 @@ export default function BookingDetailView({
         booking_code: filters.booking_code || "",
         rent_type: filters.rent_type || "all",
         status: filters.status || "all",
-        hotel_name:filters.hotel_name||"",
+        hotel_name: filters.hotel_name || "",
       });
     }
   }, [filters]);
 
-  useEffect(() => {
-    if (dateRange.checkIn && dateRange?.checkOut) {
-      const formatDateForAPI = (date: dayjs.Dayjs) => {
-        if (!date) {
-          return
-        }
-        return date.format("YYYY-MM-DDTHH:mm:ssZ");
-      };
-      const updatedFilters = {
-        ...localFilters,
-        check_in_from: formatDateForAPI(dateRange?.checkIn),
-        check_in_to: formatDateForAPI(dateRange?.checkOut),
-      };
+  // useEffect(() => {
+  //   if (dateRange.checkIn && dateRange?.checkOut) {
+  //     const formatDateForAPI = (date: dayjs.Dayjs) => {
+  //       if (!date) {
+  //         return;
+  //       }
+  //       return date.format("YYYY-MM-DDTHH:mm:ssZ");
+  //     };
+  //     const updatedFilters = {
+  //       ...localFilters,
+  //       check_in_from: formatDateForAPI(dateRange?.checkIn),
+  //       check_in_to: formatDateForAPI(dateRange?.checkOut),
+  //     };
 
-      onFilterChange(updatedFilters);
-    }
-  }, [dateRange])
+  //     onFilterChange(updatedFilters);
+  //   }
+  // }, [dateRange]);
   // Handler click row
   const handleRowClick = (booking) => {
     setSelectedBooking(booking);
@@ -239,7 +239,7 @@ export default function BookingDetailView({
 
   // Xử lý thay đổi tab (status)
   const handleTabChange = (tabLabel: string) => {
-    const selectedTab = tabs.find(tab => tab.label === tabLabel);
+    const selectedTab = tabs.find((tab) => tab.label === tabLabel);
     if (!selectedTab) return;
 
     const status = selectedTab.value;
@@ -254,8 +254,12 @@ export default function BookingDetailView({
     // Cập nhật filter cho controller (giữ nguyên date range hiện tại)
     const updatedFilters = {
       ...updatedLocalFilters,
-      check_in_from: dateRange?.checkIn ? formatDateForAPI(dateRange.checkIn) : "",
-      check_in_to: dateRange?.checkOut ? formatDateForAPI(dateRange.checkOut) : "",
+      check_in_from: dateRange?.checkIn
+        ? formatDateForAPI(dateRange.checkIn)
+        : "",
+      check_in_to: dateRange?.checkOut
+        ? formatDateForAPI(dateRange.checkOut)
+        : "",
     };
 
     onFilterChange(updatedFilters);
@@ -270,12 +274,12 @@ export default function BookingDetailView({
       booking_code: "",
       rent_type: "all",
       status: "all",
-      hotel_name:""
+      hotel_name: "",
     });
 
     const resetDateRange = {
-      checkIn: dayjs(),
-      checkOut: dayjs().add(1, "day"),
+      checkIn: null,
+      checkOut: null,
     };
 
     setDateRange(resetDateRange);
@@ -336,43 +340,61 @@ export default function BookingDetailView({
     { label: "Không nhận phòng", value: "no_show" },
   ];
 
-  
-
   // Desktop: Bảng gốc (giữ nguyên 100%)
   const renderDesktop = () => (
     <TableContainer sx={{ mt: 5, width: "100%", overflowX: "auto" }}>
       <Table>
         <TableHead>
           <TableRow sx={{ backgroundColor: "#f5f5f5" }}>
-            <TableCell><strong>Mã đặt phòng</strong></TableCell>
-            <TableCell><strong>Tên khách sạn</strong></TableCell>
-            <TableCell><strong>Tổng số tiền thanh toán</strong></TableCell>
-            <TableCell><strong>Loại đặt phòng</strong></TableCell>
-            <TableCell><strong>Thời gian</strong></TableCell>
-            <TableCell><strong>Tình trạng đặt phòng</strong></TableCell>
+            <TableCell>
+              <strong>Mã đặt phòng</strong>
+            </TableCell>
+            <TableCell>
+              <strong>Tên khách sạn</strong>
+            </TableCell>
+            <TableCell>
+              <strong>Tổng số tiền thanh toán</strong>
+            </TableCell>
+            <TableCell>
+              <strong>Loại đặt phòng</strong>
+            </TableCell>
+            <TableCell>
+              <strong>Thời gian</strong>
+            </TableCell>
+            <TableCell>
+              <strong>Tình trạng đặt phòng</strong>
+            </TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
           {loading ? (
             <TableRow>
-              <TableCell colSpan={6} align="center">
-                <Typography><CircularProgress sx={{color:"#98B720"}} /></Typography>
+              <TableCell colSpan={6} align='center'>
+                <Typography>
+                  <CircularProgress sx={{ color: "#98B720" }} />
+                </Typography>
               </TableCell>
             </TableRow>
           ) : bookings.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={6} align="center">
-              <img src={empty} alt="" />
+              <TableCell colSpan={6} align='center'>
+                <img src={empty} alt='' />
               </TableCell>
             </TableRow>
           ) : (
             bookings.map((row) => {
-              const formatDateTime = (dateString) => dayjs(dateString).format("DD/MM/YYYY, HH:mm");
+              const formatDateTime = (dateString) =>
+                dayjs(dateString).format("DD/MM/YYYY, HH:mm");
               const rentTypeLabel =
-                row.rent_type === "hourly" ? "Theo giờ" :
-                row.rent_type === "daily" ? "Qua ngày" :
-                row.rent_type === "overnight" ? "Qua đêm" : "Không xác định";
-              const statusLabel = STATUS_API_TO_LABEL[row.status] || "Chờ xử lý";
+                row.rent_type === "hourly"
+                  ? "Theo giờ"
+                  : row.rent_type === "daily"
+                  ? "Qua ngày"
+                  : row.rent_type === "overnight"
+                  ? "Qua đêm"
+                  : "Không xác định";
+              const statusLabel =
+                STATUS_API_TO_LABEL[row.status] || "Chờ xử lý";
               const roomName = row.room_types?.[0]?.name || "N/A";
 
               return (
@@ -380,14 +402,12 @@ export default function BookingDetailView({
                   key={row.id}
                   onClick={() => handleRowClick(row)}
                   sx={{ cursor: "pointer" }}
-                  hover
-                >
+                  hover>
                   <TableCell
                     sx={{
                       fontWeight: row.code.includes("(G)") ? "bold" : "normal",
                       color: row.code.includes("(G)") ? "#1976d2" : "#98B720",
-                    }}
-                  >
+                    }}>
                     {row.code}
                   </TableCell>
                   <TableCell>{parseRoomName(row.hotel_name)}</TableCell>
@@ -401,8 +421,7 @@ export default function BookingDetailView({
                         fontWeight: "medium",
                         mt: 1,
                         ...paymentStatusStyles[getPaymentLabel(row)],
-                      }}
-                    >
+                      }}>
                       {getPaymentLabel(row)}
                     </Box>
                   </TableCell>
@@ -421,7 +440,7 @@ export default function BookingDetailView({
                   <TableCell>
                     <Chip
                       label={statusLabel}
-                      size="small"
+                      size='small'
                       sx={{ minWidth: 110, ...statusStyles[statusLabel] }}
                     />
                   </TableCell>
@@ -438,18 +457,23 @@ export default function BookingDetailView({
   const renderMobile = () => (
     <Box sx={{ mt: 5, display: "flex", flexDirection: "column", gap: 3 }}>
       {loading ? (
-        <Typography align="center">Đang tải...</Typography>
+        <Typography align='center'>Đang tải...</Typography>
       ) : bookings.length === 0 ? (
-        <Typography align="center" color="#999" py={6}>
+        <Typography align='center' color='#999' py={6}>
           Không có dữ liệu đặt phòng
         </Typography>
       ) : (
         bookings.map((row) => {
-          const formatDateTime = (dateString) => dayjs(dateString).format("DD/MM/YYYY, HH:mm");
+          const formatDateTime = (dateString) =>
+            dayjs(dateString).format("DD/MM/YYYY, HH:mm");
           const rentTypeLabel =
-            row.rent_type === "hourly" ? "Theo giờ" :
-            row.rent_type === "daily" ? "Qua ngày" :
-            row.rent_type === "overnight" ? "Qua đêm" : "Không xác định";
+            row.rent_type === "hourly"
+              ? "Theo giờ"
+              : row.rent_type === "daily"
+              ? "Qua ngày"
+              : row.rent_type === "overnight"
+              ? "Qua đêm"
+              : "Không xác định";
           const statusLabel = STATUS_API_TO_LABEL[row.status] || "Chờ xử lý";
           const roomName = row.room_types?.[0]?.name || "N/A";
 
@@ -469,8 +493,7 @@ export default function BookingDetailView({
                   transform: "translateY(-2px)",
                 },
               }}
-              onClick={() => handleRowClick(row)}
-            >
+              onClick={() => handleRowClick(row)}>
               {/* Header card */}
               <Box
                 sx={{
@@ -481,20 +504,19 @@ export default function BookingDetailView({
                   alignItems: "center",
                   flexWrap: "wrap",
                   gap: 1,
-                }}
-              >
-                <Stack direction="row" spacing={1.5} alignItems="center">
-                  <Typography variant="subtitle2" color="text.secondary">
+                }}>
+                <Stack direction='row' spacing={1.5} alignItems='center'>
+                  <Typography variant='subtitle2' color='text.secondary'>
                     {row.code}
                   </Typography>
-                  <Typography variant="subtitle1" fontWeight="600">
+                  <Typography variant='subtitle1' fontWeight='600'>
                     {parseRoomName(row.hotel_name)}
                   </Typography>
                 </Stack>
 
                 <Chip
                   label={statusLabel}
-                  size="small"
+                  size='small'
                   sx={{ ...statusStyles[statusLabel], minWidth: 100 }}
                 />
               </Box>
@@ -505,7 +527,7 @@ export default function BookingDetailView({
               <Box sx={{ p: 2 }}>
                 <Stack spacing={1.5}>
                   <Box>
-                    <Typography variant="body2" color="text.secondary">
+                    <Typography variant='body2' color='text.secondary'>
                       Loại đặt phòng
                     </Typography>
                     <Typography>
@@ -518,10 +540,10 @@ export default function BookingDetailView({
                   </Box>
 
                   <Box>
-                    <Typography variant="body2" color="text.secondary">
+                    <Typography variant='body2' color='text.secondary'>
                       Thời gian
                     </Typography>
-                    <Typography color="#616161">
+                    <Typography color='#616161'>
                       {formatDateTime(row.check_in)}
                       <br />
                       {formatDateTime(row.check_out)}
@@ -529,11 +551,11 @@ export default function BookingDetailView({
                   </Box>
 
                   <Box>
-                    <Typography variant="body2" color="text.secondary">
+                    <Typography variant='body2' color='text.secondary'>
                       Tổng thanh toán
                     </Typography>
-                    <Typography fontWeight="600">
-                   {formatPrice(row.total_price)}
+                    <Typography fontWeight='600'>
+                      {formatPrice(row.total_price)}
                     </Typography>
                     <Box
                       sx={{
@@ -545,8 +567,7 @@ export default function BookingDetailView({
                         fontSize: "0.8rem",
                         fontWeight: "medium",
                         ...paymentStatusStyles[getPaymentLabel(row)],
-                      }}
-                    >
+                      }}>
                       {getPaymentLabel(row)}
                     </Box>
                   </Box>
@@ -560,8 +581,8 @@ export default function BookingDetailView({
   );
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
-       <Box sx={{ p: { xs: 2, sm: 3, md: 4 }, minHeight: "100vh" }}>
-       <Box
+      <Box sx={{ p: { xs: 2, sm: 3, md: 4 }, minHeight: "100vh" }}>
+        <Box
           sx={{
             display: "flex",
             justifyContent: "space-between",
@@ -569,7 +590,7 @@ export default function BookingDetailView({
             mb: 4,
           }}>
           <Typography variant='h5' fontWeight='bold'>
-          Quản lý đặt phòng
+            Quản lý đặt phòng
           </Typography>
         </Box>
         <Paper sx={{ p: 3, mb: 3 }}>
@@ -579,13 +600,14 @@ export default function BookingDetailView({
             <Stack
               direction={{ xs: "column", sm: "row" }}
               mb={4}
-            
               gap={2}
               flexWrap={"wrap"}
-              alignItems={{xs:"start",md:'end'}}>
+              alignItems={{ xs: "start", md: "end" }}>
               {/* Tìm kiếm */}
-              <Box width={{xs:"100%",md:"unset"}}>
-                <Typography fontWeight={"bold"} sx={{ mb: 1.5 }}>Mã đặt phòng</Typography>
+              <Box width={{ xs: "100%", md: "unset" }}>
+                <Typography fontWeight={"bold"} sx={{ mb: 1.5 }}>
+                  Mã đặt phòng
+                </Typography>
                 <TextField
                   placeholder='Tìm kiếm'
                   value={localFilters.booking_code}
@@ -603,7 +625,7 @@ export default function BookingDetailView({
                     ),
                   }}
                   sx={{
-                    width:{ xs:"100%",md:280},
+                    width: { xs: "100%", md: 180 },
                     "& .MuiOutlinedInput-root": {
                       height: 40,
                       borderRadius: "24px",
@@ -630,8 +652,10 @@ export default function BookingDetailView({
                   }}
                 />
               </Box>
-              <Box width={{xs:"100%",md:"unset"}}>
-                <Typography fontWeight={"bold"} sx={{ mb: 1.5 }}>Tên khách sạn</Typography>
+              <Box width={{ xs: "100%", md: "unset" }}>
+                <Typography fontWeight={"bold"} sx={{ mb: 1.5 }}>
+                  Tên khách sạn
+                </Typography>
                 <TextField
                   placeholder='Tìm kiếm'
                   value={localFilters.hotel_name}
@@ -649,7 +673,7 @@ export default function BookingDetailView({
                     ),
                   }}
                   sx={{
-                    width:{ xs:"100%",md:280},
+                    width: { xs: "100%", md: 220 },
                     "& .MuiOutlinedInput-root": {
                       height: 40,
                       borderRadius: "24px",
@@ -676,8 +700,10 @@ export default function BookingDetailView({
                   }}
                 />
               </Box>
-              <Box width={{xs:"100%",md:"unset"}}>
-                <Typography fontWeight={"bold"} sx={{ mb: 1.5 }}>Loại đặt phòng</Typography>
+              <Box width={{ xs: "100%", md: "unset" }}>
+                <Typography fontWeight={"bold"} sx={{ mb: 1.5 }}>
+                  Loại đặt phòng
+                </Typography>
                 <Select
                   displayEmpty
                   value={localFilters.rent_type}
@@ -688,7 +714,7 @@ export default function BookingDetailView({
                     })
                   }
                   sx={{
-                    width:{ xs:"100%",md:200},
+                    width: { xs: "100%", md: 160 },
                     height: 40,
                     borderRadius: "24px",
                     bgcolor: "#fff",
@@ -721,15 +747,17 @@ export default function BookingDetailView({
               </Box>
 
               {/* 2 ô DatePicker – ĐÃ FIX LỖI 100% */}
-              <Box width={{xs:"100%",md:"unset"}}>
-                <Typography fontWeight={"bold"} sx={{ mb: 1.5 }}>Thời gian nhận phòng</Typography>
+              <Box width={{ xs: "100%", md: "unset" }}>
+                <Typography fontWeight={"bold"} sx={{ mb: 1.5 }}>
+                  Thời gian nhận phòng
+                </Typography>
                 <DateSearch
                   value={dateRange}
-                  type="daily"
+                  type='daily'
                   onChange={setDateRange}
                   restrictToFuture={true}
-                // Nếu SimpleDateSearchBar hỗ trợ fullWidth thì thêm prop fullWidth={true}
-                // hoặc wrap trong Box với width 100% như trên
+                  // Nếu SimpleDateSearchBar hỗ trợ fullWidth thì thêm prop fullWidth={true}
+                  // hoặc wrap trong Box với width 100% như trên
                 />
               </Box>
 
@@ -764,12 +792,12 @@ export default function BookingDetailView({
 
             {/* Chip */}
             <Stack direction='row' flexWrap='wrap' gap={1.5} mt={3}>
-            {tabs.map((tab) => {
+              {tabs.map((tab) => {
                 const isActive = localFilters.status === tab.value;
                 return (
                   <Chip
                     key={tab.label}
-                    label={tab.label}  // Chỉ hiển thị label, không có count
+                    label={tab.label} // Chỉ hiển thị label, không có count
                     onClick={() => handleTabChange(tab.label)}
                     sx={{
                       cursor: "pointer",
@@ -862,7 +890,7 @@ function BookingDetailModal({ open, onClose, booking }) {
           boxShadow: "0 10px 30px rgba(0,0,0,0.15)",
         },
       }}>
-      <DialogTitle sx={{p:{xs:0,md:2},pb:2 }}>
+      <DialogTitle sx={{ p: { xs: 0, md: 2 }, pb: 2 }}>
         <Stack
           direction='row'
           justifyContent='space-between'
@@ -876,7 +904,7 @@ function BookingDetailModal({ open, onClose, booking }) {
         </Stack>
       </DialogTitle>
 
-      <DialogContent sx={{p:{xs:0,md:2}}}>
+      <DialogContent sx={{ p: { xs: 0, md: 2 } }}>
         <Stack spacing={3}>
           {/* Thông tin đặt phòng */}
           <Stack spacing={2}>
@@ -902,7 +930,11 @@ function BookingDetailModal({ open, onClose, booking }) {
             <Stack direction='row' justifyContent='space-between'>
               <Typography color='text.secondary'>Tên khách sạn:</Typography>
               <Typography fontWeight='medium'>
-                {booking?.hotel_name?JSON.parse(booking?.hotel_name)?.vi||JSON.parse(booking?.hotel_name)?.en || booking?.hotel_name:  "Nguyễn Văn A"}
+                {booking?.hotel_name
+                  ? JSON.parse(booking?.hotel_name)?.vi ||
+                    JSON.parse(booking?.hotel_name)?.en ||
+                    booking?.hotel_name
+                  : "Nguyễn Văn A"}
               </Typography>
             </Stack>
             <Stack direction='row' justifyContent='space-between'>
@@ -911,12 +943,11 @@ function BookingDetailModal({ open, onClose, booking }) {
                 {booking.full_name || "Nguyễn Văn A"}
               </Typography>
             </Stack>
-            
 
             <Stack direction='row' justifyContent='space-between'>
               <Typography color='text.secondary'>Số điện thoại:</Typography>
               <Typography fontWeight='medium'>
-                {("0"+booking.phone?.slice(3)) || "0123456789"}
+                {"0" + booking.phone?.slice(3) || "0123456789"}
               </Typography>
             </Stack>
 

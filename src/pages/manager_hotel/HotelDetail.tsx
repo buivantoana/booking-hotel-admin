@@ -1,5 +1,19 @@
-import { Box, Typography, Button, Chip, IconButton, useTheme, useMediaQuery } from "@mui/material";
-import { ArrowBackIos, ArrowBackIosNew, ArrowForwardIos, Edit as EditIcon, Star } from "@mui/icons-material";
+import {
+  Box,
+  Typography,
+  Button,
+  Chip,
+  IconButton,
+  useTheme,
+  useMediaQuery,
+} from "@mui/material";
+import {
+  ArrowBackIos,
+  ArrowBackIosNew,
+  ArrowForwardIos,
+  Edit as EditIcon,
+  Star,
+} from "@mui/icons-material";
 import { Grid, Paper, Stack, Divider } from "@mui/material";
 import ManagerRooms from "./ManagerRooms";
 import { useEffect, useRef, useState } from "react";
@@ -20,7 +34,7 @@ export default function HotelDetail({
   setCancelDialogOpenRoom,
   setApproveDialogOpenRoom,
   attribute,
-  setDeleteDialogOpen
+  setDeleteDialogOpen,
 }) {
   return (
     <Box sx={{ minHeight: "100vh" }}>
@@ -51,7 +65,7 @@ function HotelHeader({
   detailHotel,
   setCancelDialogOpen,
   setApproveDialogOpen,
-  setDeleteDialogOpen
+  setDeleteDialogOpen,
 }) {
   const parseVi = (str) => {
     if (!str) return "";
@@ -124,7 +138,7 @@ function HotelHeader({
 
         <Box>
           <Typography
-            fontSize={isMobile?18:22}
+            fontSize={isMobile ? 18 : 22}
             fontWeight={700}
             color='#222'
             sx={{ lineHeight: 1.2 }}>
@@ -134,64 +148,73 @@ function HotelHeader({
 
         {!isMobile && <>{renderStatusChip(status)}</>}
       </Box>
-      {status != "rejected"&&
-      <Box>
-        {status=="pending"?<Box display={"flex"} gap={"10px"}>
-            <Button
-              variant='contained'
-              onClick={() => setCancelDialogOpen(true)}
-              sx={{
-                bgcolor: "#F0F1F3",
-                color: "black",
-                fontWeight: 600,
-                fontSize: 15,
-                px: 4,
-                py: 1,
-                borderRadius: "50px",
-                textTransform: "none",
-                boxShadow: "none",
-              }}>
-              Từ chối
-            </Button>
-            <Button
-              variant='contained'
-              onClick={() => setApproveDialogOpen(true)}
-              sx={{
-                bgcolor: "#98B720",
-                color: "white",
-                fontWeight: 600,
-                fontSize: 15,
-                px: 4,
-                py: 1,
-                borderRadius: "50px",
-                textTransform: "none",
-                boxShadow: "none",
-              }}>
-              Phê duyệt
-            </Button>
-          </Box>:
-        <Button
-          variant='outlined'
-          onClick={() => {
-            if (status === "active" || status === "paused") {
-              setDeleteDialogOpen(true);
-            } else {
-              setApproveDialogOpen(true);
-            }
-          }}
-          sx={{
-            borderRadius: "24px",
-            height: 40,
-            minWidth: 120,
-            border: "1px solid rgba(208, 211, 217, 1)",
-            background: "rgba(240, 241, 243, 1)",
-            color: "black",
-          }}>
-          {status === "active" || status === "paused"
-            ? "Ngừng kinh doanh"
-            : "Tiếp tục kinh doanh"}
-        </Button>}
-      </Box>}
+      <>
+        {["pending", "active", "terminated"].includes(status) && (
+          <>
+            {" "}
+            {status != "rejected" && (
+              <Box>
+                {status == "pending" ? (
+                  <Box display={"flex"} gap={"10px"}>
+                    <Button
+                      variant='contained'
+                      onClick={() => setCancelDialogOpen(true)}
+                      sx={{
+                        bgcolor: "#F0F1F3",
+                        color: "black",
+                        fontWeight: 600,
+                        fontSize: 15,
+                        px: 4,
+                        py: 1,
+                        borderRadius: "50px",
+                        textTransform: "none",
+                        boxShadow: "none",
+                      }}>
+                      Từ chối
+                    </Button>
+                    <Button
+                      variant='contained'
+                      onClick={() => setApproveDialogOpen(true)}
+                      sx={{
+                        bgcolor: "#98B720",
+                        color: "white",
+                        fontWeight: 600,
+                        fontSize: 15,
+                        px: 4,
+                        py: 1,
+                        borderRadius: "50px",
+                        textTransform: "none",
+                        boxShadow: "none",
+                      }}>
+                      Phê duyệt
+                    </Button>
+                  </Box>
+                ) : (
+                  <Button
+                    variant='outlined'
+                    onClick={() => {
+                      if (status === "active") {
+                        setDeleteDialogOpen(true);
+                      } else {
+                        setApproveDialogOpen(true);
+                      }
+                    }}
+                    sx={{
+                      borderRadius: "24px",
+                      height: 40,
+                      minWidth: 120,
+                      border: "1px solid rgba(208, 211, 217, 1)",
+                      background: "rgba(240, 241, 243, 1)",
+                      color: "black",
+                    }}>
+                    {status === "active" ? "Ngừng hợp tác" : "Tiếp tục hợp tác"}
+                  </Button>
+                )}
+              </Box>
+            )}
+          </>
+        )}
+      </>
     </Box>
   );
 }
@@ -205,7 +228,7 @@ function HotelInfoDetail({
   locations,
   setCancelDialogOpenRoom,
   setApproveDialogOpenRoom,
-  attribute
+  attribute,
 }) {
   const [action, setAction] = useState("manager");
   const parseVi = (str) => {
@@ -237,7 +260,9 @@ function HotelInfoDetail({
   } / ${rentTypes.daily?.from || "14:00"} ~ ${rentTypes.daily?.to || "12:00"}`;
 
   const images = detailHotel.images ? JSON.parse(detailHotel.images) : [];
-  const imagesVerify = detailHotel.verify_images ? JSON.parse(detailHotel.verify_images) : [];
+  const imagesVerify = detailHotel.verify_images
+    ? JSON.parse(detailHotel.verify_images)
+    : [];
   const thumbImages = Array.from(new Set([...images, ...imagesVerify]));
   const [navMain, setNavMain] = useState(null);
   const [navThumb, setNavThumb] = useState(null);
@@ -324,134 +349,134 @@ function HotelInfoDetail({
               </Typography>
 
               <Box mb={1} position={"relative"}>
-              <Slider
-                {...settingsMain}
-                ref={(slider) => {
-                  sliderMain.current = slider;
-                  setNavMain(slider);
-                }}>
-                {thumbImages.map((img, i) => (
-                  <Box height={"360px !important"}>
-                    <img
-                      key={i}
-                      src={img}
-                      style={{
-                        width: "100%",
-                        height: "100%",
-                        objectFit: "cover",
-                        borderRadius: 12,
-                      }}
-                    />
-                  </Box>
-                ))}
-              </Slider>
+                <Slider
+                  {...settingsMain}
+                  ref={(slider) => {
+                    sliderMain.current = slider;
+                    setNavMain(slider);
+                  }}>
+                  {thumbImages.map((img, i) => (
+                    <Box height={"360px !important"}>
+                      <img
+                        key={i}
+                        src={img}
+                        style={{
+                          width: "100%",
+                          height: "100%",
+                          objectFit: "cover",
+                          borderRadius: 12,
+                        }}
+                      />
+                    </Box>
+                  ))}
+                </Slider>
 
-              {/* CUSTOM ARROWS */}
-              <IconButton
-                onClick={() => sliderMain.current?.slickPrev()}
-                sx={{
-                  position: "absolute",
-                  top: "50%",
-                  left: 10,
-                  bgcolor: "white",
-                  width: 36,
-                  height: 36,
-                  borderRadius: "50%",
-                  transform: "translateY(-50%)",
-                  boxShadow: 2,
-                  transition: "all 0.3s ease", // mượt khi hover
+                {/* CUSTOM ARROWS */}
+                <IconButton
+                  onClick={() => sliderMain.current?.slickPrev()}
+                  sx={{
+                    position: "absolute",
+                    top: "50%",
+                    left: 10,
+                    bgcolor: "white",
+                    width: 36,
+                    height: 36,
+                    borderRadius: "50%",
+                    transform: "translateY(-50%)",
+                    boxShadow: 2,
+                    transition: "all 0.3s ease", // mượt khi hover
 
-                  // Hover effect
-                  "&:hover": {
-                    bgcolor: "#98b720", // nền chuyển xanh
-                    boxShadow: 6, // bóng đậm hơn tí
+                    // Hover effect
+                    "&:hover": {
+                      bgcolor: "#98b720", // nền chuyển xanh
+                      boxShadow: 6, // bóng đậm hơn tí
 
-                    "& .MuiSvgIcon-root": {
-                      // đổi màu icon khi hover
-                      color: "white !important",
+                      "& .MuiSvgIcon-root": {
+                        // đổi màu icon khi hover
+                        color: "white !important",
+                      },
                     },
-                  },
 
-                  // Icon mặc định
-                  "& .MuiSvgIcon-root": {
-                    fontSize: 16,
-                    color: "#333",
-                    transition: "color 0.3s ease",
-                  },
-                }}>
-                <ArrowBackIosNew sx={{ fontSize: 16 }} />
-              </IconButton>
-
-              <IconButton
-                onClick={() => sliderMain.current?.slickNext()}
-                sx={{
-                  position: "absolute",
-                  top: "50%",
-                  right: 10,
-                  width: 36,
-                  height: 36,
-                  borderRadius: "50%",
-                  bgcolor: "white",
-                  boxShadow: 2,
-                  transform: "translateY(-50%)",
-                  transition: "all 0.3s ease", // mượt khi hover
-
-                  // Hover effect
-                  "&:hover": {
-                    bgcolor: "#98b720", // nền chuyển xanh
-                    boxShadow: 6, // bóng đậm hơn tí
-
+                    // Icon mặc định
                     "& .MuiSvgIcon-root": {
-                      // đổi màu icon khi hover
-                      color: "white !important",
+                      fontSize: 16,
+                      color: "#333",
+                      transition: "color 0.3s ease",
                     },
-                  },
+                  }}>
+                  <ArrowBackIosNew sx={{ fontSize: 16 }} />
+                </IconButton>
 
-                  // Icon mặc định
-                  "& .MuiSvgIcon-root": {
-                    fontSize: 16,
-                    color: "#333",
-                    transition: "color 0.3s ease",
+                <IconButton
+                  onClick={() => sliderMain.current?.slickNext()}
+                  sx={{
+                    position: "absolute",
+                    top: "50%",
+                    right: 10,
+                    width: 36,
+                    height: 36,
+                    borderRadius: "50%",
+                    bgcolor: "white",
+                    boxShadow: 2,
+                    transform: "translateY(-50%)",
+                    transition: "all 0.3s ease", // mượt khi hover
+
+                    // Hover effect
+                    "&:hover": {
+                      bgcolor: "#98b720", // nền chuyển xanh
+                      boxShadow: 6, // bóng đậm hơn tí
+
+                      "& .MuiSvgIcon-root": {
+                        // đổi màu icon khi hover
+                        color: "white !important",
+                      },
+                    },
+
+                    // Icon mặc định
+                    "& .MuiSvgIcon-root": {
+                      fontSize: 16,
+                      color: "#333",
+                      transition: "color 0.3s ease",
+                    },
+                  }}>
+                  <ArrowForwardIos />
+                </IconButton>
+              </Box>
+
+              {/* Thumbnail */}
+              <Box
+                sx={{
+                  ".slick-current img": {
+                    outline: "2px solid #98b720",
+                    outlineOffset: "-2px", // kéo viền vào trong đúng 2px → trông như border trong
+                    opacity: 1,
+                    // optional: thêm viền ngoài nếu muốn đậm hơn
+                  },
+                  // Đảm bảo tất cả ảnh đều có kích thước cố định và không bị co giãn do border/outline
+                  img: {
+                    display: "block",
+                    width: "100%",
+                    height: "100px",
+                    objectFit: "cover",
+                    borderRadius: 1,
+                    opacity: 0.6,
+                    transition: "all 0.3s ease",
+                    boxSizing: "border-box",
                   },
                 }}>
-                <ArrowForwardIos />
-              </IconButton>
-            </Box>
-
-            {/* Thumbnail */}
-            <Box
-              sx={{
-                ".slick-current img": {
-                  outline: "2px solid #98b720",
-                  outlineOffset: "-2px", // kéo viền vào trong đúng 2px → trông như border trong
-                  opacity: 1,
-                  // optional: thêm viền ngoài nếu muốn đậm hơn
-                },
-                // Đảm bảo tất cả ảnh đều có kích thước cố định và không bị co giãn do border/outline
-                img: {
-                  display: "block",
-                  width: "100%",
-                  height: "100px",
-                  objectFit: "cover",
-                  borderRadius: 1,
-                  opacity: 0.6,
-                  transition: "all 0.3s ease",
-                  boxSizing: "border-box",
-                },
-              }}>
-              <Slider
-                {...settingsThumb}
-                ref={(slider) => {
-                  sliderThumb.current = slider;
-                  setNavThumb(slider);
-                }}>
-                {thumbImages.map((img, i) => (
-                  <Box width={"95% !important"} height={"100px"}>
-                    <img key={i} src={img} />
-                  </Box>
-                ))}
-              </Slider>
-            </Box>
+                <Slider
+                  {...settingsThumb}
+                  ref={(slider) => {
+                    sliderThumb.current = slider;
+                    setNavThumb(slider);
+                  }}>
+                  {thumbImages.map((img, i) => (
+                    <Box width={"95% !important"} height={"100px"}>
+                      <img key={i} src={img} />
+                    </Box>
+                  ))}
+                </Slider>
+              </Box>
             </Grid>
 
             {/* Cột 2: Thông tin chính */}
@@ -464,8 +489,6 @@ function HotelInfoDetail({
               </Typography>
 
               <Stack spacing={2.5}>
-               
-
                 <Box>
                   <Typography fontSize={14} color='black' fontWeight={600}>
                     Số điện thoại
@@ -475,34 +498,41 @@ function HotelInfoDetail({
                   </Typography>
                 </Box>
 
-                <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'flex-start' }}>
+                <Box
+                  sx={{
+                    display: "flex",
+                    flexDirection: "row",
+                    alignItems: "flex-start",
+                  }}>
                   {/* Cột 1: Theo giờ */}
-                  <Box sx={{  width: 120 }}>
-                    <Typography fontSize={14} color="black" fontWeight={600}>
+                  <Box sx={{ width: 120 }}>
+                    <Typography fontSize={14} color='black' fontWeight={600}>
                       Theo giờ
                     </Typography>
-                    <Typography fontSize={15} color="#333">
+                    <Typography fontSize={15} color='#333'>
                       08:00 - 22:00
                     </Typography>
                   </Box>
-                  
+
                   {/* Cột 2: Qua đêm */}
-                  <Box sx={{  width: 120 }}>
-                    <Typography fontSize={14} color="black" fontWeight={600}>
+                  <Box sx={{ width: 120 }}>
+                    <Typography fontSize={14} color='black' fontWeight={600}>
                       Qua đêm
                     </Typography>
-                    <Typography fontSize={15} color="#333">
-                      {rentTypes.overnight?.from || "22:00"} - {rentTypes.overnight?.to || "08:00"}
+                    <Typography fontSize={15} color='#333'>
+                      {rentTypes.overnight?.from || "22:00"} -{" "}
+                      {rentTypes.overnight?.to || "08:00"}
                     </Typography>
                   </Box>
 
                   {/* Cột 3: Theo ngày */}
-                  <Box sx={{  width: 120 }}>
-                    <Typography fontSize={14} color="black" fontWeight={600}>
+                  <Box sx={{ width: 120 }}>
+                    <Typography fontSize={14} color='black' fontWeight={600}>
                       Theo ngày
                     </Typography>
-                    <Typography fontSize={15} color="#333">
-                      {rentTypes.daily?.from || "14:00"} - {rentTypes.daily?.to || "12:00"}
+                    <Typography fontSize={15} color='#333'>
+                      {rentTypes.daily?.from || "14:00"} -{" "}
+                      {rentTypes.daily?.to || "12:00"}
                     </Typography>
                   </Box>
                 </Box>
@@ -521,7 +551,10 @@ function HotelInfoDetail({
                     Tỉnh thành/ Quận
                   </Typography>
                   <Typography fontSize={15} color='#333'>
-                  {locations?.find(item=> item?.id == detailHotel?.city)?.name?.vi }
+                    {
+                      locations?.find((item) => item?.id == detailHotel?.city)
+                        ?.name?.vi
+                    }
                   </Typography>
                 </Box>
 
@@ -578,8 +611,8 @@ function HotelInfoDetail({
                           typeof detailHotel.amenities === "string"
                             ? JSON.parse(detailHotel.amenities)
                             : Array.isArray(detailHotel.amenities)
-                              ? detailHotel.amenities
-                              : [];
+                            ? detailHotel.amenities
+                            : [];
                         return Array.isArray(parsed) ? parsed : [];
                       } catch (e) {
                         console.warn("Parse facilities error:", e);
@@ -588,8 +621,8 @@ function HotelInfoDetail({
                     };
 
                     // Map id → object đầy đủ (label + icon)
-                    const selectedFacilities = attribute.amenities.filter((fac) =>
-                      facilityIds().includes(fac.id)
+                    const selectedFacilities = attribute.amenities.filter(
+                      (fac) => facilityIds().includes(fac.id)
                     );
 
                     if (selectedFacilities.length === 0) {
@@ -602,7 +635,12 @@ function HotelInfoDetail({
 
                     return (
                       <Box
-                        sx={{ display: "flex", flexWrap: "wrap", gap: 2, mt: 1 }}>
+                        sx={{
+                          display: "flex",
+                          flexWrap: "wrap",
+                          gap: 2,
+                          mt: 1,
+                        }}>
                         {selectedFacilities.map((fac) => (
                           <Box
                             key={fac.id}
@@ -614,14 +652,18 @@ function HotelInfoDetail({
                               border: "1px solid #e9ecef",
                               borderRadius: 3,
                               px: 1,
-                              py: .5,
+                              py: 0.5,
                               minWidth: 140,
                             }}>
                             <Box
                               component='img'
                               src={fac.icon}
                               alt={fac.name.vi}
-                              sx={{ width: 20, height: 20, objectFit: "contain" }}
+                              sx={{
+                                width: 20,
+                                height: 20,
+                                objectFit: "contain",
+                              }}
                             />
                             <Typography fontWeight={500} fontSize='0.85rem'>
                               {fac.name.vi}
@@ -632,7 +674,6 @@ function HotelInfoDetail({
                     );
                   })()}
                 </Box>
-               
               </Stack>
             </Grid>
           </Grid>
