@@ -88,7 +88,7 @@ function HotelHeader({
         sx: { bgcolor: "#98B720", color: "white" },
       },
       paused: {
-        label: "Tạm dừng",
+        label: "Ngừng kinh doanh",
         sx: { bgcolor: "#FFB020", color: "white" },
       },
       pending: {
@@ -96,7 +96,7 @@ function HotelHeader({
         sx: { bgcolor: "#1976D2", color: "white" },
       },
       terminated: {
-        label: "Đã chấm dứt",
+        label: "Ngừng hợp tác",
         sx: { bgcolor: "#D32F2F", color: "white" },
       },
       rejected: {

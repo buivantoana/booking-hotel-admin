@@ -601,7 +601,7 @@ export default function BookingDetailView({
               direction={{ xs: "column", sm: "row" }}
               mb={4}
               gap={2}
-              flexWrap={"wrap"}
+             overflow={"hidden"}
               alignItems={{ xs: "start", md: "end" }}>
               {/* Tìm kiếm */}
               <Box width={{ xs: "100%", md: "unset" }}>
@@ -625,7 +625,7 @@ export default function BookingDetailView({
                     ),
                   }}
                   sx={{
-                    width: { xs: "100%", md: 180 },
+                    width: { xs: "100%", md: 140 },
                     "& .MuiOutlinedInput-root": {
                       height: 40,
                       borderRadius: "24px",
@@ -673,7 +673,7 @@ export default function BookingDetailView({
                     ),
                   }}
                   sx={{
-                    width: { xs: "100%", md: 220 },
+                    width: { xs: "100%", md: 160 },
                     "& .MuiOutlinedInput-root": {
                       height: 40,
                       borderRadius: "24px",
@@ -714,7 +714,7 @@ export default function BookingDetailView({
                     })
                   }
                   sx={{
-                    width: { xs: "100%", md: 160 },
+                    width: { xs: "100%", md: 130 },
                     height: 40,
                     borderRadius: "24px",
                     bgcolor: "#fff",

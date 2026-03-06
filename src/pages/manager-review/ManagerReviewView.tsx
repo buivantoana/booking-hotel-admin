@@ -502,7 +502,7 @@ export default function ManagerReviewView({
             >
               {/* Tên khách sạn */}
               <Box width={{xs:"100%",md:"unset"}}>
-                <Typography sx={{ mb: 1.5 }}>Tên khách sạn</Typography>
+                <Typography sx={{ mb: 1.5,fontWeight:"bold" }}>Tên khách sạn</Typography>
                 <TextField
                   placeholder="Tìm kiếm"
                   value={localFilters.hotel_name}
@@ -535,7 +535,7 @@ export default function ManagerReviewView({
 
               {/* Tên người dùng */}
               <Box width={{xs:"100%",md:"unset"}}>
-                <Typography sx={{ mb: 1.5 }}>Tên người dùng</Typography>
+                <Typography sx={{ mb: 1.5 ,fontWeight:"bold" }}>Tên người dùng</Typography>
                 <TextField
                   placeholder="Tìm kiếm"
                   value={localFilters.user_name}
@@ -568,7 +568,7 @@ export default function ManagerReviewView({
 
               {/* Nội dung */}
               <Box width={{xs:"100%",md:"unset"}}>
-                <Typography sx={{ mb: 1.5 }}>Nội dung</Typography>
+                <Typography sx={{ mb: 1.5,fontWeight:"bold" }}>Nội dung</Typography>
                 <TextField
                   placeholder="Tìm kiếm"
                   value={localFilters.content}
@@ -601,7 +601,7 @@ export default function ManagerReviewView({
 
               {/* Điểm đánh giá */}
               <Box width={{xs:"100%",md:"unset"}}>
-                <Typography sx={{ mb: 1.5 }}>Điểm đánh giá</Typography>
+                <Typography sx={{ mb: 1.5 ,fontWeight:"bold"}}>Điểm đánh giá</Typography>
                 <Button
                   variant="outlined"
                   size="small"
@@ -611,7 +611,7 @@ export default function ManagerReviewView({
                     width: {xs:"100%",md:"max-content"},
                     borderRadius: 20,
                     textTransform: "none",
-                    borderColor: "#ddd",
+                    borderColor: "#cddc39",
                     color: "#666",
                     fontSize: "14px",
                     height: 40,

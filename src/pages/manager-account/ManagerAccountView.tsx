@@ -427,7 +427,7 @@ export default function ManagerAccountView({
           alignItems={{xs:"start",md:'end'}}
           mb={4}>
           <Box width={{xs:"100%",md:"unset"}}>
-            <Typography sx={{ mb: 1 }}>Tìm kiếm</Typography>
+            <Typography sx={{ mb: 1 ,fontWeight:"bold"}}>Tìm kiếm</Typography>
             <TextField
               placeholder='Nhập email'
               value={localFilters.email}

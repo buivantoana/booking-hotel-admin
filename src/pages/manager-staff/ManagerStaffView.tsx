@@ -481,7 +481,7 @@ export default function ManagerStaffView({
           alignItems={{xs:"start",md:'end'}}
           mb={4}>
           <Box >
-            <Typography sx={{ mb: 1 }}>Tìm kiếm</Typography>
+            <Typography sx={{ mb: 1,fontWeight:"bold" }}>Tìm kiếm</Typography>
             <TextField
               placeholder='Nhập email'
               value={localFilters.email}

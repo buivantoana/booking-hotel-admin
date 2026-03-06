@@ -198,7 +198,7 @@ export default function SimpleDateSearchBar({
               onClick={() => setOpen(true)}
               sx={{
                 cursor: "pointer",
-                border: open ? "1px solid #98b720" : "1px solid #eee",
+                border: open ? "1px solid #cddc39" : "1px solid #cddc39",
                 borderRadius: 3,
                 px: 2,
                 py: 1,

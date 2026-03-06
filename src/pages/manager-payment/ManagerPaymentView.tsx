@@ -451,7 +451,7 @@ export default function ManagerPaymentView({
               alignItems={{xs:"start",md:'end'}}>
               {/* Tìm kiếm */}
               <Box width={{xs:"100%",md:"unset"}}>
-                <Typography sx={{ mb: 1.5 }}>Tìm kiếm</Typography>
+                <Typography sx={{ mb: 1.5 ,fontWeight:"bold"}}>Tìm kiếm</Typography>
                 <TextField
                   placeholder='Tìm mã đặt phòng'
                   value={localFilters.booking_code}
@@ -497,7 +497,7 @@ export default function ManagerPaymentView({
                 />
               </Box>
               <Box width={{xs:"100%",md:"unset"}}>
-                <Typography sx={{ mb: 1.5 }}>Phương thức thanh toán</Typography>
+                <Typography sx={{ mb: 1.5 ,fontWeight:"bold"}}>Phương thức thanh toán</Typography>
                 <Select
                   displayEmpty
 
@@ -544,7 +544,7 @@ export default function ManagerPaymentView({
 
               {/* 2 ô DatePicker – ĐÃ FIX LỖI 100% */}
               <Box width={{xs:"100%",md:"unset"}}>
-                <Typography sx={{ mb: 1.5 }}>Thời gian</Typography>
+                <Typography sx={{ mb: 1.5 ,fontWeight:"bold"}}>Thời gian</Typography>
                 <DateSearch
                   value={dateRange}
                   type="daily"

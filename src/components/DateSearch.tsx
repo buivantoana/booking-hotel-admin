@@ -444,18 +444,22 @@ export default function DateSearch({
               onClick={() => setOpen(true)}
               sx={{
                 cursor: "pointer",
-                border: open ? "1px solid #98b720" : "1px solid #ddd",
+                border: open ? "1px solid #cddc39" : "1px solid #cddc39",
                 borderRadius: "50px",
-                px: 2,
-                py: 1.2,
+              
                 bgcolor: open ? "#f8fff8" : "#fff",
                 transition: "all 0.2s",
+                height:"40px",
+                display:"flex",
+                px:2,                
+                justifyContent:"center",
+                alignItems:"center",
                 "&:hover": {
                   borderColor: "#98b720",
                   boxShadow: "0 0 0 1px #98b720",
                 },
               }}>
-              <Stack direction='row' spacing={2} alignItems='center'>
+              <Stack direction='row'  spacing={2} alignItems='center'>
                 <Typography 
                   fontWeight={500} 
                   color={value.checkIn ? "#333" : "#999"}
