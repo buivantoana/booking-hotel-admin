@@ -48,13 +48,22 @@ const parseLang = (value: string, lang = "vi") => {
 const getStatusColor = (status: string) => {
   switch (status) {
     case "Chưa đối soát":
-      return { bg: "#FFF0F0", color: "#E53935" };
-    case "Hoàn thành":
-      return { bg: "#E8F5E9", color: "#98B720" };
+      return { bg: "#FFF0F0", color: "#E53935" }; // giữ nguyên (đỏ nhạt)
+
+    case "Chờ xác nhận":
+      return { bg: "#E3F2FD", color: "#1E88E5" }; // xanh dương (info)
+
     case "Chờ thanh toán":
-      return { bg: "#FFF3E0", color: "#EF6C00" };
+      return { bg: "#FFF3E0", color: "#FB8C00" }; // cam (warning)
+
+    case "Thanh toán":
+      return { bg: "#E8F5E9", color: "#43A047" }; // xanh lá nhẹ
+
+    case "Hoàn thành":
+      return { bg: "#E8F5E9", color: "#2E7D32" }; // xanh lá đậm (success)
+
     default:
-      return { bg: "#F5F5F5", color: "#424242" };
+      return { bg: "#F5F5F5", color: "#616161" }; // neutral
   }
 };
 
@@ -63,7 +72,7 @@ const STATUS_LABEL = {
   pending: "Chờ xác nhận",
   confirmed: "Chờ thanh toán",
   paid: "Thanh toán",
-  completed: "Hoàn thành", // Giả sử
+  completed: "Hoàn thành",
 };
 const formatCurrency = (amount: number) => {
   const abs = Math.abs(amount).toLocaleString("vi-VN");

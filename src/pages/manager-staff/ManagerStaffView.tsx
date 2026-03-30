@@ -109,7 +109,7 @@ function ActionMenu({
 
         {account.active ? (
           <MenuItem
-          sx={{color:"red"}}
+            sx={{ color: "red" }}
             onClick={(e) => {
               handleClose(e);
               onToggleStatus(account, false);
@@ -119,7 +119,7 @@ function ActionMenu({
           </MenuItem>
         ) : (
           <MenuItem
-          sx={{color:"#98b720"}}
+            sx={{ color: "#98b720" }}
             onClick={(e) => {
               handleClose(e);
               onToggleStatus(account, true);
@@ -174,7 +174,7 @@ export default function ManagerStaffView({
     acc.email.toLowerCase().includes(localFilters.email.toLowerCase())
   );
 
-  
+
 
   const handleSearch = () => {
     onFilterChange({ email: localFilters.email });
@@ -229,7 +229,7 @@ export default function ManagerStaffView({
       if (result?.message && !result?.code) {
         setConfirmOpen(false);
         fetchAccounts();
-        toast.success(selectedAccount.active == 1 ? "Khóa tài khoản thành công" : "Mở tài khoản thành công" );
+        toast.success(selectedAccount.active == 1 ? "Khóa tài khoản thành công" : "Mở tài khoản thành công");
       } else {
         toast.success(selectedAccount.active == 1 ? "Khóa tài khoản thất bại" : "Mở tài khoản thất bại");
       }
@@ -238,7 +238,11 @@ export default function ManagerStaffView({
       console.log(error);
     }
   };
- 
+  const roleMap: Record<string, string> = {
+    admin: "Quản trị viên",
+    accountant: "Kế toán",
+    super_admin: "Siêu quản trị",
+  };
 
   // Desktop: Bảng gốc (giữ nguyên 100%)
   const renderDesktop = () => (
@@ -257,12 +261,12 @@ export default function ManagerStaffView({
         <TableBody>
           {loading ? (
             <TableRow>
-              <Typography><CircularProgress sx={{color:"#98B720"}} /></Typography>
+              <Typography><CircularProgress sx={{ color: "#98B720" }} /></Typography>
             </TableRow>
           ) : displayedAccounts.length === 0 ? (
             <TableRow>
               <TableCell colSpan={6} align="center">
-              <img src={empty} alt="" />
+                <img src={empty} alt="" />
               </TableCell>
             </TableRow>
           ) : (
@@ -281,10 +285,10 @@ export default function ManagerStaffView({
                 </TableCell>
                 <TableCell>
                   <Chip
-                    label={account.role}
+                    label={roleMap[account.role] || account.role}
                     sx={{
-                      bgcolor: "#e8f5e9" ,
-                      color:  "#4caf50",
+                      bgcolor: "#e8f5e9",
+                      color: "#4caf50",
                       fontWeight: "medium",
                     }}
                   />
@@ -339,11 +343,11 @@ export default function ManagerStaffView({
                 transform: "translateY(-2px)",
               },
             }}
-           
+
           >
             {/* Header card */}
             <Box
-             onClick={() => handleViewDetail(account)}
+              onClick={() => handleViewDetail(account)}
               sx={{
                 p: 2,
                 bgcolor: "#f8f9fa",
@@ -427,7 +431,10 @@ export default function ManagerStaffView({
     <Box sx={{ p: { xs: 2, sm: 3, md: 4 } }}>
       <AccountModal
         open={modalOpen}
-        onClose={() => setModalOpen(false)}
+        onClose={() => {
+          setSelectedAccount(null);
+          setModalOpen(false)
+        }}
         account={selectedAccount}
         onSuccess={() => {
           fetchAccounts();
@@ -456,8 +463,8 @@ export default function ManagerStaffView({
             },
             color: "white",
             fontWeight: "bold",
-            fontSize:isMobile?"12px":"16px",
-            padding:isMobile?1: "12px 24px",
+            fontSize: isMobile ? "12px" : "16px",
+            padding: isMobile ? 1 : "12px 24px",
             borderRadius: "12px", // bo tròn mạnh
             textTransform: "none", // không in hoa tự động
             boxShadow: "none",
@@ -478,10 +485,10 @@ export default function ManagerStaffView({
         <Stack
           direction={{ xs: "column", md: "row" }}
           spacing={2}
-          alignItems={{xs:"start",md:'end'}}
+          alignItems={{ xs: "start", md: 'end' }}
           mb={4}>
           <Box >
-            <Typography sx={{ mb: 1,fontWeight:"bold" }}>Tìm kiếm</Typography>
+            <Typography sx={{ mb: 1, fontWeight: "bold" }}>Tìm kiếm</Typography>
             <TextField
               placeholder='Nhập email'
               value={localFilters.email}
@@ -496,7 +503,7 @@ export default function ManagerStaffView({
                 ),
               }}
               sx={{
-                width: {xs:"100%",md:300},
+                width: { xs: "100%", md: 300 },
                 "& .MuiOutlinedInput-root": {
                   height: 40,
                   borderRadius: "24px",
@@ -610,7 +617,7 @@ export default function ManagerStaffView({
                 <strong>Tên:</strong> {selectedAccount.name}
               </Typography>
               <Typography>
-                <strong>Vai trò:</strong> {selectedAccount.role}
+                <strong>Vai trò:</strong> {roleMap[selectedAccount.role] || account.role}
               </Typography>
               <Typography>
                 <strong>Trạng thái:</strong>{" "}
@@ -636,7 +643,7 @@ export default function ManagerStaffView({
           <Box sx={{ position: "relative" }}>
             <img src={selectedAccount?.active == 0 ? success : remove} alt='' />
             <Typography fontWeight={600} fontSize='20px' mb={1}>
-         {selectedAccount?.active == 1?` Bạn muốn khóa tài khoản này?`:` Bạn muốn mở khoản này?`}  
+              {selectedAccount?.active == 1 ? ` Bạn muốn khóa tài khoản này?` : ` Bạn muốn mở khoản này?`}
             </Typography>
             <IconButton
               onClick={() => setConfirmOpen(false)}
@@ -674,7 +681,7 @@ export default function ManagerStaffView({
               width: "100%",
             }}>
             Xác nhận tiếp tục
-             
+
           </Button>
           <Button
             onClick={() => setConfirmOpen(false)}
@@ -772,16 +779,16 @@ const AccountModal: React.FC<AccountModalProps> = ({
       toast.warning("Mật khẩu xác nhận không khớp!");
       return;
     } else {
-      
-      if (formData.password && formData.password == formData.confirmPassword){
-        if(formData.password.length>=6){
+
+      if (formData.password && formData.password == formData.confirmPassword) {
+        if (formData.password.length >= 6) {
           payload.password = formData.password;
-        }else{
+        } else {
           toast.warning("Mật khẩu ít nhất 6 ký tự")
           return
         }
       }
-       
+
     }
 
     try {
@@ -797,9 +804,9 @@ const AccountModal: React.FC<AccountModalProps> = ({
       if (result?.message && !result?.code) {
         onSuccess?.();
         onClose();
-        toast.success(isEdit? "Chỉnh sửa nhân viên thành công": "Thêm nhân viên thành công");
+        toast.success(isEdit ? "Chỉnh sửa nhân viên thành công" : "Thêm nhân viên thành công");
       } else {
-        toast.error(isEdit? "Chỉnh sửa nhân viên thất bại": "Thêm nhân viên thất bại");
+        toast.error(isEdit ? "Chỉnh sửa nhân viên thất bại" : "Thêm nhân viên thất bại");
       }
     } catch (error: any) {
       console.error(error);
@@ -812,7 +819,7 @@ const AccountModal: React.FC<AccountModalProps> = ({
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth='sm' fullWidth>
-      <DialogTitle sx={{p:{xs:1,md:3}}}>
+      <DialogTitle sx={{ p: { xs: 1, md: 3 } }}>
         <Box display='flex' justifyContent='space-between' alignItems='center'>
           <Typography variant='h6' fontWeight='bold'>
             {isEdit ? "Chỉnh sửa thông tin" : "Thêm mới tài khoản"}
@@ -823,7 +830,7 @@ const AccountModal: React.FC<AccountModalProps> = ({
         </Box>
       </DialogTitle>
 
-      <DialogContent sx={{p:{xs:1,md:3}}} dividers>
+      <DialogContent sx={{ p: { xs: 1, md: 3 } }} dividers>
         <Box display='grid' gridTemplateColumns='1fr 1fr' gap={2} mt={1}>
           <Box>
             <Typography variant='subtitle2' color='text.secondary' mb={0.5}>
@@ -937,7 +944,7 @@ const AccountModal: React.FC<AccountModalProps> = ({
                 value={formData.role}
                 onChange={handleRoleChange}
               >
-                <MenuItem value='admin'>Admin</MenuItem>
+                <MenuItem value='admin'>Quản trị viên</MenuItem>
                 <MenuItem value='accountant'>Kế toán</MenuItem>
               </Select>
             </FormControl>
@@ -952,7 +959,7 @@ const AccountModal: React.FC<AccountModalProps> = ({
             </Typography>
             <TextField
 
-type={showPassword ? "text" : "password"}
+              type={showPassword ? "text" : "password"}
               value={formData.password}
               onChange={handleChange("password")}
               fullWidth
@@ -969,7 +976,7 @@ type={showPassword ? "text" : "password"}
                     borderWidth: 1.5,
                   },
                 },
-                
+
               }}
               InputProps={{
                 endAdornment: (
@@ -995,7 +1002,7 @@ type={showPassword ? "text" : "password"}
             </Typography>
             <TextField
 
-type={showConfirmPassword ? "text" : "password"}
+              type={showConfirmPassword ? "text" : "password"}
               value={formData.confirmPassword}
               onChange={handleChange("confirmPassword")}
               fullWidth
@@ -1012,7 +1019,7 @@ type={showConfirmPassword ? "text" : "password"}
                     borderWidth: 1.5,
                   },
                 },
-                
+
               }}
               InputProps={{
                 endAdornment: (

@@ -153,11 +153,11 @@ export default function ManagerAttributeView({
       let result = await deleteAttribute(selectedAttribute?.id, activeTab);
       if (result?.message && !result?.code) {
         setConfirmOpen(false);
-        toast.success(result?.message);
+        toast.success("Xóa thành công");
         setSelectedAttribute(null);
         fetchAttribute();
       } else {
-        toast.error(result?.message);
+        toast.error("Xóa thất bại");
       }
       console.log("AAAA result handleDeleteAttribute", result);
     } catch (error) {
