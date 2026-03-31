@@ -454,6 +454,7 @@ export default function ManagerStaffView({
           variant='contained'
           startIcon={<Add />}
           onClick={() => {
+            setSelectedAccount(null)
             setModalOpen(true);
           }}
           sx={{

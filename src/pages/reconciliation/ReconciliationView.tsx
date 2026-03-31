@@ -1301,65 +1301,97 @@ function HotelDetailFinal({
             justifyContent='space-between'>
             {/* Cột trái */}
             <Box sx={{ flex: 1, minWidth: 0 }}>
-              {/* Công nợ phát sinh */}
-              <Stack
-                direction='row'
-                justifyContent='space-between'
-                alignItems='center'
-                mb={1.5}>
-                <Typography variant='body1' color='#424242'>
-                  Công nợ phát sinh trong tháng
-                </Typography>
-                <Typography variant='h6' fontWeight={500} color='#33AE3F'>
-                  {formatCurrency(debtInMonth)}
-                </Typography>
-              </Stack>
+  {/* Công nợ đầu kỳ */}
+  <Stack
+    direction='row'
+    justifyContent='space-between'
+    alignItems='center'
+    mb={1.5}>
+    <Typography variant='body1' color='#424242'>
+      Công nợ đầu kỳ
+    </Typography>
+    <Typography variant='h6' fontWeight={500} color='#33AE3F'>
+      {formatCurrency(settlement?.opening_balance)}
+    </Typography>
+  </Stack>
 
-              <Divider sx={{ my: 2 }} />
+  <Divider sx={{ my: 2 }} />
 
-              {/* Công nợ khấu trừ */}
-              <Stack
-                direction='row'
-                justifyContent='space-between'
-                alignItems='center'
-                mb={1.5}>
-                <Typography variant='body1' color='#424242'>
-                  Công nợ khấu trừ
-                </Typography>
-                <Typography variant='h6' fontWeight={600} color='#E53935'>
-                  -{formatCurrency(deductedDebt)}
-                </Typography>
-              </Stack>
+  {/* Công nợ phát sinh */}
+  <Stack
+    direction='row'
+    justifyContent='space-between'
+    alignItems='center'
+    mb={1.5}>
+    <Typography variant='body1' color='#424242'>
+      Công nợ phát sinh trong tháng
+    </Typography>
+    <Typography variant='h6' fontWeight={500} color='#33AE3F'>
+      {formatCurrency(debtInMonth)}
+    </Typography>
+  </Stack>
 
-              <Divider sx={{ my: 2 }} />
-              <Box sx={{ height: 1, bgcolor: "#E0E0E0", my: 2 }} />
+  <Divider sx={{ my: 2 }} />
 
-              {/* Tổng công nợ */}
-              <Stack
-                direction='row'
-                justifyContent='space-between'
-                alignItems='center'
-                mb={1.5}>
-                <Typography variant='h6' fontWeight={700} color='#33AE3F'>
-                  Tổng công nợ
-                </Typography>
-                <Typography variant='h5' fontWeight={700} color='#33AE3F'>
-                  {formatCurrency(totalDebt)}
-                </Typography>
-              </Stack>
+  {/* Công nợ khấu trừ */}
+  <Stack
+    direction='row'
+    justifyContent='space-between'
+    alignItems='center'
+    mb={1.5}>
+    <Typography variant='body1' color='#424242'>
+      Công nợ khấu trừ
+    </Typography>
+    <Typography variant='h6' fontWeight={600} color='#E53935'>
+      {deductedDebt === 0 ? '0đ' : `-${formatCurrency(deductedDebt)}`}
+    </Typography>
+  </Stack>
 
-              <Typography
-                variant='caption'
-                color='#E53935'
-                sx={{ lineHeight: 1.5 }}>
-                <span style={{ color: "#33AE3F" }}>
-                  {" "}
-                  (+) Hotel Booking cần thanh toán cho KS
-                </span>{" "}
-                <br />
-                (-) KS cần thanh toán cho Hotel Booking
-              </Typography>
-            </Box>
+  <Divider sx={{ my: 2 }} />
+
+  {/* Đã thanh toán */}
+  <Stack
+    direction='row'
+    justifyContent='space-between'
+    alignItems='center'
+    mb={1.5}>
+    <Typography variant='body1' color='#424242'>
+      Đã thanh toán
+    </Typography>
+    <Typography variant='h6' fontWeight={600} color='#E53935'>
+      {settlement?.paid_amount === 0 ? '0đ' : `-${formatCurrency(settlement?.paid_amount)}`}
+    </Typography>
+  </Stack>
+
+  <Divider sx={{ my: 2 }} />
+  <Box sx={{ height: 1, bgcolor: "#E0E0E0", my: 2 }} />
+
+  {/* Tổng công nợ */}
+  <Stack
+    direction='row'
+    justifyContent='space-between'
+    alignItems='center'
+    mb={1.5}>
+    <Typography variant='h6' fontWeight={700} color='#33AE3F'>
+      Tổng công nợ
+    </Typography>
+    <Typography variant='h5' fontWeight={700} color='#33AE3F'>
+      {formatCurrency(totalDebt)}
+    </Typography>
+  </Stack>
+
+  <Typography
+    variant='caption'
+    color='#E53935'
+    sx={{ lineHeight: 1.5 }}>
+    <span style={{ color: "#33AE3F" }}>
+      {" "}
+      (+) Hotel Booking cần thanh toán cho KS
+    </span>{" "}
+    <br />
+    (-) KS cần thanh toán cho Hotel Booking
+  </Typography>
+</Box>
 
             {/* Cột giữa */}
             <Box sx={{ textAlign: "left", flexShrink: 0 }}>
@@ -1481,7 +1513,7 @@ function HotelDetailFinal({
                 </>
               )}
 
-              {settlement?.status == "draft" && (
+              {/* {settlement?.status == "draft" && (
                 <Typography
                   variant='body2'
                   color='#616161'
@@ -1489,7 +1521,7 @@ function HotelDetailFinal({
                   Vui lòng hoàn tất đối soát trước{" "}
                   <strong>{deadlineText}</strong> để nhận thanh toán đúng hạn
                 </Typography>
-              )}
+              )} */}
             </Box>
           </Stack>
         </Box>
