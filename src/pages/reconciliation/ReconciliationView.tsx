@@ -1405,9 +1405,9 @@ function HotelDetailFinal({
               <Typography variant='body2' color='#616161' mt={2} gutterBottom>
                 Số lượng đặt phòng
               </Typography>
-              <Typography variant='h6' fontWeight={600} color='#1976D2'>
+              <Typography variant='body1' fontWeight={500}>
                 {/* API chưa có → placeholder */}
-                --
+               {settlement?.booking_count || 0}
               </Typography>
             </Box>
 
